@@ -1,6 +1,6 @@
 # Overview
 
-The goal of this project is to maintain a list of bug websites such as [Heartbleed.com](http://heartbleed.com).
+The goal of this project is to maintain a list of bug websites such as [Heartbleed.com](http://heartbleed.com). Contributions welcome!
 
 # Websites
 
