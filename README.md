@@ -9,7 +9,7 @@ The goal of this project is to maintain a list of bug websites such as [Heartble
 * [BreachAttack.com](http://breachattack.com/) – HTTPS information leak by compression. Related to CRIME.
 * [DrownAttack.com](https://drownattack.com/) – attacks servers supporting modern TLS protocol suites by using their support for the obsolete, insecure, SSL v2 protocol.
 * [Factorable.net](https://factorable.net/) – widespread weak keys in network devices.
-* [FreakAttach.com](https://freakattack.com/) – allows an attacker to intercept HTTPS connections between vulnerable clients and servers and force them to use weakened encryption
+* [FreakAttack.com](https://freakattack.com/) – allows an attacker to intercept HTTPS connections between vulnerable clients and servers and force them to use weakened encryption
 * [GoToFail.com](https://gotofail.com/) – certain Apple iOS versions did not check TLS certificate validity.
 * [Heartbleed.com](http://heartbleed.com) – OpenSSL memory leak which could leak private keys.
 * [httpoxy.org](https://httpoxy.org/) – insecure handling of HTTP proxy environment variable in CGI applications.
