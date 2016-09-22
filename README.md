@@ -15,5 +15,5 @@ The goal of this project is to maintain a list of bug websites such as [Heartble
 * [httpoxy.org](https://httpoxy.org/) – insecure handling of HTTP proxy environment variable in CGI applications.
 * [ImageTragick.com](https://imagetragick.com/) – remote code execution in imagemagick via user-submitted images.
 * [Poodle.io](https://poodle.io/) – allows MITM attacker to downgrade TLS connections and decrypt SSLv3 connections.
-* [[Sweet32.info](https://sweet32.info/) - Birthday attacks on 64-bit block ciphers in TLS and OpenVPN.
+* [Sweet32.info](https://sweet32.info/) - Birthday attacks on 64-bit block ciphers in TLS and OpenVPN.
 * [WeakDH.org](https://weakdh.org/) – applications which support DHE_EXPORT ciphers allow MITM via weak Diffie-Hellman keys.
