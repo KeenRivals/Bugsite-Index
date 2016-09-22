@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
+    <title>Logjam Measurement</title>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+      $('document').ready(function(){
+        $('#dhe512ok').removeClass('hidden');
+      });
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <div class="alert alert-warning" role="alert">
+	      <strong>Test Failed</strong> Your web browser doesn't look to support Javascript. Please enable Javascript from <a href="https://jquery.com">*.jquery.com</a>, <a href="index.html">weakdh.org</a>, and <a href="https://zmap.io">*.zmap.io</a>, or try loading <a href="https://dhe512.zmap.io">this website</a>.
+      </div>
+    </noscript>
+    <div id="dhe512ok" class="alert alert-info hidden" role="alert">
+      <strong>Good News!</strong> Your browser is safe against the Logjam attack.
+    </div>
+    <div id="dhe512warn" class="alert alert-danger hidden" role="alert">
+      <strong>Warning!</strong> Your web browser is vulnerable to Logjam and can be tricked into using weak encryption. You should update your browser.
+    </div>
+    <script type="text/javascript" src="https://dhe512.zmap.io/dhe512test.js"></script>
+  </body>
+</html>

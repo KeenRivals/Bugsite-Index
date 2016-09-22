@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Widespread Weak Keys in Network Devices - factorable.net</title>
+        <link href="css/bootstrap.css" rel="stylesheet">
+
+        <style type="text/css">
+          body {padding-top: 60px; padding-bottom: 40px; }
+          h1 {padding: 0 0 10px 0; }
+          h2 {padding: 0 0 5px 0; font-size: 1.8em}
+          h3 {padding: 0 0 5px 0; }
+	  h4 {padding: 0 0 5px 0; }
+	  .buttons {padding: 5px 0 0 0; }
+          .authors li {margin: 5px; margin-left: 20px}
+          .searchbox h4: {padding: 0 5px 0 5px; display:inline;}
+          .loadspace {padding: 0 0 180px 0;}
+        </style>
+
+        <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+          <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+</head>
+<body>
+  <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+          <div class="container">
+              <a class="brand" href="index.html">factorable.net</a>
+              <ul class="nav">
+                  <li class="active"><a href="index.html">About the Project</a></li>
+                  <li><a href="paper.html">Research Paper</a></li>
+                  <li><a href="faq.html">FAQ</a></li>
+                  <li><a href="resources.html">Source Code</a></li>
+		  <li><a href="advisories.html">Advisories</a></li>
+              </ul>
+          </div>
+      </div>
+  </div>
+	<div class="container" id="whole">
+	<div class="well">
+	<h1>Widespread Weak Keys in Network Devices</h1>
+            <p>We performed a large-scale study of RSA and DSA cryptographic keys in use on the Internet and discovered that significant numbers of keys are insecure due to insufficient randomness.  These keys are being used to secure TLS (HTTPS) and SSH connections for hundreds of thousands of hosts.</p>
+            <ul>
+            <li>We found that 5.57% of TLS hosts and 9.60% of SSH hosts share public keys in an apparently vulnerable manner, due to either insufficient randomness during key generation or device default keys.</li>
+            <li>We were able to remotely obtain the RSA private keys for 0.50% of TLS hosts and 0.03% of SSH hosts because their public keys shared nontrivial common factors due to poor randomness.</li>
+            <li>We were able to remotely obtain the DSA private keys for 1.03% of SSH hosts due to repeated signature randomness.</li>
+            </ul>
+            <p>Nearly all the vulnerable hosts are headless and embedded network devices, such as routers, firewalls, and server management cards.  These types of devices often generate keys automatically on first boot, and lack many of the physical sources of randomness used by traditional PCs to generate random numbers.  We identified apparently vulnerable devices and software from 54 manufacturers and notified these companies about the problems.</p> 
+            
+            <p>In experiments with several popular open-source software components, we were able to reproduce these vulnerabilities and show how such weak keys can arise in practice.  Most critically, we found that the Linux random number generator can produce predictable output at boot under certain conditions, although we also observed compromised keys on BSD and Windows-based systems.</p>
+
+            <div class="buttons">
+            <h4>Learn more:</h4>
+            <div class="buttons">
+            <a class="btn btn-primary" href="paper.html">Research Paper</a>
+            <a class="btn btn-primary" href="faq.html">FAQ</a>
+            </div>
+            </div>
+        </div>
+<div class="well">
+          <h3>The Team</h3>
+	  <p>This study was performed by computer scientists at the <a href="http://www.cs.ucsd.edu">University of California, San Diego</a> and the <a href="http://cse.umich.edu/">University of Michigan</a>.<p>
+	  <ul class="authors">
+            <li><a href="https://cseweb.ucsd.edu/~naheninger/">Nadia Heninger</a>, Postdoctoral Fellow, UC San Diego</li>
+            <li><a href="https://zakird.com">Zakir Durumeric</a>, Ph.D. Student, University of Michigan</li>
+            <li><a href="https://ericw.us/trow/">Eric Wustrow</a>, Ph.D. Student, University of Michigan</li>
+            <li><a href="https://jhalderm.com">J. Alex Halderman</a>, Assistant Professor, University of Michigan</li>
+          </ul>
+          <p>The research team can be reached at <a href="mailto:factorable@umich.edu">factorable@umich.edu</a>.</p>
+</div>
+         <div class="footer">
+           <a href="http://cse.umich.edu"><img src="umich.png" alt="University of Michigan" align="left"></a>
+           <a href="http://www.cs.ucsd.edu/"><img src="ucsd.png" alt="University of California, San Diego" align="right"></a>
+         </div>
+        <script type="text/javascript">
+          var _gauges = _gauges || [];
+          (function() {
+            var t   = document.createElement('script');
+            t.type  = 'text/javascript';
+            t.async = true;
+            t.id    = 'gauges-tracker';
+            t.setAttribute('data-site-id', '4f3c079fcb25bc666100000a');
+            t.src = '//secure.gaug.es/track.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(t, s);
+          })();
+        </script>
+
+	</div>
+	</html>

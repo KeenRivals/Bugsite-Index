@@ -1,0 +1,726 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1,maximum-scale=1, user-scalable=no">
+	<title>BREACH ATTACK</title>
+	<link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/normalize/2.1.0/normalize.css">
+	<style>
+		*, *:before, *:after {-moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;}	
+
+
+		html, body {
+			margin: 0;
+			padding: 0;
+			background: #ECF0F1;
+			color:#95a5a6;
+			font-family: Helvetica, Arial, sans-serif;
+		}
+
+		.headerlinks
+		{ 
+			color: #95a5a6;
+			font-weight:normal;
+		}
+
+		a.biolinks
+		{ color: black }
+
+		a {
+			color: #f39c12;
+			text-decoration: none;
+			font-weight: bold;
+		}
+
+		a:hover, a:active {
+			text-decoration: underline;
+		}
+
+		.constraint {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 20px;
+			background: #fff;
+		}
+
+		.blue {
+			color: #3498db;
+			font-weight: bold;
+
+		}
+
+		.orange {
+			color: #f39c12;
+		}
+		span.orange {
+			font-weight: bold;
+		}
+
+		aside span.orange {
+			font-weight: normal;
+			font-style: italic;
+			font-size: 0.9em;
+		}
+		
+
+		.corner {
+			text-align: right;
+			background: none;
+			padding: 0 20px;
+			font-size: 0.8em;
+		}
+
+		header {
+			position: relative;
+			min-height: 90px;
+			margin-top: 20px;
+			padding: 15px;
+			width: 100%;
+			background: #fff;
+		}
+		header:before {
+			content: "";
+			position: absolute;
+			top: 0;
+			right: 0;
+			border-width: 0 16px 16px 0;
+			border-style: solid;
+			border-color: rgb(236, 240, 241) rgb(236, 240, 241) rgb(255, 255, 255) rgb(255, 255, 255);
+			background: rgb(101, 142, 21);
+			display: block;
+			width: 0;
+			-webkit-box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3), -1px 1px 1px rgba(0, 0, 0, 0.2);
+			-moz-box-shadow: 0 1px 0 rgba(0,0,0,0.3), -1px 1px 1px rgba(0,0,0,0.2);
+			box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3), -1px 1px 1px rgba(0, 0, 0, 0.2);
+		}
+
+		header .logo {
+			margin-left: 30px;
+			float:left;
+			min-height: 60px;
+			height: 100%;
+			width: 10em;
+			background: url("images/logo.png") center no-repeat;
+		}
+	
+		footer {
+			background: #34495e;
+			text-align: center;	
+		}
+		.main {
+			/*margin-bottom: 20px;*/
+		}
+
+		.main p {
+			line-height: 1.8em;
+		}
+		.main p.small {
+			margin: 5px 0;
+		}
+
+		.menu {
+			color:;
+			text-align: right;
+			line-height: 30px;
+		}
+
+		.menu li {
+			display: inline-block;
+			padding: 0 10px;
+		}
+
+		.container {
+			position: relative;
+			margin: 0 auto;
+		}
+
+		section.title {
+			background: #34495e;
+		}
+		section.title .inside {
+			padding: 20px;
+			background: #495c6e;
+		}
+		section.title h1 {
+			font-size: 1.5em;
+			margin: 0;
+			padding: 10px;
+			color:white;
+		}	
+		section.title h2 {
+			margin: 0;
+			padding: 3px 10px;
+			font-size: 1.1em;
+			font-weight: bold;
+			color: #7f94aa;
+		}
+		section.title h3 {
+			margin: 0;
+			padding: 3px 10px 10px;
+			font-size: 1em;
+		}
+
+		.main .speed {
+			background: url("images/breachrun.jpg") center no-repeat #fff;
+			background-size: cover;
+			width: 100%;
+			min-height: 120px;
+		}
+		.main .bottom {
+			height: 4px;
+			border-top: 4px solid rgb(149, 165, 166);
+			text-align: center;
+		}
+		.main .bottom img {
+			vertical-align: top;
+		}
+
+		.main .calendar {
+			text-align: center;
+			width: 160px;
+			height: 145px;
+			background: #EEE;
+			float:left;
+			margin: 0 25px 25px 0;
+		}
+		.main .calendar p {
+			line-height: 1.4em;
+		}
+		.main .calendar .month {
+			margin: 0;
+			padding: 10px 0 0;
+			color: #3498db;
+			font-weight: bold;
+			font-size: 2em;
+
+		}
+
+		.main .calendar .year {
+			margin: 0;
+			color: #34495e;
+			font-size: 4em;
+			font-weight: bold;
+
+		}
+
+		.main article {
+			background: #fff;
+		}
+		.main article > p {
+			margin: 20px 0;
+
+		}
+
+		.main article h2 {
+			margin: 25px 0 20px;
+			color:#34495e;
+			text-transform: uppercase;
+		}
+
+		.main article h3 {
+			color: black;
+			font-size: 1.3em;
+		}
+
+		.internal {
+			padding: 0;
+			margin: 0;
+			list-style:  none;
+			counter-reset: internal-counter;
+		}
+		.internal li {
+			padding: 2px 0;
+		}
+		.internal li:before {
+			font-size: 1.2em;
+			color: #f39c12;
+			content: "\2022 ";
+			padding: 0 3px;
+			counter-increment: internal-counter;
+		}
+		.numeral {
+			padding: 0 20px;
+			list-style: none;
+			counter-reset: priority;
+		}
+		.numeral li {
+			margin: 10px 0;
+		}
+
+		.numeral li:before {
+			color: #f39c12;
+			padding: 0 3px;
+			font-size: bold;
+			content: counter(priority) ". ";
+			counter-increment: priority;
+		}
+
+		.separator {
+			border-bottom: 1px dashed #95a5a6;
+			max-width: 800px;
+			margin: 0 auto;
+		}
+		.separator-light {
+			margin: 0 auto;
+			height: 1px;
+			background: #e3e4e4;
+		}
+
+		.main .grey {
+			background: #e3e4e4;
+		}
+
+		.box {
+			padding: 0 40px;
+			margin: 0 auto;
+			list-style: none;
+			text-align: center;
+			display: -webkit-box;
+			display: -moz-box;
+			display: -ms-flexbox;
+			display: -webkit-flex;
+			display: flex;
+
+			-webkit-box-orient: horizontal;
+			-webkit-box-pack: center;
+			-webkit-box-align: center;
+			-moz-box-orient: horizontal;
+			-moz-box-pack: center;
+			-moz-box-align: center;
+			box-orient: horizontal;
+			box-pack: center;
+			box-align: center;
+		}
+		.box li {
+			-webkit-flex: 1;
+                        -webkit-box-flex: 1;
+			-ms-flex: 1;
+			text-align: center;
+		}
+
+		 .box li p:first-of-type {
+			color: rgb(52, 73, 94);
+			font-size: 1.2em;
+			font-weight: bold;
+		}
+		.box li p:last-of-type {
+			font-size:0.9em;
+			padding: 0 20px;
+		}
+
+		.picture {
+			width: 200px;
+			height: 150px;
+			margin: 5px;
+		}
+		.picture.left {
+			float: left;
+			margin-right: 30px;
+
+
+		}
+		.picture.left > img {
+			border-right: 4px solid rgb(149, 165, 166);
+
+		}
+
+		.picture.right > img {
+			border-left: 4px solid rgb(149, 165, 166);
+		}
+
+		.picture.right {
+			float: right;
+			margin-left: 30px;
+
+		}
+
+		.arrow-right {
+			vertical-align: middle;
+			display: inline-block;
+			width: 2px;
+			height: 100%;
+		}
+
+		.researcher {
+			min-height: 130px;
+		}
+
+		.researcher p {
+			font-size: 1em;
+		}
+
+		.researcher .details {
+			/*margin-left: 238px;*/
+		}
+
+		.researcher.right .details {
+			margin: 0;
+		}
+
+		.big {
+			padding: 20px 10%;
+		}
+
+
+		@media  (max-width : 568px) {
+			header .logo {
+				float:none;
+				margin: 0;
+				width: 100%;
+			}
+			.menu {
+				padding:0;
+			}
+			.menu li {
+				font-size: 1.2em;
+				border-bottom: 1px solid rgba(0,0,0,0.3);
+				display: block;
+				padding: 4px 0;
+				text-align: center;
+			}
+			.calendar {
+				display: none;
+			}
+			.box {
+				-webkit-box-orient: vertical;
+				-webkit-flex-direction: column;
+			}
+			.researcher {
+				text-align: center;
+			}
+
+			.researcher img {
+				box-shadow: 3px 3px 8px 1px rgb(0, 0, 0);
+				border-radius: 5px;
+			}
+
+			.picture.left, .picture.right {
+				margin: 0 auto;
+				float:none;
+			}
+
+			aside.corner {
+				text-align: center;
+			}
+			.arrow-right {
+				display: none;
+			}
+
+			.picture.left > img {
+				border: none;
+			}
+			.picture.right > img {
+				border: none;
+			}
+
+			.researcher .details {
+				margin: 0;
+			}
+			section.title {
+				text-align: center;
+			}
+		}
+
+		.links {
+			text-align: center;
+			margin-bottom: 20px;
+		}
+
+	</style>
+	<!--[if IE]>
+		<style>
+			.box {
+				text-align: center;
+				display:block;
+				min-height: 200px;
+			}
+			.box li {
+				width: 33%;
+				float: left;
+				text-align: center;
+			}
+		</style>
+	<![endif]-->
+</head>
+
+<body>
+	<div class="container">
+		<aside class="corner constraint">
+			<p>[ <a href="index.html#resources"><span class="orange">watch the proof-of-concept</a></span> ]</p>
+		</aside>
+
+		<header class="constraint">
+			<div class="logo"></div>
+			<ul class="menu">
+				<li><a href="index.html#howitworks" class="headerlinks">How it works</a></li>
+				<li><a href="index.html#mitigations" class="headerlinks">Mitigations</a></li>
+				<li><a href="index.html#resources" class="headerlinks">Resources</a></li>
+				<li><a href="index.html#aboutus" class="headerlinks">About us</a></li>
+			</ul>
+			
+		</header>
+		<section class="title">
+			<div class="inside constraint">
+				<h1>SSL, GONE IN 30 SECONDS</h1>
+				<h2><span>A BREACH beyond CRIME</span> - Introducing our newest toy from Black Hat USA 2013:</h2>
+				<h3 class="orange">Browser Reconnaissance & Exfiltration via Adaptive Compression of Hypertext </h3>
+			</div>
+		</section>
+		
+		<section class="main">
+			<div class="constraint">
+				<div class="speed"></div>
+				<div class="bottom">
+					<img src="images/img_point.png">
+				</div>
+			</div>
+
+			<article class="constraint"> 
+				<h2> History </h2>
+				<div class="calendar">
+					<p class="month">SEP</p>
+					<p class="year">2012</p>
+					<div class="bottom">
+					<img src="images/img_point.png">
+				</div>
+				</div>
+
+				<p class="small">
+					At ekoparty 2012, Thai Duong and Juliano Rizzo announced <span class="orange">CRIME</span>, a compression side-channel attack against HTTPS. An attacker with the ability to:</p> 
+
+
+						<ul class="internal"> 
+							<li> Inject partial chosen plaintext into a victim's requests</li>
+							<li> Measure the size of encrypted traffic</li>
+<br>can leverage information leaked by compression to recover targeted parts of the plaintext. 
+						</ul>
+				</p>
+				<p>Compression side-channel attacks are not new. Indeed, ten years before Duong and Rizzo's presentation, a <a target="new" href="http://www.google.com/url?q=http%3A%2F%2Fwww.iacr.org%2Fcryptodb%2Fdata%2Fpaper.php%3Fpubkey%3D3091&amp;sa=D&amp;sntz=1&amp;usg=AFQjCNE3bLw6qw3leHgt5FquRGbloOecEA">paper</a> appeared describing such attacks in general. However, CRIME gave a concrete, real-world example. </p>
+
+				<p>
+					The particular demonstration given at ekoparty showed how an attacker might execute this attack to recover the headers of an HTTP request. Since HTTP headers contain cookies, and cookies are the primary vehicle for web application authentication (after login), this presents a significant attack. 
+				</p>
+
+				<p>
+					By disabling TLS/SSL-level compression – which was already little-used, and in fact disabled in most browsers – the attack as demonstrated at ekoparty is completely <a href="http://en.wikipedia.org/wiki/CRIME_(security_exploit)" target=new>mitigated</a>.
+				</p>
+
+			</article>
+
+			<div class="separator"></div>
+
+			<article class="constraint"> 
+				 <a name="howitworks" style="text-decoration: none;"><h2> Breach </h2></a>
+				<p>
+					While CRIME was mitigated by disabling <span class="blue">TLS/SPDY compression</span> (and by modifying gzip to allow for explicit separation of compression contexts in SPDY), BREACH attacks HTTP responses. These are compressed using the common <span class="blue">HTTP compression</span>, which is much more common than TLS-level compression. This allows essentially the same attack demonstrated by Duong and Rizzo, but without relying on TLS-level compression (as they anticipated). 
+				</p>
+				<p>
+					<span class="blue">BREACH is a category of vulnerabilities</span> and not a specific instance affecting a specific piece of software. To be vulnerable, a web application must: 
+				</p>
+
+				<ul class="internal"> 
+							<li> &nbsp;Be served from a server that uses HTTP-level compression </li>
+<li> &nbsp;Reflect user-input in HTTP response bodies </li>
+<li> &nbsp;Reflect a secret (such as a CSRF token) in HTTP response bodies </li>
+						</ul>
+
+
+
+				<p>
+					Additionally, while not strictly a requirement, the attack is helped greatly by responses that remain mostly the same (modulo the attacker's guess). This is because the difference in size of the responses measured by the attacker can be quite small. Any noise in the side-channel makes the attack more difficult (though not impossible). 
+				</p>
+
+				<p>
+					It is important to note that the attack is <span class="blue">agnostic to the version of TLS/SSL</span>, and does not require TLS-layer compression. Additionally, the attack <span class="blue">works against any cipher suite</span>. Against a stream cipher, the attack is simpler; the difference in sizes across response bodies is much more granular in this case. If a block cipher is used, additional work must be done to align the output to the cipher text blocks.
+				</p>
+
+			</article>
+
+			<article class="constraint"> 
+				<h3>How practical is it? </h3>
+				<p>					
+					The BREACH attack can be exploited with just a few thousand requests, and <span class="blue">can be executed in under a minute.</span> The number of requests required will depend on the secret size. The power of the attack comes from the fact that it allows guessing a secret one character at a time. 
+				</p>
+			</article>
+
+			<div class="separator"></div>
+
+			<article class="grey">
+				<div class="inside constraint" style="background:#ECF0F1">
+					<h3>Am I affected?</h3>
+					<p>If you have an <span class="blue"> HTTP response body</span> that meets all the following conditions, you might be vulnerable:</p>
+					<ul class="box">
+						<li class="item">
+							<img src="images/compression.png" >
+							<p>Compression</p>
+							<p>Your page is served with HTTP compression enabled (GZIP / DEFLATE)</p>
+						</li>
+						<li class="item">
+							<img class="img2" src="images/userdata.png" >
+							<p>User Data</p>
+							<p>Your page reflects user data via query string parameters, POST...</p>
+						</li>
+						<li class="item">
+							<img class="img2" src="images/secret.png">
+							<p>A Secret</p>
+							<p>Your application page serves PII, a CSRF token, sensitive data...</p>
+						</li>
+					</ul>
+				</div>
+			</article>
+			<div class="separator"></div>
+
+			<article class="constraint"> 
+				 <a name="mitigations" style="text-decoration: none;"><h2> Mitigations </h2></a>
+
+				<div class="left"> 
+					<img src="images/lamp.png" style="float:left; padding-right:20px">
+				</div>
+				<p>
+					We offer several tactics for mitigating the attack. Unfortunately, we are unaware of a clean, effective, practical solution to the problem. Some of these mitigations are more practical and a single change can cover entire apps, while others are page specific. 
+				</p>
+				<p>
+					The mitigations are <span class="blue">ordered by effectiveness</span> (not by their practicality - as this may differ from one application to another). 
+				</p>
+
+				<ol class="numeral"> 
+						<li>Disabling HTTP compression </li>
+						<li>Separating secrets from user input </li>
+						<li>Randomizing secrets per request </li>
+						<li>Masking secrets (effectively randomizing by XORing with a random secret per request) </li>
+						<li>Protecting vulnerable pages with CSRF  </li>
+						<li>Length hiding (by adding random number of bytes to the responses) </li>
+						<li>Rate-limiting the requests 	</li>
+				</ol>
+
+				<p>
+					Whichever mitigation you choose, it is strongly recommended you also <span class="blue">monitor your traffic</span> to detect attempted attacks.
+				</p>
+
+			</article>
+
+			<div class="separator"></div>
+
+			<article class="grey">
+				<div class="big inside constraint" style="background:#ECF0F1">
+					<div class="researcher">
+						<div class="picture left">
+							<img class="img1" src="images/188.png" width="188"height="119" alt="188"><div class="arrow-right"><img src="images/img_point_right.png"></div>
+							
+						</div>	
+
+						<div class="details">
+							<a name="aboutus" ><h3><a href="https://twitter.com/pradoangelo" class="biolinks" target=new>Angelo Prado</a></h3></a>
+							<p>
+							Angelo Prado is a Lead Product Security Engineer, involved with the security community for over 8 years. He is originally from Spain and has spoken at Blackhat USA, Georgetown University, Comillas University & GSICKMinds. <a href="http://www.blackhat.com/us-13/speakers/Angelo-Prado.html" target=new>more...</a>
+							</p>
+						</div>
+					</div>
+					
+				</div>
+			</article>
+
+			<div class="separator-light">
+				<div class="separator"></div>
+			</div>
+
+			<article class="grey">
+				<div class="big inside constraint" style="background:#ECF0F1">
+					<div class="researcher right">
+						<div class="picture right">
+							<div class="arrow-right"><img src="images/img_point_left.png"></div>
+							<img class="img1" src="images/189.png" width="188"height="119" alt="188">
+							
+						</div>
+
+						<div class="details">
+							<h3><a href="https://twitter.com/iamtheneal" target="new" class="biolinks">Neal Harris</a></h3>
+							<p>
+							While studying pure math in school, I dipped my toes into the world of security by spending summers doing cryptanalysis. After stumbling through a PhD at UC San Diego, I left academia to pursue a full-time career breaking things. <a href="http://www.blackhat.com/us-13/speakers/Neal-Harris.html" target=new>more...</a>
+							</p>
+						</div>
+					</div>
+					
+				</div>
+			</article>
+			
+			<div class="separator-light">
+				<div class="separator"></div>
+			</div>
+
+			<article class="grey">
+				<div class="big inside constraint" style="background:#ECF0F1">
+					<div class="researcher">
+						<div class="picture left">
+							<img class="img1" src="images/190.png" width="188"height="119" alt="188"><div class="arrow-right"><img src="images/img_point_right.png"></div>
+							
+						</div>	
+
+						<div class="details">
+							<h3>Yoel Gluck</h3>
+							<p>
+							Yoel Gluck is a security researcher with 12 years of experience in the industry. Yoel graduated from Bar-Ilan University (Israel) with a B.Sc in Computer Science & Math <a href="http://www.blackhat.com/us-13/speakers/Yoel-Gluck.html" target=new>more...</a>
+							</p>
+						</div>
+					</div>
+					
+				</div>
+			</article>
+			
+			<div class="separator"></div>
+
+			<article class="constraint"> 
+				 <a name="related" style="text-decoration: none;"><h2> Related work </h2></a>
+
+				<p>
+				
+						<span class="right"><img src="images/lamp.png" style="float:right; padding-left:40px; padding-right:40px;"></span>
+					<b>TIME:</b> At Black Hat Europe 2013 (Amsterdam) Tal Be'ery and Amichai Shulman presented <a href="https://www.blackhat.com/eu-13/briefings.html#Beery" target=new>"A Perfect CRIME? TIME Will Tell"</a>. In their presentation, Tal and Amichai demonstrated an attack using a combination of a compression oracle and <b>time based side channel</b> to extract data from HTTP/HTTPS traffic on HTTP responses.
+				</p>
+
+			</article>
+
+			<div class="separator"></div>
+			<article class="constraint"> 
+				 <a name="resources" style="text-decoration: none;"><h2> Resources </h2></a>
+				<div class="left"> 
+					<img src="images/icon_user.png" style="float:left; padding-right:20px">
+				</div>
+				<p>
+					To help the community better understand this class of vulnerabilities and <span class="blue">determine if your application is vulnerable</span>, we are releasing a PoC application, code and research work below. You can also reach us at <a href="mailto:contact@breachattack.com">contact@breachattack.com</a>
+				</p>
+
+			</article>
+
+		</section>
+
+		<div class="separator"></div>
+
+		<div class="links constraint" style="font-size:24px;">
+
+		<a href="resources/BREACH&#32;-&#32;SSL,&#32;gone&#32;in&#32;30&#32;seconds.pdf" target=new style="font-weight:normal;">Paper</a>
+                                       /
+       <a href="resources/BREACH&#32;-&#32;BH&#32;2013&#32;-&#32;PRESENTATION.pdf" target=new style="font-weight:normal;">Presentation</a>
+       /
+       <a href="http://www.youtube.com/watch?v=pIKIXQNFplY&hd=1"  target=new style="font-weight:normal;">Video</a>                                       /
+       <a href="https://github.com/nealharris/BREACH" target="new" style="font-weight:normal;">PoC code</a> /
+       <a href="precompiled.html" target="new" style="font-weight:normal;">Binaries</a>
+
+   		</div>
+
+
+		
+		<div class="" style="background: #ccc; height: 20px"> </div>
+		<footer>
+			<div class="inside constraint" style="background: #3c5063; font-size:13px">
+				<p>Except where otherwise noted, content on this page is licensed under a <a href="http://creativecommons.org/licenses/by/3.0/deed.en_GB">Creative Commons Attribution 3.0 Unported License</a>. Intended for educational purposes. <a href="index.html">BreachAttack.com </a>– 2013 | design by <a href="https://twitter.com/diervo" target=new>@diervo</a>
+                                                .
+</p>				<a href="https://twitter.com/search?q=breachattack&src=typd&f=realtime" target=new><img style="border:none " src="images/twitter.png" width="32" height="32" alt="twitter"></a>
+			</div>	
+		
+
+		</footer>
+
+	</div>
+</body>
+</html>

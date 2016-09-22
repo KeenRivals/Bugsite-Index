@@ -1,0 +1,60 @@
+fastgcd
+-------
+
+Nadia Heninger
+J. Alex Halderman
+
+Fastgcd is a C implementation of an efficient algorithm to compute the pairwise
+GCDs of a collection of integers.  The algorithm is due to Bernstein and is a
+simplified version of (http://cr.yp.to/papers.html#smoothparts).
+
+The input to the program is a file listing the collection of integers (e.g.,
+RSA moduli).  The algorithm will compute the GCD of each input integer with the
+product of every other input integer, and output the nontrivial common divisors
+along with a list of input integers which had a nontrivial common divisor.  In
+the simplest case for RSA moduli, the common divisor will be a single prime
+factor.  We leave it as an exercise to deal with cases where the divisor is
+composite.
+
+This program was used in "Mining your Ps and Qs: Detection of Widespread Weak
+Keys in Network Devices" to discover weak RSA keys. For more information, and a
+copy of the paper, see https://factorable.net/
+
+
+Install
+-------
+
+To install fastgcd (in current directory), simply run
+
+./install.sh
+
+The install script will download and install a local copy of gmp-5.0.5 and
+extract and apply our patch to GMP.  This patch modifies GMP to add an integer
+output format that can accommodate integers larger than 2^32 bytes, which is
+necessary for large inputs to the algorithm.  This means that the temporary
+files written to disk in the course of the algorithm by our patched GMP are not
+compatible with the standard GMP output format.
+
+Running
+-------
+
+To run a fresh instance of fastgcd, use
+
+./fastgcd input.moduli
+
+On completion, fastgcd will output:
+
+vulnerable_moduli       - list of moduli that had a nontrivial common divisor
+                          with any input modulus, in hex, one per line.
+
+gcds                    - list of the common divisor of each modulus in 
+                          vulnerable_moduli with the product of every other 
+                          modulus in input.moduli, in hex, one per line.
+
+
+We have provided a sample input:
+input.moduli            - list of moduli, in hex, one per line. Note: these
+                          must be unique.
+
+Sample output produced by running fastgcd on the provided input.moduli file are
+contained in sample.out/.

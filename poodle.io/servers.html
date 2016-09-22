@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+    <meta name="keywords" content="poodle attack sslv3 report zmap durumeric adrian bailey halderman" />
+    <meta name="description" content="POODLE Attack and SSLv3 Support Measurement" />
+    <link rel="stylesheet" type="text/css" href="bootstrap.css"/>
+    <title>Protecting Servers against POODLE</title>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>    <![endif]-->
+
+</head>
+<body>
+
+<div class="container">
+<div class="row">
+  <div class="page-header" id="banner">
+    <h1><a href="index.html">POODLE</a> <small><strong>Disabling SSLv3 Support on Servers</strong></small></h1>
+  </div>
+
+	<a name="sysadmin"></a>
+    <p>If you maintain a web server, the safest short-term response is to disable SSLv3 support (or disable CBC-mode ciphers in coordination with SSLv3). The protocol is more than fifteen years old and the current versions of all major web browsers have supported TLS 1.0 since 2006. It is also important to remember that many protocols other than HTTPS utilize TLS for transport security, including POP3, IMAP, SMTP, XMPP, FTP, and NNTP.</p><p> We've included instructions on how to disable SSLv3 support for the following products below. </p>
+
+      <ul>
+        <li><a href="servers.html#nginx">Nginx</a></li>
+        <li><a href="servers.html#apache">Apache Web Server</a></li>
+	<li><a href="servers.html#iis">Microsoft IIS</a></li>
+        <li><a href="servers.html#postfix">Postfix</a></li>
+        <li><a href="servers.html#sendmail">Sendmail</a></li>
+	<li><a href="servers.html#dovecot">Dovecot</a></li>
+	<li><a href="servers.html#haproxy">HAProxy</a></li>
+	<li><a href="servers.html#389DirectoryServer">389 Directory Server</a></li>
+	<li><a href="servers.html#Courier-imap">Courier-imap</a></li>
+	<li><a href="servers.html#lighttpd">Lighttpd</a></li>
+	<li><a href="http://wiki.apache.org/tomcat/Security/POODLE">Apache Tomcat</a></li>
+      </ul>
+
+      <hr/>
+			<h2>What clients do not support TLS?</h2>
+
+			<p>The largest userbase that will be affected by a lack of TLS support are Internet Explorer clients using IE6 or below. It is estimated that <a href="https://www.modern.ie/en-us/ie6countdown">3.8%</a> of all clients are still running IE6, but IE6 only represents 0.1% of US browsers. Opera began supporting TLS in version 5, and TLS support was present in Firefox 2 (and possibly earlier versions). All versions of Google Chrome support TLS. A more long-term solution is to use <a href="https://tools.ietf.org/html/draft-bmoeller-tls-downgrade-scsv-02">TLS Signaling Cipher Suite Value (SCSV)</a>.</p>
+<hr/>
+<h2>How can I test my server?</h2><p>If you have a public web server, you can test it using the <a href="https:/www.ssllabs.com/ssltest/">Qualys SSL Server Test</a>. You can also test private web servers and other TLS endpoints using OpenSSL by running <code>openssl s_client -ssl -connect fqdn:port</code>. If your server has SSLv3 disabled, you will receive a handshake error, otherwise, you'll receive the same output as when you run <code>openssl s_client -connect fqdn:port</code>.
+			</p>
+
+
+	<hr/>
+<a name="nginx"></a>
+<h2>nginx</h2>
+	<p>Modify the <code>ssl_protocols</code> directive to only use TLSv1, TLSv1.1,
+		and TLSv1.2.
+		If you do not have a <code>ssl_protocols</code> directive, add it to the top
+		of your configuration file.</p>
+
+	<pre>ssl_protocols TLSv1 TLSv1.1 TLSv1.2;</pre>
+<hr/>
+<a name="apache"></a>
+<h2>Apache</h2>
+	<p>The SSL configuration file changed slightly in httpd version 2.2.23. For
+		<emph>httpd version 2.2.23 and newer</emph>, specify all protocols except
+		SSLv2 and SSLv3.</p>
+
+	<pre>SSLProtocol ALL -SSLv2 -SSLv3</pre>
+
+	<p>For </emph>httpd version 2.2.22</emph> and older, only specify TLSv1. This
+		is treated as a wildcard for all TLS versions.</p>
+
+	<pre>SSLProtocol TLSv1</pre>
+
+	<p>For Apache + mod_nss, edit <code>/etc/httpd/conf.d/nss.conf</code> to 
+		allow only TLS 1.0+.</p>
+
+	<pre>NSSProtocol TLSv1.0,TLSv1.1</pre>
+<hr/>
+
+<a name="iis"></a>
+<h2>Microsoft IIS</h2>
+	<p>Please see the write-up at 
+		<a href="https://www.digicert.com/ssl-support/iis-disabling-ssl-v3.htm">digicert</a> 
+		for how to disable SSLv3.</p>
+<hr/>
+
+<a name="postfix"></a>
+<h2>Postfix SMTP</h2>
+	<p>Thanks to gertvdijk on <a href="http://askubuntu.com/questions/537196/how-do-i-patch-workaround-sslv3-poodle-vulnerability-cve-2014-3566">AskUbuntu</a>.</p>
+	<p>Modify the <code>smtpd_tls_mandatory_protocols</code> configuration line.</p>
+
+	<pre>smtpd_tls_mandatory_protocols=!SSLv2,!SSLv3</pre>
+<hr/>
+
+<a name="sendmail"></a>
+<h2>Sendmail</h2>
+	<p>Thanks to gertvdijk on <a href="http://askubuntu.com/questions/537196/how-do-i-patch-workaround-sslv3-poodle-vulnerability-cve-2014-3566">AskUbuntu</a>.</p>
+	<p>Modify the <code>LOCAL_CONFIG</code> section of the
+		<code>sendmail.mc</code> file.</p>
+
+	<pre>CipherList=HIGH<br>
+ServerSSLOptions=+SSL_OP_NO_SSLv2 +SSL_OP_NO_SSLv3 +SSL_OP_CIPHER_SERVER_PREFERENCE<br>
+ClientSSLOptions=+SSL_OP_NO_SSLv2 +SSL_OP_NO_SSLv3</pre>
+<hr/>
+
+<a name="dovecot"></a>
+<h2>Dovecot</h2>
+	<p>Thanks to gertvdijk on <a href="http://askubuntu.com/questions/537196/how-do-i-patch-workaround-sslv3-poodle-vulnerability-cve-2014-3566">AskUbuntu</a>.</p>
+	<p>For Dovecot 2.1+, edit <code>/etc/dovecot/local.conf</code> to add the 
+		below lines and then restart Dovecot.</p>
+
+	<pre>ssl_protocols = !SSLv2 !SSLv3</pre>
+
+	<p>For Dovecot 2, edit <code>/etc/dovecot/conf.d/10-ssl.conf</code> to add the
+		below lines and then restart Dovecot.</p>
+	
+	<pre>ssl_cipher_list = ALL:!LOW:!SSLv2:!SSLv3:!EXP:!aNULL</pre>
+<hr/>
+
+<a name="haproxy"></a>
+<h2>HAProxy Server</h2>
+	<p>Thanks to gertvdijk on <a href="http://askubuntu.com/questions/537196/how-do-i-patch-workaround-sslv3-poodle-vulnerability-cve-2014-3566">AskUbuntu</a>.</p>
+	<p>Edit the <code>bind</code> line in your <code>/etc/haproxy.cfb</code>
+		file.</p>
+
+	<pre>bind :443 ssl crt <crt> ciphers <ciphers> no-sslv3</pre>
+<hr/>
+
+<a name="389DirectoryServer"></a>
+<h2>389 Directory Server</h2>
+	<p>Thanks to Loris Santamaria.</p>
+
+	<p>Modify <code>cn=encryption,cn=config</code>A and restart the server.</p>
+
+	<pre>ldapmodify -x -D "cn=Directory Manager" -W &lt;&lt;EOF<br>
+dn: cn=encryption,cn=config<br>
+changetype: modify<br>
+replace: nsSSL3<br>
+nsSSL3: off</pre>
+
+<hr/>
+
+<a name="Courier-imap"></a>
+<h2>Courier-imap</h2>
+	<p>Thanks to gertvdijk on <a href="http://askubuntu.com/questions/537196/how-do-i-patch-workaround-sslv3-poodle-vulnerability-cve-2014-3566">AskUbuntu</a>.</p>
+	<p>For Ubuntu 12.04, edit <code>/etc/courier/imapd-ssl</code>.</p>
+
+	<pre>IMAPDSSLSTART=YES<br>
+IMAPDSTARTTLS=YES<br>
+IMAP_TLS_REQUIRED=1<br>
+TLS_PROTOCOL=TLS1<br>
+TLS_STARTTLS_PROTOCOL=TLS1</pre>
+<hr/>
+
+<a name="lighttpd"></a>
+<h2>Lighttpd</h2>
+	<p>Thanks to gertvdijk on <a href="http://askubuntu.com/questions/537196/how-do-i-patch-workaround-sslv3-poodle-vulnerability-cve-2014-3566">AskUbuntu</a>.</p>
+	<p>For Lighttpd 1.4.28+, edit <code>/etc/lighttpd/lighttpd.conf</code></p>
+
+	<pre>ssl.use-sslv2 = "disable"<br>
+ssl.use-sslv3 = "disable"</pre>
+
+    <p>On versions of Lighttpd older than &lt; 1.4.28, there is no elegant solution to disableing SSLv4, but you can disable SSLv3 by specifically disabling SSLv3 cipher suites (in <code>ssl.cipher-list</code>). Allowable suites are: <pre>ECDHE-ECDSA-CAMELLIA256-SHA384 ECDHE-ECDSA-AES256-GCM-SHA384
+ECDHE-ECDSA-AES256-SHA384 ECDHE-ECDSA-AES256-SHA
+ECDHE-RSA-CAMELLIA256-SHA384 ECDHE-RSA-AES256-GCM-SHA384
+ECDHE-RSA-AES256-SHA384 ECDHE-RSA-AES256-SHA DHE-DSS-CAMELLIA256-SHA
+DHE-DSS-AES256-GCM-SHA384 DHE-DSS-AES256-SHA256 DHE-DSS-AES256-SHA
+DHE-RSA-CAMELLIA256-SHA DHE-RSA-AES256-GCM-SHA384 DHE-RSA-AES256-SHA256
+DHE-RSA-AES256-SHA ECDHE-ECDSA-CAMELLIA128-SHA256
+ECDHE-ECDSA-AES128-GCM-SHA256 ECDHE-ECDSA-AES128-SHA256
+ECDHE-ECDSA-AES128-SHA ECDHE-RSA-CAMELLIA128-SHA256
+ECDHE-RSA-AES128-GCM-SHA256 ECDHE-RSA-AES128-SHA256 ECDHE-RSA-AES128-SHA</pre></p>
+<hr/>
+<a name="apache-tomcat"></a>
+<h2>Apache Tomcat</h2>
+	<p>Apache has posted instructions on disabling SSLv3 instructions at <a href="http://wiki.apache.org/tomcat/Security/POODLE">http://wiki.apache.org/tomcat/Security/POODLE</a>.</p>
+
+<hr/>
+
+<h2>Notifying your users</h2>
+	<p>Add this code to your website to embed our browser SSLv3 test.</p>
+	<pre>&lt;iframe src="https://poodle.io/sslv3test.html" width="100%" frameborder="0" height="75"&gt;&lt;/iframe&gt;</pre>
+<hr/>
+
+
+<p>We are working to post details on how to disable SSLv3 support in additional
+	services. If you have details on how SSLv3 support can be disabled in your
+	product, please email us at
+	<a href="mailto:poodle-team@umich.edu">poodle-team@umich.edu</a>.</p>
+</br>
+</div>
+</div>
+</body>

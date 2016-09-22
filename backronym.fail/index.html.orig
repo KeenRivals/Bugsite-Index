@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="author" content="Duo Labs">
+    <meta name="description" content="The BACKRONYM Vulnerability">
+    <title>The BACKRONYM Vulnerability</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,400,400italic" type="text/css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="backronym.css">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+
+    <div class="container">
+      <h1>The BACKRONYM Vulnerability</h1>
+
+      <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-6 col-lg-push-6 col-md-push-6 col-sm-push-6" style="text-align: center;">
+          <img class="logo" src="backronym.png" alt="The BACKRONYM Vulnerability" />
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-6 col-lg-pull-6 col-md-pull-6 col-sm-pull-6">
+
+          <p>A new and serious vulnerability has been identified in a popular software library. How do we know it's serious? Because the vulnerability has a clever name, sweet logo, and as much hype as we can generate from a single web page.</p>
+
+          <p>This vulnerability is known as <i>BACKRONYM</i> and affects Oracle's popular MySQL database software. The BACKRONYM vulnerability allows for an attacker to downgrade and snoop on the SSL/TLS connection that MySQL client libraries use to communicate to a MySQL server.</p>
+
+		  <p>The BACKRONYM vulnerability was discovered by Adam Goodman, a security researcher in the <a target="_blank" href="https://labs.duosecurity.com">Duo Labs</a> group at <a target="_blank" href="https://www.duosecurity.com">Duo Security</a>. (PR note: can we add blinking text in here that says "<span class="css3-blink">Buy Duo products</span>"?)
+
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-6">
+          <h3>Is this a real vulnerability?</h3>
+          <p>Yes. Didn't you see that it has a name, logo, and website? These are all signs of a critical Internet-ending vulnerability that you should start freaking out about.</p>
+          <p>But seriously, it is a real vulnerability in MySQL client libraries (and forks such as MariaDB and Percona) that you should investigate and remediate if necessary.</p>
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-6">
+          <h3>What's the impact of BACKRONYM?</h3>
+		  <p>BACKRONYM allows an attacker to downgrade MySQL SSL/TLS connections, snoop on database queries and results, or even directly manipulate database contents. In other words, all your passwords, PII, and other database contents may be exposed. Your fancy encrypted-at-rest data doesn't mean much when it's not encrypted when flying across the network.</p>
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+          <hr />
+          <h3>Q&amp;A</h3>
+
+          <h4>What does BACKRONYM stand for?</h4>
+          <p>We spent countless hours analyzing the BACKRONYM vulnerability to come up with a human-readable description that would convey the underlying root-cause to infosec professionals. The best description we could come up with was:</p>
+          <p><big><b>B</b>ad <b>A</b>uthentication <b>C</b>auses <b>K</b>ritical <b>R</b>isk <b>O</b>ver <b>N</b>etworks, <b>Y</b>ikes <b>M</b>ySQL!</big></p>
+          <p>In order to more efficiently communicate the vulnerability and maximize potential PR hype, we shortened our description to an acronym. Lo and behold, the acronym happened to be "BACKRONYM". We think that intentionally coming up with backronyms for vulnerabilities like <a target="_blank" href="http://en.wikipedia.org/wiki/POODLE">POODLE</a> is disingenuous.</p>
+
+          <h4>How can BACKRONYM be exploited by an attacker?</h4>
+		  <p>The most serious risk is posed by adversaries with passive monitoring capabilities like the NSA, intelligence agencies, or other capable attackers who may have a foothold on your network. Many MySQL clients will use a DNS hostname (eg. db1.app.company.com) to connect to the database server, triggering a DNS query that may traverse monitored links on the Internet. A global passive adversary like the NSA can spoof a reply to this DNS request in order to hijack the MySQL connection, perform the downgrade, and steal/manipulate database contents.</p>
+		  <p>Programs like the NSA's <a target="_blank" href="">QUANTUM project</a> (specifically QUANTUMDNS) have shown that DNS spoofing and man-on-the-side attacks are commonly exploited by intelligence agencies.</p>
+		  <p>Another vector of attack would be for an attacker to be directly on the network path between the MySQL client and server in order to man-in-the-middle and downgrade the connection. While there is less exposure between the client and server in common database access scenarios (as compared to the DNS spoofing approach), there still can be use-case and deployment-specific risk here.</p>
+
+		  <h4>What do I need to do to fix BACKRONYM?</h4>
+          <p>Step 1: PANIC! I mean look at that logo - your database is basically exploding!</p>
+          <p>Step 2: Tell all your friends about BACKRONYM. Use your thought leadership talents to write blog post about BACKRONYM to reap sweet Internet karma. Leverage your efforts in responding to BACKRONYM to build political capital with the executives in your organization. Make sure your parents know it's not safe to shop online until BACKRONYM is eradicated.</p>
+		  <p>Step 3: Actually remediate the vulnerability in any of your affected MySQL client-side libraries (also MariaDB and Percona). Unfortunately, there's no patch backported for MySQL <= 5.7.2. So if you’re on MySQL 5.6 like 99.99% of the Internet is, you're basically out of luck and have to upgrade to the MySQL 5.7 "preview release" or figure out how to pull in libmysqlclient >= 6.1.3. Backporting security fixes is hard, apparently.</p>
+
+		  <h4>Are there any workarounds possible in absence of a backported patch?</h4>
+          <p>If you’re unable to upgrade to MySQL 5.7.3 or patch your affected client-side library, we recommend reducing the exposure of any network paths between your MySQL client and the MySQL server. As the attack requires MITM capabilities between the client and server, any further restrictions (eg. IP ACLs) you can put in place to reduce the risk of a MITM adversary will help.
+</p>
+
+		  <h4>How can I leverage BACKRONYM to scare my CEO, get more security budget, or meet new friends?</h4>
+          <p>Check out our l33t proof-of-concept tool, mysslstrip, to MITM and downgrade your MySQL connections from SSL/TLS to plaintext: <a target="_blank" href="https://github.com/duo-labs/mysslstrip">https://github.com/duo-labs/mysslstrip</a>.</p>
+          <p>Or take to the streets and begin debating the BACKRONYM vulnerability on your favorite social network medium. We recommend Twitter as the best venue for in-depth discussions on vital and nuanced cybersecurity topics. Pro-tip for subject-matter experts that will be providing commentary to the press about BACKRONYM: keywords like catastrophic, internet-ending, and cyber-pompeii are recommended to highlight its importance.</p>
+
+		  <h4>Is this vulnerability being exploited in the wild?</h4>
+          <p>It is unclear if this vulnerability is being exploited in the wild. However, it is reasonable to assume that cyber-arms <a target="_blank" href="https://twitter.com/csoghoian/status/528783329999749120">merchants of death</a> may know about and be exploiting the issue.</p>
+
+		  <h4>Why stop at vulnerability names and logos?</h4>
+		  <p>That's a good question. And one we asked ourselves when developing this site.</p>
+		  <p>Clever vulnerability names and logos just don't cut it anymore. Here at Duo Labs, we believe in continual innovation and raising the bar in vulnerability disclosure, so we've gone the extra mile to provide a BACKRONYM vulnerability Haiku (greetz to <a target="_blank" href="https://twitter.com/rantyben">@rantyben</a>):</p>
+		  <pre>TLS? In MY
+database? It's less likely
+than you think it is</pre>
+
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+          <hr />
+          <h3>See it in Action</h3>
+		  <p>Check out this wicked screenshot of <a target="_blank" href="https://github.com/duo-labs/mysslstrip">mysslstrip</a> performing a downgrade attack on a MySQL SSL connection, allowing eavesdropping of all traffic between the MySQL client and MySQL server.</p>
+          <img width="900px" src="mysslstrip.png" alt="mysslstrip">
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+          <hr />
+          <h3>References</h3>
+
+          <ul>
+<li>BACKRONYM blog post - <a target="_blank" href="https://www.duosecurity.com/blog/backronym-mysql-vulnerability">https://www.duosecurity.com/blog/backronym-mysql-vulnerability</a></li>
+<li>mysslstrip PoC tool - <a target="_blank" href="https://github.com/duo-labs/mysslstrip">https://github.com/duo-labs/mysslstrip</a></li>
+<li>oCERT-2015-003 advisory - <a target="_blank" href="http://www.ocert.org/advisories/ocert-2015-003.html">http://www.ocert.org/advisories/ocert-2015-003.html</a></li>
+<li>CVE-2015-3152 - <a target="_blank" href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-3152">https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-3152</a></li>
+<li>Todd Farmer's post - <a target="_blank" href="http://mysqlblog.fivefarmers.com/2015/04/29/ssltls-in-5-6-and-5-5-ocert-advisory/">http://mysqlblog.fivefarmers.com/2015/04/29/ssltls-in-5-6-and-5-5-ocert-advisory/</a></li>
+          </ul>
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+          <hr />
+          <h3>Get in Touch</h3>
+
+		  <p>
+		  For crazy-press-hype or technical inquiries about BACKRONYM, email: <a href="mailto:labs@duosecurity.com">labs@duosecurity.com</a>.
+		  </p>
+
+		  <p>
+		  For more security research and hijinks from Duo Labs, follow <a target="_blank" href="https://twitter.com/duo_labs">@duo_labs</a> on Twitter.
+	      </p>
+
+		  <p>
+		  Oh, and check out Duo for your <a target="_blank" href="https://www.duosecurity.com">two-factor authentication</a> needs!
+	      </p>
+		</div>
+
+	  </div>
+
+
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+          <hr />
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-6" style="text-align: center;">
+          <p>
+		  Brought to you by <a target="_blank" href="https://labs.duosecurity.com">Duo Labs</a><br><br>
+          <a target="_blank" href="https://labs.duosecurity.com"><img width="300px" src="duolabs.png" alt="Duo Labs"></a>
+          </p>
+		</div>
+
+        <div class="col-lg-6 col-md-6 col-sm-6" style="text-align: center;">
+          <p>
+		  And <a target="_blank" href="https://www.duosecurity.com">Duo Security</a><br><br>
+          <a target="_blank" href="https://www.duosecurity.com"><img width="300px" src="duo.png" alt="Duo Security"></a>
+          </p>
+        </div>
+      </div>
+
+   </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-49699188-9', 'backronym.fail');
+      ga('create', 'UA-49699188-6', 'auto', {'name': 'rollup'});
+      ga('send', 'pageview');
+      ga('rollup.send', 'pageview');
+    </script>
+
+    <script>
+      $.ajax({
+        url: document.location.protocol + '//munchkin.marketo.net/munchkin.js',
+        dataType: 'script',
+        cache: true,
+        success: function() { Munchkin.init('074-UQX-410'); }
+      });
+    </script>
+
+  </body>
+</html>

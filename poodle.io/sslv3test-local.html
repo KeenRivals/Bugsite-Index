@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+    <meta name="keywords" content="poodle attack sslv3 report zmap durumeric adrian bailey halderman" />
+    <meta name="description" content="POODLE Attack and SSLv3 Support Measurement" />
+    <link rel="stylesheet" type="text/css" href="bootstrap.css"/>
+    <title>POODLE Attack and SSLv3 Support Measurement</title>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>    <![endif]-->
+    <script type="text/javascript">
+      $('document').ready(function(){
+        $('#sslv3ok').removeClass('hidden');
+      });
+    </script>
+  </head>
+  <body>
+    <noscript>
+      <div class="alert alert-warning" role="alert">
+        <strong>Test Failed</strong> Your browser does not allow Javascript. Please enable Javascript for this test.
+      </div>
+    </noscript>
+    <div id="sslv3ok" class="alert alert-info hidden" role="alert">
+      <strong>Good News!</strong> Your browser does not support SSLv3.
+    </div>
+    <div id="sslv3warn" class="alert alert-danger hidden" role="alert">
+      <strong>Warning!</strong> Your browser supports SSLv3. To disable SSLv3, follow the instructions below.
+    </div>
+    <script type="text/javascript" src="https://ssl3.zmap.io/sslv3test.js"></script>
+  </body>
+</html>

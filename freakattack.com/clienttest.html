@@ -1,0 +1,61 @@
+
+<!--[if lt IE 10 ]> <html class="old-ie"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="not-ie"> <!--<![endif]-->
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+    <meta name="keywords" content="freak attack report zmap durumeric adrian bailey halderman" />
+    <meta name="description" content="FREAK Attack Client Check" />
+    <link rel="stylesheet" type="text/css" href="bootstrap.css"/>
+    <title>FREAK Attack: Client Check</title>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="test.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>    <![endif]-->
+
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="page-header" id="banner">
+          <h1>FREAK Attack: Client Check</h1>
+        </div>
+
+        <div class="alert alert-danger hidden" role="alert" id="vulnerable_notify">
+					<b>Warning!</b> Your browser is vulnerable to the FREAK attack.
+					It can be tricked into using weak encryption if you visit a vulnerable website.
+					We encourage you to update your browser right away.
+        </div>
+				<div class="alert alert-danger hidden" role="alert" id="rsaexport_notify" >
+					<b>Warning!</b> Your browser offers RSA_EXPORT cipher suites.
+					It can be tricked into using weak encryption if you visit a vulnerable website.			
+					We encourage you to update your browser right away.
+				</div>
+				<div class="alert alert-info hidden" role="alert" id="safe_notify">
+					<b>Good News!</b> Your browser appears to be safe from the FREAK attack.
+				</div>
+				<div class="alert alert-warning hidden" role="alert" id="manual_check" >
+					<b>Whoops!</b> Your browser might be incompatible with our automatic vulnerability test.
+					If <a href="https://cve.freakattack.com">this link loads without errors</a>, you're vulnerable.
+				</div>
+
+				<p>Chrome for Windows and all modern versions of Firefox are known to be safe.  However, even if your browser is safe, certain third-party software, including some anti-virus products and adware programs, can expose you to the attack by intercepting TLS connections from the browser.  If you are using a safe browser but our client test says you&rsquo;re vulnerable, this is a likely cause.</p>
+
+				<p>If you're curious, your client currently offers the following cipher suites:</p>
+				<table id="cipherTable">
+					<tr>
+						<th>Cipher Suite</th>
+					</tr>
+				</table>
+
+				<br />
+				<h5><b>Tools for software developers</b></h5>
+
+				<p>Here are some additional tool for developers debugging their applications. You can try our low-level state-machine tests by loading <a href="https://cve.freakattack.com">this page</a> and <a href="https://cve2.freakattack.com">this page</a>.  (If either connection succeeds, your software is vulnerable.)  Additionally, you can see what cipher suites your TLS library offers by loading <a href="https://ciphers.freakattack.com">this page</a>.  (If the list includes any <tt>EXPORT</tt> ciphers, your software is vulnerable.)</p>
+
+			</div>
+		</div>
+	</body>
+</html>

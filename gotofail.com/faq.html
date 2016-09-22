@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html><head><meta charset=utf-8><title>goto fail; // FAQ</title>
+<link rel="icon" href="data:;base64,=">
+<body>
+<h3>Q: How does gotofail.com work?</h3>
+<p>When you open gotofail.com some javascript runs that scans your <a href="http://en.wikipedia.org/wiki/User_agent">user agent</a> string to find out what browser and OS you're using. That information is used to classify you into one of several categories based on your detected OS/browser combination. The classes are:</p>
+<ul>
+<li>Your detected OS is not vulnerable: a message saying that will be shown without further tests, but you have the option force the test if you're paranoid.</li>
+<li>Your detected OS may be vulnerable but you are using a browser that's immune: you get a warning message recommending you re-test in Safari with a short explanation of other apps that are at risk from the bug.</li>
+<li>You are running OS X 10.9.2 on a browser that's immune: you will be told that you should be safe unless you're running a beta/prerelease version of OS X, and that if you don't know what that means you're fine.</li>
+<li>Your detected OS may be vulnerable and you are using a browser that hasn't been excluded as non-exploitable: an 'active' test is run to see if your browser continues to load a test message after seeing an invalid ServerKeyExchange packet (that would be bad) and either give you the scary red warning or a green safe message depending on the result.</li>
+</ul>
+<h3>Q: Can you explain like I'm five how the bug works?</h3>
+<p>Normal SSL/TLS:</p>
+<ul>
+<li>Client (browser): Hey server, let's speak in private. Here is a list of ciphers I know that we could use.</li>
+<li>RealServer: Okay, we can speak in private, here is my identification paperwork.</li>
+<li>Client: Your paperwork looks good, lets continue.</li>
+<li>RealServer: Let's use cipher XYZ. Please encrypt the conversation key you want to use to this public key. I have signed our conversation so far with the key from my identification paperwork to prove everything is legit.</li>
+<li>Client: Okay, your signature looks good, here's the conversation key encrypted so only you can read it. I am switching to cipher XYZ with that key now.</li>
+<li>Client and RealServer converse privately.</li>
+</ul>
+<p>SSL/TLS with a vulnerable Apple product:</p>
+<ul>
+<li>Client (browser): Hey server, let's speak in private. Here is a list of ciphers I know that we could use.</li>
+<li>FakeServer: Okay, we can speak in private, here is my identification paperwork (RealServer's identification paperwork).</li>
+<li>Client: Your paperwork looks good, lets continue.</li>
+<li>FakeServer: Let's use cipher XYZ. Please encrypt the conversation key you want to use to this public key. Here's a picture of a cat I found, isn't it great?</li>
+<li>Client: Oh, sooo cute! What were we talking about? Oh yeah, here's the conversation key encrypted so that only you can read it. I am switching to cipher XYZ with that key now.</li>
+<li>FakeServer (thinking to itself): I can't believe Client fell for that trick. Now I just set up a conversation with RealServer...</li>
+<li>Client and RealServer converse with FakeServer able to see and change everything.</li>
+</ul>
+
+<h3>Q: What versions iOS are vulnerable?</h3>
+<p>iOS 6 from 6.0 to 6.1.5, iOS 7 from 7.0 to 7.0.5 and some beta/prerelease builds of 7.1.</p>
+<h3>Q: What versions of OS X are vulnerable?</h3>
+<p>10.9, 10.9.1 and some beta/prerelease builds of 10.9.2.</p>
+<h3>Q: What do you think about how Apple is handling the situation?</h3>
+<p>It appears that they are unwilling to release stand-alone emergency patches for security issues and instead wait until the next point release is ready. This is <b>madness</b> from a policy standpoint. Even worse, despite it being well known that security patches are usually quickly picked apart to make exploits, they did not synchronize the release for all affected platforms. The bug had gone undetected since late 2012, delaying the iOS update until the OS X update was ready would have caused less harm. I have been seeing Apple IP addresses hitting the site with fixed browsers identifying as OS X 10.9.2 since Saturday morning Cupertino time.</p>
+<h3>Q: Do you think the bug was an accident?</h3>
+<p>As others have said "if I wanted to backdoor Apple's SSL this is how I'd do it". It is hard for me to believe that the second "goto fail;" was inserted accidently given that there were no other changes within a few lines of it. In my opinion, the bug is too easy to exploit for it to have been an NSA plant. My speculation is that someone put it in on purpose so they (or their buddy) could sell it.</p>
+<h3>Q: Why do I get different results when I test at work vs at home?</h3>
+<p>Your IT people are paranoid and have an 'egress firewall' set up that blocks requests on weird ports. In almost all cases this will be detected and you'll see an error message.</p>
+<h3>Q: Why do I get a yellow warning in Chrome/Firefox but green in Safari?</h3>
+<p>Firefox only provides the major release number, for example 10.9 or 10.8, in the user agent string. You'll also see this with Chrome on iPhone if you're jailbroken and have an unofficial patch. In either case, trust whatever message is shown in Safari.</p>
+<h3>Q: Why are my results wrong if I spoof my user agent string?</h3>
+<p>The result message mention scanning your operating system and browser version, if you are spoofing your user agent string that should cue you to temporarily disable spoofing.</p>
+<h3>Q: Is there anything I can do to help?</h3>
+<p>Aside from donating (bandwidth and CPU cycles aren't free), please contact me if you run a large/popular site and would like to embed something to check your visitors.</p>
+<h3>Q: What does the backend look like?</h3>
+<p>Everything is static content to ensure that the load doesn't become a problem. The web server is vanilla nginx with a patched version of OpenSSL.</p>
+<h3>Q: Can I have the OpenSSL patch?</h3>
+<pre>
+/*
+Save as 'gotofail.c'
+To build:
+gcc -shared -fPIC -o libgotofail.so gotofail.c
+To use:
+LD_PRELOAD=./libgotofail.so PROGRAM AND ARGUMENTS GO HERE
+*/
+#define _GNU_SOURCE
+int X509_check_private_key(void *a, void *b) { return 1; }
+</pre>
+</body>
+</html>

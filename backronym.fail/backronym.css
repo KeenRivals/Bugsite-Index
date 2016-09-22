@@ -1,0 +1,71 @@
+body {
+    font-family: "Lato", sans-serif;
+    font-weight: 300;
+    font-size: 1.5em;
+    color: #222;
+    margin: 4em 0;
+}
+h1 {
+    font-size: 2em;
+    font-weight: 400;
+    text-align: center;
+}
+h2 {
+    font-size: 1.5em;
+    font-weight: 400;
+    margin: 1em 0;
+}
+h3 {
+    font-size: 1.2em;
+    font-weight: 400;
+    margin: 2em 0 0.5em 0;
+
+}
+h4 {
+    font-size: 1em;
+    font-weight: 400;
+    margin: 2em 0 0.5em 0;
+}
+
+.row img {
+    max-width: 200px;
+}
+
+@media (min-width: 768px) {
+    h1 {
+        margin: 1em 0;
+        text-align: left;
+    }
+    .download {
+        padding-left: 20px;
+        font-size: 0.8em;
+    }
+}
+
+@media (min-width: 992px) {
+    body {
+        font-size: 2em;
+    }
+    .container {
+        max-width: 970px;
+    }
+    hr {
+        margin: 2em 0;
+    }
+    .row img {
+        max-width: 100%;
+    }
+}
+
+@-webkit-keyframes blinker {  
+  from { opacity: 1.0; }
+  to { opacity: 0.0; }
+}
+.css3-blink {
+  -webkit-animation-name: blinker;  
+  -webkit-animation-iteration-count: infinite;  
+  -webkit-animation-timing-function: cubic-bezier(1.0,0,0,1.0);
+  -webkit-animation-duration: 1s; 
+  text-decoration: blink;
+  color: green;
+}

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="">
+      <meta name="author" content="">
+      <link rel="icon" type="image/png" href="media/img/favicon.png">
+      <title>DROWN Attack - Postfix</title>
+      <link href="media/css/style.css" rel="stylesheet" type="text/css">
+      <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600|Montserrat:400,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+      <header id="top">
+        <h1>The DROWN Attack</h1>
+        <div class="logo"></div>
+      </header>
+        <section id="intro">
+            <ul class="toc">
+          <li><a href="index.html" >Back</a>
+          </li><li>
+          </li><li>
+        </ul>
+        </section>
+
+
+    <section>
+        
+          <h3>Postfix Settings - The DROWN Attack</h3>
+        
+
+    <p>Postfix releases 2.9.14, 2.10.8, 2.11.6, 3.0.2,
+        released on 20/Jul/2015 and all later releases are not vulnerable
+        in their default configuration.  The below recommended TLS settings
+        for Postfix are sufficient to avoid exposure to DROWN. Many of these
+        are defaults in sufficiently recent releases.  Nevertheless, in addition
+        to ensuring that your Postfix configuration disables SSLv2 and weak or
+        obsolete ciphers, you should also deploy the appropriate OpenSSL upgrade.
+        </p>
+
+<pre>
+    # Whenever the built-in defaults are sufficient, let the built-in
+    # defaults stand by deleting any explicit overrides.
+
+    # Disable deprecated SSL protocol versions.  See:
+    # http://www.postfix.org/postconf.5.html#smtp_tls_protocols
+    # http://www.postfix.org/postconf.5.html#smtpd_tls_protocols
+    #
+    # Default in all supported stable Postfix releases since July 2015.
+    # Defaults for the mandatory variants never allowed SSLv2.
+    #
+    smtpd_tls_protocols = !SSLv2, !SSLv3
+    smtp_tls_protocols = !SSLv2, !SSLv3
+    lmtp_tls_protocols = !SSLv2, !SSLv3
+    tlsproxy_tls_protocols = $smtpd_tls_protocols
+    #
+    smtpd_tls_mandatory_protocols = !SSLv2, !SSLv3
+    smtp_tls_mandatory_protocols = !SSLv2, !SSLv3
+    lmtp_tls_mandatory_protocols = !SSLv2, !SSLv3
+    tlsproxy_tls_mandatory_protocols = $smtpd_tls_mandatory_protocols
+
+    # Disable export and low-grade ciphers.  See:
+    # http://www.postfix.org/postconf.5.html#smtpd_tls_ciphers
+    # http://www.postfix.org/postconf.5.html#smtp_tls_ciphers
+    #
+    # Default in all supported stable Postfix releases since July 2015.
+    #
+    smtpd_tls_ciphers = medium
+    smtp_tls_ciphers = medium
+
+    # Enable forward-secrecy with a 2048-bit prime and the P-256 EC curve. See
+    # http://www.postfix.org/FORWARD_SECRECY_README.html#server_fs
+    # http://www.postfix.org/postconf.5.html#smtpd_tls_dh1024_param_file
+    # http://www.postfix.org/postconf.5.html#smtpd_tls_eecdh_grade
+    #
+    # The default DH parameters use a 2048-bit strong prime as of Postfix 3.1.0.
+    #
+    smtpd_tls_dh1024_param_file=${config_directory}/dh2048.pem
+    smtpd_tls_eecdh_grade = strong
+
+    # Trimmed cipherlist improves interoperability with old Exchange servers
+    # and reduces exposure to obsolete and rarely used crypto.  See:
+    # http://www.postfix.org/postconf.5.html#smtp_tls_exclude_ciphers
+    # http://www.postfix.org/postconf.5.html#smtpd_tls_exclude_ciphers
+    #
+    smtp_tls_exclude_ciphers =
+        EXPORT, LOW, MD5,
+        aDSS, kECDHe, kECDHr, kDHd, kDHr,
+        SEED, IDEA, RC2
+    smtpd_tls_exclude_ciphers =
+        EXPORT, LOW, MD5, SEED, IDEA, RC2
+</pre>
+</section>
+
+
+      <!--<div class="footer-logo"></div>-->
+
+      <footer>
+        <p class="text-muted">Last updated March 1, 2016.  The DROWN
+        website and logo (<a href="media/img/DROWN_logo.svg">svg</a>;
+        free to use under
+        a <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>
+        license) were designed
+        by <a href="http://sarahmadden.com/">Sarah Madden</a>.
+        Additional development for this website was done by Christian
+        Dresen of M&uuml;nster University of Applied Sciences.
+        | <a href="imprint.html">Imprint</a></p>
+      </footer>
+<!--End of content -->
+      
+
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+      <script type="text/javascript">
+        // This is for a Gauges analytics account that I can give everyone accounts to. -- AH
+        var _gauges = _gauges || [];
+        (function() {
+          var t   = document.createElement('script');
+          t.type  = 'text/javascript';
+          t.async = true;
+          t.id    = 'gauges-tracker';
+          t.setAttribute('data-site-id', '56ccfb3c4b2ffa7a33003cfa');
+          t.setAttribute('data-track-path', 'https://track.gaug.es/track.gif');
+          t.src = 'https://d36ee2fcip1434.cloudfront.net/track.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(t, s);
+        })();
+      </script>
+  </body>
+</html>
+

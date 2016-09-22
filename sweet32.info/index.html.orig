@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<title>Sweet32: Birthday attacks on 64-bit block ciphers in TLS and OpenVPN</title>
+
+<!-- Begin Meta -->
+<!-- Please do not edit this part -->
+<!-- Edit meta.xml and run ./utils/make.pl -->
+<!--*- coding: utf-8 -*-->
+<meta http-equiv="Content-Type" content="text/HTML; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" type="text/css" href="screen.css" />
+<!-- End Meta -->
+<link rel="shortcut icon" href="sweet32.ico" />
+
+<meta name="Title" content="Sweet32: Birthday attacks on 64-bit block ciphers in TLS and OpenVPN" />
+<meta name="Description" content="Sweet32: Birthday attacks on 64-bit block ciphers in TLS and OpenVPN" />
+<meta name="Keywords" content="Sweet32 Triple-DES BlowFish Birthday Birthday Attack TLS HTTPS VPN OpenVPN" />
+
+</head>
+
+
+<body>
+
+<div id="scroll-content">
+<div id="main">
+
+<h1>Sweet32: Birthday attacks on 64-bit block ciphers in TLS and OpenVPN</h1>
+<h2 class="subtitle">CVE-2016-2183, CVE-2016-6329</h2>
+
+<div class="item">
+<div class="item-body">
+
+<p> Cryptographic protocols
+  like <a href="https://tools.ietf.org/html/rfc5246">TLS</a>, <a href="https://tools.ietf.org/html/rfc4253">SSH</a>, <a href="https://eprint.iacr.org/2006/097.pdf">IPsec</a>,
+  and <a href="https://openvpn.net/">OpenVPN</a> commonly
+  use <a href="https://en.wikipedia.org/wiki/Block_cipher">block
+  cipher</a> algorithms, such as AES, Triple-DES, and Blowfish, to
+  encrypt data between clients and servers. To use such algorithms, the
+  data is broken into fixed-length chunks, called blocks, and each block is
+  encrypted separately according to a <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation">mode of operation</a>.
+  Older block ciphers, such as Triple-DES and
+  Blowfish use a block size of 64 bits, whereas AES uses a block size
+  of 128 bits.
+</p>
+
+<p>
+  It is well-known in the cryptographic community that a short block
+  size makes a block cipher vulnerable to
+  <a href="http://web.cs.ucdavis.edu/~rogaway/papers/modes.pdf">birthday</a>
+  <a href="https://eprint.iacr.org/2012/623">attacks</a>, even if there
+  are no cryptographic attacks against the block cipher itself.
+  We observe that such attacks have now become practical for the common usage of 
+  64-bit block ciphers in popular protocols like TLS and OpenVPN.
+  Still, such ciphers are widely enabled on the Internet.
+  Blowfish is currently the default cipher in OpenVPN, and Triple-DES
+  is supported by nearly all HTTPS web servers, and currently used for
+  roughly 1-2% of HTTPS connections between mainstream browsers and
+  web servers.</p>
+
+<p>We show that a network attacker who can monitor a long-lived
+  Triple-DES HTTPS connection between a web browser and a website can
+  recover secure HTTP cookies by capturing around 785&nbsp;GB of
+  traffic.  In our proof-of-concept demo, this attack currently takes
+  less than two days, using malicious Javascript to generate traffic. Keeping a web connection alive for two days may not
+  seem very practical, but it worked easily in the lab.  In terms of computational complexity, this
+  attack is comparable to the recent <a href="http://www.isg.rhul.ac.uk/tls/">attacks</a>
+  on <a href="http://www.rc4nomore.com/">RC4</a>.  We also demonstrate
+  a similar attack on VPNs that use 64-bit ciphers, such as OpenVPN,
+  where long-lived Blowfish connections are the norm. </p>
+
+<p>
+  Countermeasures are currently being implemented by browser vendors,
+  OpenSSL, and the OpenVPN team, and we advise users to update to the
+  latest available versions.</p>
+
+<p> 
+  Our results will appear in the following technical paper at <a href="https://www.sigsac.org/ccs/CCS2016/">ACM CCS 2016</a>:
+</p>
+<div class="publi">
+<a class="icon1" href="SWEET32_CCS16.pdf">
+<img src="article.png" title="download article" alt="[article]"></a>
+<h3><a href="SWEET32_CCS16.pdf">On the Practical (In-)Security of 64-bit Block Ciphers &mdash; Collision Attacks on HTTP over TLS and OpenVPN</a></h3>
+<div class="info" style="margin-right:5em">Karthikeyan Bhargavan, Gaëtan Leurent</div>
+</div>
+
+
+</div>
+</div>
+
+<div class="item">
+<h2 id="intro">Block Ciphers and the Birthday Bound</h2>
+<div class="item-body">
+
+<p>
+The security of a block cipher is often reduced to the key size <em>k</em>: the
+best attack should be the exhaustive search of the key, with complexity
+2<sup><em>k</em></sup>.  However, the block size <em>n</em> is also an important security
+parameter, defining the amount of data that can be encrypted under the
+same key.  This is particularly important when using common modes of
+operation: we require block ciphers to be secure with up to 2<sup><em>n</em></sup>
+queries, but most modes of operation (e.g. CBC, CTR, GCM,
+OCB, etc.) are unsafe with more than 2<sup><em>n</em>/2</sup> blocks of message (the
+birthday bound).
+</p><p>
+With a modern block cipher with 128-bit blocks such as AES, the
+birthday bound corresponds to 256&nbsp;EB.
+However, for a block cipher with 64-bit
+blocks, the birthday bound corresponds to only 32&nbsp;GB, which is easily reached in practice.  When the amount of data
+encrypted under a fixed key approaches this limit, the security guarantees
+of the mode of operation start to crumble.  This problem is
+well-known by cryptographers, who always require keys to be
+changed <strong>well before</strong> 2<sup>n/2</sup> blocks.  However
+it is often minimized by practitioners
+because the attacks require known plaintext, and reveal only little
+information.
+Indeed, standard bodies only recommend to change the
+key just before 2<sup>n/2</sup> blocks, and many implementations don't
+enforce any limit on the use of a key.
+</p><p>
+In particular, there are many uses of block ciphers with 64-bit blocks
+where large amount of data are potentially encrypted under the same key, such as:
+</p><ul>
+<li> 3G telephony (UMTS), encrypted with KASUMI; </li>
+<li> OpenVPN, which uses Blowfish as the default cipher; </li>
+<li> many Internet protocols, such as TLS, IPSec and SSH, support Triple-DES
+  as a legacy cipher. </li>
+</ul><p>
+In all these scenarios, 32&nbsp;GB of data can be transferred in less than one
+hour with a fast connection.
+</p>
+
+</div>
+<h2 id="CBC">Exploiting Block Cipher Collisions</h2>
+<div class="item-body">
+
+<figure style="float:right; margin:1em">
+<img src="CBC.svg" style="width:20em" />
+<figcaption>
+The CBC mode
+</figcaption>
+</figure>
+
+<p>
+In practice, block ciphers are used with a mode of operation in order to
+deal with messages of arbitrary length.
+The CBC mode is one of the oldest encryption modes, and still widely
+used.  The message <em>M</em> is divided into blocks <em>m<sub>i</sub></em> and is
+encrypted as:
+<span class="centered"><em> c<sub>i</sub> = E<sub>k</sub>(m<sub>i</sub> &#8853; c<sub>i-1</sub>)</em>,</span>
+where <em>c<sub>-1</sub></em> is an initialization
+value usually denoted as IV.
+We now explain the impact of collisions on the CBC mode.
+</p>
+
+<p>
+CBC has been proven secure up to $2^{n/2}$ blocks of
+messages.
+On the other hand there is a simple birthday attack against CBC: after
+2<sup><em>n</em>/2</sup> message blocks encrypted with the same key (in the same
+message or in different messages), a collision between two ciphertext
+blocks <em>c<sub>i</sub> = c<sub>j</sub></em> is expected.  Since <em>E<sub>k</sub></em> is a
+permutation, a collision in the output means that the inputs are the
+same (<em>m<sub>i</sub> &#8853; c<sub>i-1</sub> = m<sub>j</sub> &#8853; c<sub>j-1</sub></em>)
+which reveals the xor of two plaintext blocks:
+<span class="centered">
+<em>m<sub>i</sub> &#8853; m<sub>j</sub> = c<sub>i-1</sub> &#8853; c<sub>j-1</sub></em>.
+</span>
+</p>
+
+<p>
+With 2<sup><em>d</em></sup> blocks of data the expected number of collisions
+is roughly 2<sup>2<em>d-n-</em>1</sup> (following the birthday paradox).
+</p>
+
+
+<h3>Practical impact</h3>
+
+<p>
+In many contexts, recovering only the xor between
+two plaintext blocks is not sufficient for an attack with a
+practical impact.  However, an attack can be mounted when the following
+conditions are fulfilled:
+</p><ul>
+<li> a fixed secret is sent repeatedly; </li>
+<li> some fraction of the plaintext is known. </li>
+</ul><p>
+In this case, there is a chance that a
+collision leaks the xor between the fixed secret and the known
+plaintext; this would immediately reveal the secret.  More precisely,
+this attack is expected to succeed with high probability as soon as
+2<sup>s</sup> copies of the secret and 2<sup>t</sup> known blocks are encrypted,
+with <em>s+t &ge; n</em>.
+</p><p>
+In particular, this is applicable to the security of encrypted HTTP
+connections, when an authentication token is send with every request.
+A man-in-the-browser attacker can generate a large
+number of requests, and recover the authentication token, using the fact
+that most headers in the request are predictable or even controlled by
+the attacker.
+</p>
+</div>
+
+
+<div class="spacer"></div>
+
+<h2 id="usage">64-bit Block Cipher Usage on the Internet</h2>
+<div class="item-body">
+
+<p>
+Many of the most influential Internet security protocols, such as TLS,
+SSH, and IPsec were standardized at a time when 64-bit block ciphers,
+such as Triple-DES and Blowfish, were still considered
+strong.
+For example, in TLS 1.0 and 1.1, Triple-DES is the mandatory encryption
+algorithm, so all TLS libraries implement it and a vast majority of
+web servers support it.  In addition, until we disclosed the
+attacks in this paper, OpenSSL included Triple-DES ciphersuites in its
+HIGH-security list (it has now been moved to MEDIUM).
+</p>
+
+<h3>Triple-DES and Blowfish usage in VPNs.</h3>
+
+<p>
+<span class="h5">IPSec</span> Most IPSec-based VPN clients support
+Triple-DES for interoperability.  In particular, some versions of
+Microsoft's L2TP VPN client
+use <a href="https://support.microsoft.com/en-us/kb/325158">Triple-DES
+by default</a>.
+</p>
+
+<p>
+<span class="h5">OpenVPN</span> 
+<a href="https://openvpn.net">OpenVPN</a> is a popular open-source VPN solution
+originally written by James Yonan.  The <strong>default encryption</strong> for the
+transport protocol of OpenVPN <strong>is Blowfish &ndash; a 64-bit cipher &ndash;</strong> with the
+CBC mode.  OpenVPN supports two different modes to generate session keys
+to encrypt the messages:
+<ul>
+<li> In <strong>pre-shared-key mode</strong>, static keys are used for all the traffic.
+  In particular, there is no limit to the lifetime of those keys.</li>
+<li> In <strong>TLS mode</strong>, session keys are generated with a TLS handshake,
+  using certificates to authenticate the peers.  The session keys are
+  updated periodically, with limits on the number of packets, the number
+  of bytes, or a session time.  The default configuration rekeys the
+  tunnel every hour.</li>
+</ul>
+
+<h3>Triple-DES usage in HTTPS.</h3>
+
+<p>
+Triple-DES is the second most widely supported cipher (after AES) in HTTPS
+servers, with about <a href="https://securitypitfalls.wordpress.com/2016/04/17/february-2016-scan-results-incomplete/">87% of servers supporting
+it</a>.
+Furthermore, all popular web browsers support Triple-DES. The cipher that
+is actually negotiated for a TLS connection is chosen by the server,
+based on its local preference order and on the order in which the
+client advertises its ciphersuites. Since most modern browsers and servers
+prefer AES over Triple-DES one may expect only a negligible number of connections
+to negotiate Triple-DES. However, we find evidence that 1-2% of
+all TLS connections likely use Triple-DES in CBC mode, as described below.
+</p>
+
+<p>
+<span class="h5">Firefox Telemetry</span>
+<a href="https://mzl.la/2bkLMFA">Telemetry data from Mozilla Firefox</a>
+show that Triple-DES is used for close to 1% of HTTPS connections from
+Firefox browsers (0.76% with beta 49).  The use of Triple-DES with Firefox 
+is slowly decreasing, and peaked with the removal of RC4 from
+the list of supported ciphers in version 36.  Indeed a number of servers
+are configured to use, in order of preference, first RC4, then Triple-DES,
+and now use Triple-DES with Firefox.  Since all modern browsers have
+deprecated RC4 between 2013 and 2015 (following
+RFC 7465), they will also use
+a Triple-DES ciphersuite in this situation.
+</p>
+
+<p>
+<span class="h5">Scanning the Top 1M Websites</span>
+We performed a scan of the top 1 million servers as listed by
+Alexa using the <a href="https://github.com/jvehent/cipherscan">cipherscan</a>
+tool.  We
+found that 86% of the servers that support TLS include Triple-DES as one
+of the supported ciphers.  Moreover, 1.2% of these servers are configured
+in such a way that they will actually pick a
+Triple-DES based ciphersuite with a modern browser, even though better alternatives are available.
+(In particular many of these servers support AES-based ciphersuites, but use Triple-DES or RC4 preferentially.)
+</p>
+
+
+<p>
+<span class="h5">Windows XP Clients and Windows 2003 Servers</span>
+The Windows Server 2003 operating system does not support AES-based
+ciphersuites in its default configuration, although support for AES can
+be added with an optional <a href="https://support.microsoft.com/en-us/kb/948963">hotfix</a>.  The Windows XP operating system with
+security update <a href="https://support.microsoft.com/en-us/kb/980436">MS10-049</a> supports
+AES-based ciphersuites.
+If AES-based ciphersuites have not been added, these operating systems support only
+RC4, Triple-DES, DES, and RC2-40.  While they are not supported
+anymore by Microsoft, they still have some users, and this creates
+situations where the best available cipher is Triple-DES.
+</p>
+
+<div class="spacer"></div>
+
+<!-- <figure style="float:right; margin:1em"> -->
+<!-- <table class="perfs"> -->
+<!-- <thead> -->
+<!--   <tr><th>Website</th> <th>connection closed after</th></tr> -->
+<!-- </thead> -->
+<!-- <tbody> -->
+<!-- <tr><td><a href="https://google.com">google.com</a></td><td>1 hour </td></tr> -->
+<!-- <tr><td><a href="https://facebook.com">facebook.com</a></td><td>no limit detected </td></tr> -->
+<!-- <tr><td><a href="https://youtube.com">youtube.com</a></td><td>no limit detected </td></tr> -->
+<!-- <tr><td><a href="https://yahoo.com">yahoo.com</a></td><td>no limit detected </td></tr> -->
+<!-- <tr><td><a href="https://live.com">live.com</a></td><td>up to one day </td></tr> -->
+<!-- <tr><td><a href="https://baidu.com">baidu.com</a></td><td> 100 requests </td></tr> -->
+<!-- <tr><td><a href="https://amazon.com">amazon.com</a></td><td> 100 requests </td></tr> -->
+<!-- <tr><td><a href="https://wikipedia.org">wikipedia.org</a></td><td> 100 requests </td></tr> -->
+<!-- <tr><td><a href="https://qq.com">qq.com</a></td><td>2000 requests </td></tr> -->
+<!-- <tr><td><a href="https://twitter.com">twitter.com</a></td><td>  50 requests </td></tr> -->
+<!-- </tbody> -->
+<!-- </table> -->
+<!-- <figcaption> -->
+<!-- HTTPS connection lifetime (Alexa top 10) -->
+<!-- </figcaption> -->
+<!-- </figure> -->
+
+<h3> Long-lived HTTPS connection </h3>
+
+<p>
+An important requirement for the attack is to send a large number of
+requests in the same TLS connection. 
+Therefore, we need to find client and
+servers that not only negotiate the use of Triple-DES, but also exchange a
+large number of HTTP request in the same TLS connection (without
+rekeying).  This is possible using a persistent HTTP connection, as
+defined in HTTP/1.1 (Keep-Alive).
+On the client side, all browsers
+that we tested (Firefox, Chrome, Opera) will reuse a TLS connection as
+long as the server keeps it open.
+</p>
+
+<p>
+On the server side,
+we found that a number of HTTP servers will close the TLS connection
+even when it is still active.  In particular, Apache and Nginx
+limit the number of requests sent in the same connection, with a maximum
+of 100 in the default configuration.  On the other hand, IIS does not
+seem to have such a limit.  In practice, many high profile servers
+accept a very large number of requests in a single TLS connection.
+</p>
+
+<p>
+<span class="h5">Vulnerable Websites</span>
+For a better estimate of the number of vulnerable servers, we tested
+servers from Alexa's top 10k that negotiate Triple-DES with a modern
+client.  We identified 11483 different HTTPS servers, and found that 226 of them (1.9%) negotiate Triple-DES
+with a modern client.  Moreover, 72 of these (0.6% of the total) also
+accept to keep a connection open for at least 800k requests.
+Consequently, the duration of the attack is not unrealistic, at least
+from the viewpoint of browsers and servers, and we estimate that at
+least 0.6% of HTTPS connections are vulnerable to our attacks.
+</p>
+<p>
+For advice about how to check a website's
+configuration and configure it properly, see the <a href="#faq">FAQ</a>.</p>
+
+
+
+</div>
+
+<div class="spacer"></div>
+
+<h2 id="demo"> Attacking Authenticated HTTP over TLS and OpenVPN </h2>
+<div class="item-body">
+
+<p>
+We now demonstrate concrete attacks against authenticated HTTP sessions even
+when they are secured by TLS or OpenVPN. 
+First, we identify a few examples of secret authentication credentials
+that are repeatedly sent by the browser on every request.  We then 
+show how we can recover these secrets using block cipher collisions.
+</p>
+
+<h3> HTTP Bearer Tokens</h3>
+
+<p>
+<span class="h5">Cookie-based Sessions</span>
+Modern HTTPS websites use a variety of methods to manage authenticated
+sessions with their clients.  The most popular mechanism is secure
+<em>cookies</em> as specified in RFC6265. Once a user has logged in, the
+server sets a cookie containing a secret value on the user's
+browser. The browser will then send the cookie on all subsequent
+requests to the website, implicitly authenticating the user.
+</p><p>
+Cookies are sensitive, because an attacker who obtains a session cookie
+can then log in as the user from a different browser. The cookie acts
+as a <em>bearer token</em> that carries the user's delegated credential.
+</p><p>
+A cookie for a website is normally included in all requests to that
+website whether that request was initiated by the user, or a script on
+the website, or even by a different website. Browsers sometimes impose
+stricter rules for this last category of requests, called cross-origin
+or cross-domain requests.  For example, XmlHttpRequests sent from one
+domain to another may not have cookies attached. However, cross-domain
+requests for images or iframes will still send cookies.
+</p>
+
+<p>
+<span class="h5">HTTP BasicAuth</span>
+Apart from cookies, there are other mechanisms for a website to
+authenticate the user. In the HTTP Basic Authentication mechanism
+specified in RFC7617, the browser asks the user to enter a username
+and password into a special dialog and then sends this information (in
+plaintext) as an HTTP header of the form:
+</p>
+<pre>
+Authorization: Basic dGVzdDoxMjPCow=
+</pre>
+
+<p>
+Once a user has entered his login information once, the browser will typically
+cache this information and use it on all subsequent requests to the server.
+Notably, even if a different website creates a cross-domain request to the
+authenticated server, the BasicAuth credentials will be automatically sent
+by the browser.
+
+BasicAuth credentials contain the user's password and are hence security-critical.
+One should only use this authentication mechanism over HTTPS but a number of
+corporate websites use BasicAuth over HTTP, under the assumption that their
+users can only access the website over a VPN or some other secure connection.
+</p>
+
+<figure style="float:right; margin:1em">
+<img src="Attack.svg" style="width:20em" />
+<figcaption>
+The Beastly attacker
+</figcaption>
+</figure>
+
+<h3> The Beastly Attack Scenario </h3>
+<p>
+
+Our attack scenario, is similar to the setup used in recent attacks on RC4.
+The attacker wants to steal some bearer token that is being repeatedly
+sent by a browser to a website secured with HTTPS, or an HTTP website
+accessed through a VPN. We assume that the attacker can
+control some JavaScript on a web page loaded by the user's browser,
+either by actively tampering with an HTTP response on the wire, or by
+hosting a malicious website that the user is fooled into visiting.  We
+also assume that the attacker can observe all the encrypted traffic between the
+target browser and the secure website.
+</p><p>
+We further assume that the data is encrypted with a 64-bit block cipher
+in CBC mode (either an HTTPS connection where the client and server have
+negotiated Triple-DES, or an HTTP connection though a VPN encrypted with Blowfish or Triple-DES). Suppose the victim is already logged in to a
+website and has a session cookie.  The attacker runs malicious
+JavaScript code on the victim's browser that repeatedly sends HTTP
+queries to the target website server, each containing the session
+cookie.  If he sends close to 2<sup>32</sup> queries, a collision is
+expected between a ciphertext block corresponding to the cookie
+(<em>c<sub>i</sub></em>), and a known block (<em>c<sub>j</sub></em>), containing a known part of the
+query.  The collision attack against CBC reveals the session cookie:
+<span class="centered">
+<em>p<sub>i</sub> = p<sub>j</sub> &#8853; c<sub>i-1</sub> &#8853; c<sub>j-1</sub></em>.
+</span>
+</p><p>
+Note that most of the traffic generated by the attacker is known or
+predictable.  The requested URL is chosen by the attacker, and all the
+headers excepted the cookie are predictable and can be observed in any
+HTTP traffic.
+</p>
+
+<div class="spacer"></div>
+
+<!-- </div> -->
+<!-- <h2 id="demo">HTTPS attack in practice</h2> -->
+<!-- <div class="item-body"> -->
+
+<div style="float:right; margin:1em; width: 20em">
+<figure style="margin: 0px;">
+<pre style="border:solid 1px; margin-bottom:0px; width:100%;">&lt;html&gt;
+  &lt;body&gt;
+    &lt;script&gt;
+    var W = new Array;
+    for (var i=0; i&lt;8; i++) {
+        var x = new Worker("worker.js");
+        W.push(x);
+    }
+    &lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;
+</pre>
+<figcaption>
+<i>attack.html</i>
+</figcaption>
+</figure>
+<figure style="margin: 0px;">
+<pre style="border:solid 1px; margin-bottom:0px; width:100%;">var url = "https://10.0.0.1/index.html";
+var xhr = new XMLHttpRequest;
+
+// Expand URL to ~4kB using a query string
+// Alternatively, force a large cookie
+url += "?";
+var x = 10000000;
+for (var i=0; i&lt;=500; i++) {
+    url += x++;
+}
+
+
+while(true) {
+    xhr.open("HEAD", url, false);
+    xhr.withCredentials = true;
+    xhr.send();
+    xhr.abort();
+}
+</pre>
+<figcaption>
+<i>worker.js</i>
+</figcaption>
+</figure>
+</div>
+
+<h3> Proof-of-Concept Attack Demo </h3>
+
+<p>
+The attacker code consists of two parts: a JavaScript program that 
+sends a large number of HTTP requests, and a network
+adversary who processes the resulting ciphertext to recovers a 16-byte secret.
+</p>
+
+<p>
+<span class="h5">Man-in-the-browser code</span> The attacker code is
+shown on the right: it uses Web workers to
+issue <span class="tt">XmlHttpRequests</span>, using
+the <span class="tt">withCredentials</span> property to make sure that cookies are
+send in the cross-origin request.
+We experimented with several browsers, and we obtained the best
+results with Firefox Developer Edition 47.0a2.
+</p>
+
+<p>
+<span class="h5">Recovering collisions</span>
+We captured the encrypted packets with <span class="tt">tcpdump</span> and used a
+C++ program to extract the ciphertext blocks (using <span class="tt">libpcap</span>).
+In both the HTTPS attack and the OpenVPN attack, each HTTP query is sent in a
+separate encrypted record, which contain the plaintext at a fixed
+position, as well as some extra information (packet number, padding,
+MAC, ...).  Therefore, it is easy to know to which plaintext block
+corresponds each ciphertext block, and to align the cookie to a block limit.
+
+After capturing all the traffic, the C++ program sorts the ciphertext
+blocks in order to locate collisions.  Since the amount of data is quite
+large (hundreds of gigabytes), we use the external sort implementation of the
+<span class="tt">stxxl</span> library.  With a NAS storage, sorting the data took
+around four hours.
+</p>
+
+
+<h3>Attacking Basic Auth over OpenVPN</h3>
+
+<p>
+To demonstrate the attack against OpenVPN, we use a pre-shared-key
+tunnel between two physical machines running Linux, with Firefox
+Developer Edition 47.0a2 on one side, and an nginx server on the other
+side.  Access to the server is protected by BasicAuth, and the user
+has entered his credentials.  Using the default OpenVPN settings, the
+tunnel is encrypted with Blowfish in CBC mode.
+</p>
+
+<p>
+We use the Javascript code described in the previous section to send a
+large number of requests to the server though the tunnel.  We found
+that increasing the size of the request to 4~kB does not significantly
+reduce the query rate, but reduces the number of queries required for
+the attack.  In our setting, the browser generates about 2900 requests
+per second, using several web Worker running in parallel.  We expect
+the first collision after roughly
+2<sup>32.3</sup> blocks (40&nbsp;GB), <em>i.e.</em> one hour.
+In practice, we detected the first collision
+early, after only 30 minutes (2<sup>31.3</sup> blocks); as expected, the
+predicted xor difference was correct.  The full attack needs about
+2<sup>36.6</sup> blocks (785&nbsp;GB) to recover a two-block secret out of 4&nbsp;kB
+messages; this should take about 19 hours in this setting.  <strong>In our
+demo, it took 18.6 hours and 705&nbsp;GB, and we successfully
+recovered the 16-byte authentication token.</strong>
+</p>
+
+<h3>Attacking Secure Cookies over HTTPS</h3>
+
+<p>The attack against HTTPS connection is very similar to the attack
+against OpenVPN, as long as we have a client and server that negotiate
+Triple-DES, and that keep a connection open for a long time.
+</p>
+
+<p>
+<span class="h5">Vulnerable Websites</span> As detailed above, about 0.6% of the top Alexa 100K
+websites support Triple-DES and allow long-lived HTTPS connections.  This
+list contains many high-profile e-commerce and banking websites.
+</p>
+
+<p>
+We use the Javascript code described above,
+but we note that with several <span class="tt">Workers</span> running in
+parallel, modern browsers open a few parallel connections to
+the server and split the requests over these connections.
+For our attack, we need to maximize the throughput over a <i>single</i>
+connection.  This can be achieved by disturbing some of the connections
+so that most of request are send in a single.  In our setup, we used
+<span class="tt">iptables</span> rules to limit the rate of all connections except one.
+In a real attack, this would be done by an active man-in-the-middle, but
+a passive man-in-the-middle can also mount the attack -- it will just
+take more time to collect the data.</p>
+
+<p><span class="h5">Proof-of-Concept Attack Demo</span>
+In our setup we use Firefox Developer Edition 47.0a2 running
+on Linux and an IIS 6.0 server
+in a Windows Server 2003 R2 SP2 Virtual machine.  The default configuration of
+IIS 6.0 with all recommended updates offers only RC4 and Triple-DES ciphers,
+and will use Triple-DES with Firefox and other recent browsers where RC4 is
+disabled.  Moreover, IIS 6.0 supports HTTP/1.1 and keeps an active connection open
+for an arbitrary long time.
+</p>
+
+<p>
+On Firefox Developer Edition 47.0a2, with a few dozen
+<span class="tt">Worker</span>s running in parallel, we can send up to 2000 requests
+per second in a single TLS connection.
+In our experiment, we were lucky to detect the first collision after
+only 25 minutes (2<sup>20.1</sup> requests), and we verified that the
+collision revealed the xor of two plaintexts blocks.  As seen
+previously, the full attack should require 2<sup>36.6</sup> blocks (785&nbsp;GB) to
+recover a two-block cookie, which should take 38 hours in our setting.
+<strong>Experimentally, we have recovered a two-block cookie from an HTTPS trace
+  of only 610&nbsp;GB, captured in 30.5 hours.</strong>
+</p>
+
+</div>
+<h2 id="impact">Impact and Mitigation</h2>
+<div class="item-body">
+
+<p>
+We have demonstrated the first concrete attacks on mainstream Internet
+protocols that exploit block cipher collisions. Our attacks can
+recover valuable secrets such as HTTP cookies and passwords in under
+40 hours. Our attacks impact a majority of OpenVPN connections and an
+estimated 0.6% of HTTPS connections to popular websites.  We expect
+that our attacks also impact a number of SSH and IPsec connections,
+but we do not have concrete measurements for these protocols.  Like
+many recent attacks on TLS, such a BEAST and RC4 NOMORE, the
+underlying principles behind our attacks were well known to
+cryptographers. Our goal is to raise awareness among practitioners
+about the vulnerabilities of short block ciphers and on safe ways of
+using them.
+</p>
+
+<h3>Comparison with RC4 attacks</h3>
+<p>
+Our attack scenario is very similar to the setup of the recent
+attacks on the use of RC4 in HTTPS.  We use
+the same man-in-the-browser setting to generate a large number of HTTP
+requests, and the data complexity of the attack is comparable.
+Our attack requires only 2<sup>29.1</sup> short queries of 512&nbsp;bytes
+(280&nbsp;GB in total), which
+can be reduced to 2<sup>27.6</sup> longer queries of 4&nbsp;kB
+(785&nbsp;GB in total).  
+However, these numbers are for the
+case when all the data is encrypted within the same session.  Even if
+the amount of data sent on a single connection is limited, as long as
+the limit is close enough to the birthday bound, we can still mount
+our attacks across multiple parallel and sequential sessions, albeit
+with a higher data and time complexity.
+</p>
+
+<h3>Mitigation</h3>
+
+<p>
+The obvious way to avoid these attacks is to stop using legacy 64-bit
+block ciphers.  Alternatively, the attack can be mitigated by rekeying
+the session frequently.</p>
+
+<p>Concretely, we recommend the following measures to prevent
+our attack:</p>
+<ul>
+<li> Web servers and VPNs should be configured to prefer
+  128-bit ciphers.  According to our scans, about 1.1% of the top 100k
+  web server from Alexa, and 0.5% of the top 1 million, support AES but
+  prefer to use 3DES.</li>
+<li> Web browsers should offer 3DES as a fallback-only cipher, to
+  avoid using it with servers that support AES but prefer 3DES. </li>
+<li> TLS libraries and applications should limit the length
+  of TLS sessions with a 64-bit cipher.  This could be done with TLS
+  renegotiation, or in some cases by closing the connection and starting
+  a new one (i.e. limiting HTTP/1.1 Keep-Alive, SPDY, and HTTP/2
+  with 3DES ciphersuites).</li>
+<li>OpenVPN users can change the cipher from the default Blowfish to AES, using
+    for instance <code>cipher AES-128-CBC</code> on the client and
+    server configuration.  If they don't control the server
+    configuration, they can mitigate the attack by forcing frequent
+    rekeying with <code>reneg-bytes 64000000</code>.
+</li>
+</ul>
+
+<h3>Responsible disclosure</h3>
+
+<p>
+We have communicated our results and concerns to the OpenVPN team, and
+to various website owners, browser vendors, and TLS libraries.  They all
+acknowledged the
+issue, and are working on implementing countermeasures.  The TLS
+vulnerability received CVE number CVE-2016-2183, and the OpenVPN
+vulnerability is tracked as CVE-2016-6329.
+</p>
+
+<p><strong>OpenVPN</strong> <a href="http://www.mail-archive.com/openvpn-announce@lists.sourceforge.net/msg00000.html">2.3.12</a> will <a href="https://www.mail-archive.com/openvpn-devel@lists.sourceforge.net/msg00029.html">display</a> a
+<a href="https://www.mail-archive.com/openvpn-devel@lists.sourceforge.net/msg00030.html">warning</a> to users who choose to use 64-bit ciphers and encourage them
+to transition to AES (cipher
+negotiation is also being implemented in the 2.4 branch). It will also
+implement a default
+renegotiation limit of 64MB when used in TLS mode in a future version.  A <a href="https://community.openvpn.net/openvpn/wiki/SWEET32">wiki entry</a> provides further details.</p>
+
+<p><strong>OpenSSL</strong> has moved 3DES ciphersuites from the
+HIGH category to
+MEDIUM in the <a href="https://github.com/openssl/openssl/commit/e95f5e03f6f1f8d3f6cbe4b7fa48e57b4cf8fd60">1.0.1</a> and <a href="https://github.com/openssl/openssl/commit/0fff5065884d5ac61123a604bbcee30a53c808ff">1.0.2</a> branches, and will disable it by default in
+the upcoming <a href="https://github.com/openssl/openssl/commit/ef28891bab7054667f2f6739f6d376c38b3ca1cc">1.1.0</a> release.
+They have a <a href="https://www.openssl.org/blog/blog/2016/08/24/sweet32/">blog entry</a> with further details.</p>
+
+<p><strong>Akamai</strong> will offer an option for web server
+administrators to drop 3DES
+from the offered ciphers.</p>
+
+<p><strong>Apple</strong> has disabled 3DES on icloud.com and is
+recommending that
+all its customers disable 3DES on their websites. </p>
+
+<p>
+Currently, most browsers see about 1% of their connections using
+3DES, and vendors consider this number too high to simply disable
+3DES on the client side, since too many websites would be broken.
+So, they are instead considering implementing data limits per
+connection to force rekeying, or offering 3DES ciphersuites only in a
+fallback negotiation if no AES ciphersuite is acceptable to the
+server.
+</p>
+
+<p><strong>Mozilla</strong> is implementing <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1268745">data limits</a> for all
+ciphersuites.</p>
+
+<p><strong>Microsoft</strong> has <a href="https://technet.microsoft.com/library/security/3155527.aspx">removed</a> 3DES from the False Start
+whitelist.</p>
+
+<p>
+More details about implemented countermeasures
+will be added to this webpage as they become
+available.
+</p>
+
+<h3>On the Web</h3>
+
+<p>The attack has been mentionned on
+<a href="https://threatpost.com/new-collision-attacks-against-3des-blowfish-allow-for-cookie-decryption/120087/">Threatpost</a>, 
+<a href="http://arstechnica.com/security/2016/08/new-attack-can-pluck-secrets-from-1-of-https-traffic-affects-top-sites/">Ars Technica</a>, 
+<a href="http://blog.cryptographyengineering.com/2016/08/attack-of-week-64-bit-ciphers-in-tls.html">Matthew Green's blog</a>, 
+<a href="https://nakedsecurity.sophos.com/2016/08/25/anatomy-of-a-cryptographic-collision-the-sweet32-attack/">Tom's hardware</a>, 
+<a href="http://news.softpedia.com/news/sweet32-attack-3des-and-blowfish-ciphers-considered-insecure-507631.shtml">Softpedia</a>, 
+<a href="https://nakedsecurity.sophos.com/2016/08/25/anatomy-of-a-cryptographic-collision-the-sweet32-attack/">Naked Security</a>, 
+<a href="http://www.theregister.co.uk/2016/08/29/big_data_busts_crypto_sweet32_captures_collisions_in_old_ciphers/">The Register</a>, 
+<a href="https://www.inria.fr/actualite/actualites-inria/nouvelle-demonstration-de-la-vulnerabilite-de-protocoles-de-securite-internet">inira.fr</a>, and
+<a href="http://www.zdnet.fr/actualites/sweet32-les-vieux-algos-se-cachent-pour-mourir-39841068.htm">ZDnet.fr</a>, among others...
+.</p>
+
+
+</div>
+</div>
+
+
+<div class="item">
+<h2 id="faq">FAQ</h2>
+<div class="item-body">
+
+  <h3>Why is 3DES still used with a modern browser?</h3>
+
+  <p>Because more than 1% of the web servers are poorly configured, and prefer using 3DES rather than AES.</p>
+
+  <h3>How can I check if my server is well configured?</h3>
+
+  <p>You can use
+  the <a href="https://www.ssllabs.com/ssltest/">scanning tool</a>
+  form Qualys SSL Labs.  In the "Handshake Simulation" section, you
+  should see 3DES or RC4 only with browsers that don't support
+  stronger ciphersuites, like IE6/XP and IE8/XP.  If you have 3DES
+  ciphersuites at the bottom of the "Cipher Suites" section, you can
+  try to remove them, but it's not an immediate security issue.
+  Removing 3DES will protect you against potential downgrade attack,
+  but it will also break connections from older clients.</p>
+
+  <h3>How can I fix my server's configuration</h3>
+
+  <p>You can follow the advice
+  from <a href="https://wiki.mozilla.org/Security/Server_Side_TLS">Mozilla</a>,
+  and their <a href="https://mozilla.github.io/server-side-tls/ssl-config-generator/">Configuration generator</a>.</p>
+
+  <h3>I'm using Blowfish-256, is it safe?</h3>
+
+  <p>No, the attack is independent of the key length.  It work on
+  Blowfish with any key length, and Triple-DES with 3 independent keys
+  (168 bits in total).</p>
+
+  <h3>Why Sweet32?</h3>
+
+  <p>
+    It's a stupid pun, based on
+    the <a href="https://en.wikipedia.org/wiki/Sweet_sixteen_%28birthday%29">sweet
+    sixteen</a> birthday celebration.  Our attack is a birthday
+    attack (taking its name from the <a href="https://en.wikipedia.org/wiki/Birthday_problem">birthday paradox</a>) with complexity 2<sup>32</sup>.  You could also say that
+    2<sup>32</sup> is the <i>sweet spot</i> where attacks become practical.
+  </p>
+
+</div>
+</div>
+
+
+
+<div class="item">
+<h2 id="about">About us</h2>
+<div class="item-body">
+
+<p>We are a pair of researchers from INRIA, the French national research
+  institute for computer science.  You can contact us at our email addresses:
+  [FirstName].[LastName]@inria.fr (use our names without any accents.) 
+
+<ul>
+<li><a href="http://prosecco.inria.fr/personal/karthik/">Karthikeyan Bhargavan</a></li>
+<li><a href="https://who.rocq.inria.fr/Gaetan.Leurent/">Gaëtan Leurent</a></li>
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+
+
+<div id="menu">
+<div id="menutop">
+<h2>Sweet32</h2>
+<div id="content">
+<img src="sweet32.svg" style="width:100%" alt="[Sweet32 Logo]"/>
+<ul id="menulist">
+  <li><a href="#intro">Block Ciphers and the Birthday Bound</a></li>
+  <li><a href="#CBC">  Exploiting Block Cipher Collisions</a></li>
+  <li><a href="#usage">64-bit Block Cipher Usage on the Internet</a></li>
+  <li><a href="#demo">Attacking Authenticated HTTP over TLS and OpenVPN</a></li>
+  <li><a href="#impact">Impact and Mitigation</a></li>
+  <li><a href="#faq">FAQ</a></li>
+  <li><a href="#about">About us</a></li>
+  <li><a href="SWEET32_CCS16.pdf">Paper</a></li>
+</ul>
+</div>
+</div>
+</div>
+</body></html>

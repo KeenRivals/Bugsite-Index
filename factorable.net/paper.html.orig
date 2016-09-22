@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Research Paper - factorable.net</title>
+        <link href="css/bootstrap.css" rel="stylesheet">
+
+        <style type="text/css">
+          body {padding-top: 60px; padding-bottom: 40px; }
+          h2 {padding: 0 0 5px 0; font-size: 1.8em}
+          h3 {padding: 0 0 5px 0; }
+          h4 {padding: 0 0 5px 0; }
+          .searchbox h4: {padding: 0 5px 0 5px; display:inline;}
+          .loadspace {padding: 0 0 180px 0;}
+          .abstract {width 50px; }
+          IMG.centered {display: block; float: right;}
+        </style>
+
+        <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+        <!--[if lt IE 9]>
+          <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+</head>
+<body>
+	<div class="navbar navbar-fixed-top">
+	    <div class="navbar-inner">
+	        <div class="container">
+	            <a class="brand" href="index.html">factorable.net</a>
+            <ul class="nav">
+                <li><a href="index.html">About the Project</a></li>
+                <li class="active"><a href="paper.html">Research Paper</a></li>
+                <li><a href="faq.html">FAQ</a></li>
+                <li><a href="resources.html">Source Code</a></li>
+		<li><a href="advisories.html">Advisories</a></li>
+            </ul>
+	        </div>
+	    </div>
+	</div>
+	<div class="container" id="whole">
+	<div class="well">
+		<h2>Mining Your Ps and Qs: Detection of Widespread Weak Keys in Network Devices</h2>
+		<h4><a href="https://cseweb.ucsd.edu/~naheninger/">Nadia Heninger</a>,
+			<a href="https://zakird.com">Zakir Durumeric</a>,
+			<a href="https://ericw.us/trow/">Eric Wustrow</a>,
+			<a href="https://jhalderm.com">J. Alex Halderman</a></h4>
+		<h4>To appear in <i>Proceedings of the <a href="https://www.usenix.org/conference/usenixsecurity12">21st USENIX Security Symposium</a></i>, August 2012.</h4>
+		
+        </div>
+        <div class="well">
+                <div class="row">
+		<div class="span8">
+
+		<h3>Abstract</h3>
+<p>RSA and DSA can fail catastrophically when used with malfunctioning random number generators, but the extent to which these problems arise in practice has never been comprehensively studied at Internet scale. We perform the largest ever network survey of TLS and SSH servers and present evidence that vulnerable keys are surprisingly widespread. We find that 0.75% of TLS certificates share keys due to insufficient entropy during key generation, and we suspect that another 1.70% come from the same faulty implementations and may be susceptible to com- promise. Even more alarmingly, we are able to obtain RSA private keys for 0.50% of TLS hosts and 0.03% of SSH hosts, because their public keys shared nontrivial common factors due to entropy problems, and DSA private keys for 1.03% of SSH hosts, because of insufficient signature randomness. We cluster and investigate the vulnerable hosts, finding that the vast majority appear to be headless or embedded devices. In experiments with three software components commonly used by these devices, we are able to reproduce the vulnerabilities and identify specific software behaviors that induce them, including a boot-time entropy hole in the Linux random number generator. Finally, we suggest defenses and draw lessons for developers, users, and the security community.</p></div>
+<div class="span3"></div>
+<a href="weakkeys12.conference.pdf"><img class="centered" src="paper.png"/></a>
+</div>
+
+</div>
+<div class="well">
+          <h3>Download</h3>
+          <p>Download the <a href="weakkeys12.conference.pdf">conference version</a> or the more detailed <a href="weakkeys12.extended.pdf">extended version</a>.</p>
+</div> <div class="well">
+          <h3>Bibtex</h3>
+          <pre>
+@InProceedings{weakkeys12,
+  author = {Nadia Heninger and Zakir Durumeric and Eric Wustrow and J. Alex Halderman},
+  title = {Mining Your {P}s and {Q}s: {D}etection of Widespread Weak Keys in Network Devices},
+  booktitle = {Proceedings of the 21st {USENIX} Security Symposium},
+  month = aug,
+  year = 2012
+}</pre>
+        </div>
+	</div>
+        <script type="text/javascript">
+          var _gauges = _gauges || [];
+          (function() {
+            var t   = document.createElement('script');
+            t.type  = 'text/javascript';
+            t.async = true;
+            t.id    = 'gauges-tracker';
+            t.setAttribute('data-site-id', '4f3c079fcb25bc666100000a');
+            t.src = '//secure.gaug.es/track.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(t, s);
+          })();
+        </script>
+
+	</html>

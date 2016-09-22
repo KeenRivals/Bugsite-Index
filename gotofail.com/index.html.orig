@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html><head><meta charset=utf-8><title>goto fail;</title>
+<link rel="icon" href="data:;base64,=">
+<script type="text/javascript">
+var sha1=function(c){var l=0,a=0,f=[],m=[1732584193,4023233417,2562383102,271733878,3285377520],b,d,g,h,p,e,n=[],k=unescape(encodeURI(c));for(b=k.length;a<=b;)n[a>>2]|=(k.charCodeAt(a)||128)<<8*(3-a++%4);for(n[c=(b+8>>6<<4)+15]=b<<3;l<=c;l+=16){b=m;for(a=0;80>a;b=[[(e=((k=b[0])<<5|k>>>27)+b[4]+(f[a]=16>a?~~n[l+a]:e<<1|e>>>31)+1518500249)+((d=b[1])&(g=b[2])|~d&(h=b[3])),p=e+(d^g^h)+341275144,e+(d&g|d&h|g&h)+882459459,p+1535694389][0|a++/20]|0,k,d<<30|d>>>2,g,h])e=f[a-3]^f[a-8]^f[a-14]^f[a-16];for(a=5;a;)m[--a]=m[a]+b[a]|0}for(c="";40>a;)c+=(m[a>>3]>>4*(7-a++%8)&15).toString(16);return c},gotofail=function(){function f(a){a=a.substring(0,a.indexOf(" ")).split("_").map(function(a){return parseInt(a,10)});2===a.length&&a.push(0);return a}for(var b={debug:!1,hooks:"okay crit warn beta safe unkn wait".split(" ")},e=0;e<b.hooks.length;++e){var g=b.hooks[e];"function"!=typeof b[g]&&(b[g]=function(){})}b.probe=function(a,b,c){var d=document.createElement("img");d.src="htt"+"ps:/"+"/gotofail.com:"+a;d.style.display="none";d.onload=c;d.attachEvent?d.attachEvent("onerror",b):d.addEventListener("error",b,!1);document.body.appendChild(d)};b.run=function(){var a=navigator.userAgent,e,c=0,d=0;0>a.indexOf("Chrome")&&0>a.indexOf("CriOS")&&0>a.indexOf("Firefox")&&0>a.indexOf("MSIE")&&(d=1);0<=a.indexOf("Mac OS X 10.9")?c=2:0<=(e=a.indexOf("Mac OS X 10_9"))?(a=f(a.substring(e+9)),2>a[2]?c=2:2===a[2]&&(c=1)):0<=a.indexOf("(iP")&&(a=f(a.substring(a.indexOf("OS")+3)),7===a[0]&&0===a[1]&&5>=a[2]||6===a[0]&&1===a[1]&&5>=a[2]||6===a[0]&&0===a[1]?c=2:7===a[0]&&1===a[1]&&0===a[2]&&(c=1));0<c&&0<d?b.probe("1266/test.png",
+function(){b.probe("1267/test2.png",b.unkn,b.okay)},b.crit):1<c?b.warn():1===c?b.beta():b.safe()};return b}();
+
+/* hook in display functions for gotofail.com */
+for (var i = 0; i < gotofail.hooks.length; ++i) {
+  /* need this function bit to scope the value of hook to the individual iteration */
+  (function() {
+    var hook = gotofail.hooks[i];
+    gotofail[hook] = function() {
+      var divs = document.getElementsByClassName("gotofail_msg");
+      for (var j = 0; j < divs.length; j++) {
+        divs[j].style.display = "none";
+      }
+      element = document.getElementById("gotofail_" + hook);
+      element.style.display="inline";
+      document.getElementById("gotofail_result").style.backgroundColor = element.style.backgroundColor;
+    }
+  })();
+}
+
+/* make sure browser is ready before trying to do anything with the dom */
+(function(){function t(){clearInterval(e);gotofail.run();var h=sha1("die in a fire, spammers"),m=document.getElementById("email"),a="",x="dhdx`hzGndwhkmja+mde",i=0;while(i<20){a+=String.fromCharCode(x.charCodeAt(i)^parseInt(h.charAt(i),16));++i}m.innerHTML=a;m.href="mailto:"+a;}var e=setInterval(function(){if(document.readyState==="complete")t()},10);})()
+</script>
+<style>
+article,section {display:block;}
+body {font-family:Arial,Helvetica,'sans-serif';background-color:gray;}
+section {background-color:white;padding:2px 10px;border-radius:10px;margin-bottom:10px;}
+h1 {font-size:1.8em;}
+h2 {font-size:1.3em;}
+h3 {font-size:1.2em;}
+#gotofail_result {background-color:lightgrey;}
+.gotofail_msg {display:none;}
+#gotofail_wait {display:inline;}
+</style>
+</head>
+<body>
+<article>
+<section id="main">
+<h1>goto fail; // <a href="http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-1266">Apple SSL bug</a> test site</h1>
+<h2>This site will help you determine whether your computer is vulnerable to <a href="https://twitter.com/search?q=%23gotofail">#gotofail</a>.<h2>
+</section>
+
+<section id="gotofail_result">
+
+<div class="gotofail_msg" id="gotofail_wait" style="background-color:lightgrey;">
+<h1>Please wait while we check your browser...</h1>
+<p>If this message remains here for more than sixty seconds, make sure you have javascript enabled and reload the page.</p>
+</div>
+
+<div class="gotofail_msg" id="gotofail_okay" style="background-color:lightgreen;">
+<h1>Safe.</h1>
+<p>We have examined your OS and browser version information and determined that an active vulnerability test was appropriate. Fortunately, your browser correctly aborted loading our test image upon seeing an invalid ServerKeyExchange message.</p>
+</div>
+
+<div class="gotofail_msg" id="gotofail_unkn" style="background-color:yellow;">
+<h1>Error.</h1>
+<p>We have examined your OS and browser version information and determined that an active vulnerability test was appropriate. Unfortunately, we are unable to provide accurate results due to either port filtering between you and us or a problem with our server. Try again later, if the problem persists ask your network administrator to unblock ports 1266 and 1267.</p>
+</div>
+
+
+<div class="gotofail_msg" id="gotofail_crit" style="background-color:pink;">
+<h1 style="color:darkred;">YOUR BROWSER IS VULNERABLE, PATCH AS SOON AS POSSIBLE!</h1>
+<p>We have examined your OS and browser version information and determined that an active vulnerability test was appropriate. Unfortunately, your browser continued loading our test image after seeing an invalid ServerKeyExchange message. An attacker able to actively intercept your network connections (this is possible on <b>most WiFi networks</b>) can freely <b>snoop on you</b>, for example when you log into your <b>bank account</b>. Please check your browser and operating system for security updates and apply them right away. <b><a href="http://www.forbes.com/sites/andygreenberg/2014/02/23/apples-gotofail-security-mess-extends-to-mail-twitter-imessage-facetime-and-more/">Other applications on your system</a></b> such as <b>mail, chat, financial, social networking and backup apps</b> are also at risk - simply switching browsers will not fully protect you.</b></p>
+</div>
+
+<div class="gotofail_msg" id="gotofail_safe" style="background-color:lightgreen;">
+<h1>Safe.</h1>
+<p>We have examined your OS and browser version information and have determined you are not at risk without actually running the test. You may <a href="#" onclick="gotofail.wait();gotofail.probe('1266/test.png',function(){gotofail.probe('1267/test2.png',gotofail.unkn,gotofail.okay)},gotofail.crit);">force the test to run anyway</a>.</p>
+</div>
+
+<div class="gotofail_msg" id="gotofail_warn" style="background-color:yellow;">
+<h1>Warning!</h1>
+<p>We have examined your OS and browser version information and have determined that your browser shouldn't be vulnerable, however <b><a href="http://www.forbes.com/sites/andygreenberg/2014/02/23/apples-gotofail-security-mess-extends-to-mail-twitter-imessage-facetime-and-more/">other applications on your system</a></b> such as <b>mail, chat, financial, social networking and backup apps</b> are at risk.</p>
+<p><b>Please re-run this test from Safari to confirm!</b></p>
+</div>
+
+<div class="gotofail_msg" id="gotofail_beta" style="background-color:lightgreen;">
+<h1>Probably safe.</h1>
+<p>We have examined your OS and browser version information and have determined that your browser shouldn't be vulnerable, however <b>if you are running a beta release of your OS you may still be at risk</b>. If you were running a beta release you would probably know it, but you will need to re-run this test from Safari to verify.</p>
+</div>
+
+</section>
+<section id="gotofail_footer">
+<h3>Please see <a href="https://www.imperialviolet.org/2014/02/22/applebug.html">agl's writeup</a> for a full description of the bug.</h3>
+<p>Apple has released <a href="http://support.apple.com/kb/HT6147">official iOS updates</a> that resolve this issue.</p>
+<p>An <a href="http://support.apple.com/kb/HT6150">update is now available</a> for OS X Mavericks, please <a href="http://support.apple.com/kb/ht1338">check for the update and install it</a> right away if you're vulnerable.</p>
+<p>Some further explanation of this site can be found in the <a href="/faq.html">FAQ</a>.</p>
+<p>For more browser SSL/TLS testing check out <a href="https://www.howsmyssl.com/">How's my SSL?</a> and <a href="https://www.ssllabs.com/ssltest/viewMyClient.html">SSL Labs</a>.</p>
+<p>Fan mail, hate mail, bug reports, etc to <a id="email" href="mailto:hidden">email hidden</a> or <a href="https://twitter.com/gotofailcom">@gotofailcom</a>. Thanks to Jacob September for help with the stylesheet.</p>
+<p><small>If you'd like to donate, feel free to send bitcoin to <a href="bitcoin:19xUQVwyc5DDo1uoN8dXA8tCEfXCrkRyir">19xUQVwyc5DDo1uoN8dXA8tCEfXCrkRyir</a> or <a href="https://supporters.eff.org/donate"> give something to EFF</a>.</p>
+</section>
+</body>
+</html>

@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="">
+      <meta name="author" content="">
+      <link rel="icon" type="image/png" href="/media/img/favicon.png">
+      <title>DROWN Attack</title>
+      <link href="media/css/style.css" rel="stylesheet" type="text/css">
+      <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600|Montserrat:400,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+      <header id="top">
+        <h1>The DROWN Attack</h1>
+        <div class="logo"></div>
+      </header>
+        <section id="intro">
+            <ul class="toc">
+          <li><a href="#check">DROWN check</a>
+          </li><li><a href="#paper">Paper</a>
+          </li><li><a href="#question-answer">Q&amp;A</a></li>
+        </ul>
+        </section>
+
+       <section>
+
+         <p>DROWN is a serious vulnerability that affects HTTPS and
+        other services that rely on SSL and TLS, some of the essential
+        cryptographic protocols for Internet security. These protocols
+        allow everyone on the Internet to browse the web, use email,
+        shop online, and send instant messages without third-parties
+        being able to read the communication.</p>
+
+        <p>DROWN allows attackers to break the encryption and read or
+        steal sensitive communications, including passwords, credit
+        card numbers, trade secrets, or financial data. Our
+        measurements indicate 33% of all HTTPS servers are
+        vulnerable to the attack.</p>
+
+        <h3>What can the attackers gain?</h3>
+
+        <p>Any communication between users and the server.  This
+        typically includes, but is not limited to, usernames and
+        passwords, credit card numbers, emails, instant messages, and
+        sensitive documents. Under some common scenarios, an attacker
+        can also impersonate a secure website and intercept or change
+        the content the user sees.</p>
+
+        <h3>Who is vulnerable?</h3>
+
+        <p>Websites, mail servers, and other TLS-dependent services
+        are at risk for the DROWN attack,
+        and <a href="/top-sites.html">many popular sites</a> are
+        affected.  We used Internet-wide scanning to measure how many
+        sites are vulnerable:</p>
+
+        <table class="table table-condensed">
+            <tr>
+              <td></td>
+              <td>Vulnerable<br>at Disclosure<br>(March 1)</td>
+	      <td>Still<br>vulnerable<br>(March 26)</td>
+            </tr>
+            <tr>
+              <td><b>HTTPS &mdash; Top one million domains</b></td>
+              <td>25%</td>
+	      <td>15%</td>
+            </tr>
+            <tr>
+              <td><b>HTTPS &mdash; All browser-trusted sites</b></td>
+              <td>22%</td>
+	      <td>16%</td>
+            </tr>
+            <tr>
+              <td><b>HTTPS &mdash; All sites</b></td>
+              <td>33%</td>
+	      <td>28%</td>
+            </tr>
+          </table>
+
+        <p>Operators of vulnerable servers need to take action.  There
+        is nothing practical that browsers or end-users can do on
+        their own to protect against this attack.</p>
+
+        <h3>Is my site vulnerable?</h3>
+
+        <p>Modern servers and clients use the TLS encryption protocol.
+        However, due to misconfigurations, many servers also still
+        support SSLv2, a 1990s-era predecessor to TLS.  This support
+        did not matter in practice, since no up-to-date clients
+        actually use SSLv2. Therefore, even though SSLv2 is known to
+        be badly insecure, until now, merely supporting SSLv2 was not
+        considered a security problem, because clients never used
+        it.</p>
+
+        <p>DROWN shows that merely supporting SSLv2 is a threat to
+        modern servers and clients.  It allows an attacker to decrypt
+        modern TLS connections between up-to-date clients and servers
+        by sending probes to a server that supports SSLv2 and uses the
+        same private key.</p>
+
+        <img class="illustration" src="media/img/DROWN_diagram1.jpg">
+
+        <p>A server is vulnerable to DROWN if:</p>
+
+        <ul class="illustrated">
+          <li>It allows SSLv2 connections.  This is surprisingly
+          common, due to misconfiguration and inappropriate default
+          settings.  Our measurements show that 17% of HTTPS servers
+          still allow SSLv2 connections.</li>
+        </ul>
+
+        <div style="margin-top:10px; margin-bottom: 10px;"><b>or:</b></div>
+
+        <ul class="illustrated">
+          <li>Its private key is used on <i>any other server</i> that
+          allows SSLv2 connections, even for another protocol.  Many
+          companies reuse the same certificate and key on their web
+          and email servers, for instance.  In this case, if the email
+          server supports SSLv2 and the web server does not, an
+          attacker can take advantage of the email server to break TLS
+          connections to the web server.  When taking key reuse into
+          account, <i>an additional 16%</i> of HTTPS servers are
+          vulnerable, putting 33% of HTTPS servers at risk.</li>
+        </ul>
+
+        <img class="illustration" src="media/img/DROWN_diagram.jpg">
+
+        <form class="form-inline" id="check" action="https://test.drownattack.com/" method="GET">
+          <label for="site"><a name="test"></a>To check whether your server appears to be vulnerable, enter the domain or IP address:</label>
+
+          <input name="site" type="text" placeholder="domain.com">
+          <button>Check for DROWN vulnerability</button>
+        </form>
+        <div class="text-muted">
+          This tool shows vulnerable services detected in Feb.&nbsp;2016
+          and probes each again to see if it&rsquo;s been fixed.
+          Results won't include new servers or ones our scanner missed.
+          Live updates are cached for 15 minutes.
+        </div>
+
+        <h3>How do I protect my server?</h3>
+
+        <p><a name="mitigation"></a>To protect against DROWN, server
+        operators need to ensure that their private keys are not used
+        anywhere with server software that allows SSLv2 connections.
+        This includes web servers, SMTP servers, IMAP and POP servers,
+        and any other software that supports SSL/TLS.  You can use the
+        form above to check whether your server appears to be exposed
+        to the attack.</p>
+
+        <p>Disabling SSLv2 can be complicated and depends on the
+        specific server software.  We provide instructions here for
+        several common products:</p>
+
+        <p><b>OpenSSL:</b> OpenSSL is a cryptographic library used in
+        many server products.  For users of OpenSSL, the easiest and
+        recommended solution is to upgrade to a recent OpenSSL
+        version.  OpenSSL 1.0.2 users should upgrade to 1.0.2g.
+        OpenSSL 1.0.1 users should upgrade to 1.0.1s.  Users of older
+        OpenSSL versions should upgrade to either one of these
+        versions.  More details can be found
+        in <a href="https://www.openssl.org/blog/blog/2016/03/01/an-openssl-users-guide-to-drown/">this
+        OpenSSL blog post</a>.</p>
+
+        <p><b>(Updated March 13th, 16:00 UTC)
+	Microsoft IIS (Windows Server):</b>
+	Support for SSLv2 on the server side is enabled by default
+	only on the OS versions that correspond to IIS 7.0 and IIS 7.5,
+	namely Windows Vista, Windows Server 2008, Windows 7 and Windows
+	Server 2008R2. This support can be disabled in the appropriate
+	SSLv2 subkey for 'Server', as outlined in
+	<a href="https://support.microsoft.com/kb/245030/EN-US">KB245030</a>.
+	Even if users have not taken the steps to disable SSLv2,
+	the export-grade and 56-bit ciphers that make DROWN feasible
+	are not supported by default.
+	</p>
+
+        <p><b>Network Security Services (NSS):</b> NSS is a common
+        cryptographic library built into many server products. NSS
+        versions 3.13 (released back in 2012) and above should have SSLv2 disabled by
+        default. (A small number of users may have enabled SSLv2
+        manually and will need to take steps to disable it.) Users of
+        older versions should upgrade to a more recent version. We
+        still recommend checking whether your private key is exposed
+        elsewhere, using the form above.</p>
+
+        <p><b>Other affected software and operating systems:</b><br>
+          Instructions and information for:
+          <a href="/apache.html">Apache</a>,
+          <a href="/postfix.html">Postfix</a>,
+          <a href="https://www.nginx.com/blog/drown-vulnerability-cve-2016-0800-in-openssl-misses-most-nginx-users/">Nginx</a>,
+          <a href="https://security-tracker.debian.org/tracker/CVE-2016-0800">Debian</a>,
+          <a href="https://access.redhat.com/security/vulnerabilities/drown">Red Hat</a>
+        </p>
+
+         <p><b>Browsers and other clients:</b> There is nothing
+        practical that web browsers or other client software can do to
+        prevent DROWN. Only server operators are able to take action
+        to protect against the attack.</p>
+      </section>
+
+      <section id="paper">
+        <h2>Full technical paper</h2>
+
+        <p><a href="/drown-attack-paper.pdf"><b>DROWN: Breaking TLS
+        using SSLv2</b></a> <small>[PDF]</small><br>
+        Nimrod&nbsp;Aviram, Sebastian&nbsp;Schinzel,
+        Juraj&nbsp;Somorovsky, Nadia&nbsp;Heninger, Maik&nbsp;Dankel,
+        Jens&nbsp;Steube, Luke&nbsp;Valenta, David&nbsp;Adrian,
+        J.&nbsp;Alex&nbsp;Halderman, Viktor&nbsp;Dukhovni,
+        Emilia&nbsp;K&auml;sper, Shaanan&nbsp;Cohney,
+        Susanne&nbsp;Engels, Christof&nbsp;Paar, and
+        Yuval&nbsp;Shavitt<br>
+        <i>25th USENIX Security Symposium</i>, Austin, TX, August 2016</i></p>
+
+        <p>More: <a href="/drown-attack-paper.pdf">Conference paper</a> | <a href="/drown.bib.html">Bibtex</a> | <a href="/drown-attack-original-report.pdf">Original tech report</a></p>
+
+        <p>The team can be contacted at <a href=mailto:mail@drownattack.com><b>mail@drownattack.com</b></a>.</p>
+
+      </section>
+
+      <section id="question-answer">
+        <h2>Q&amp;A</h2>
+        <ul class="question-list">
+          <li><a href="#faq-acronym">What does DROWN stand for?</a></li>
+          <li><a href="#faq-details">What are the technical details?</a></li>
+          <li><a href="#faq-contact">How can I contact the DROWN research team?</a></li>
+          <li><a href="#faq-cve">Is there a CVE for DROWN?</a></li>
+          <li><a href="#faq-practical">How easy is it to carry out the attack? Is it practical?</a></li>
+          <li><a href="#faq-sites">What popular sites are affected?</a></li>
+          <li><a href="#faq-exploited">Is the vulnerability currently being exploited by attackers?</a></li>
+          <li><a href="#faq-whycare">SSLv2 has been known to be insecure for 20 years. What&rsquo;s the big deal?</a></li>
+          <li><a href="#faq-privatekey">Does DROWN allow an attacker to steal the server&rsquo;s private key?</a></li>
+          <li><a href="#faq-mitm">Can DROWN be also used to perform MitM attacks?</a></li>
+          <li><a href="#faq-pfs">Does Perfect Forward Secrecy (PFS) prevent DROWN?</a></li>
+          <li><a href="#faq-cert">Do I need to get a new certificate for my server?</a></li>
+          <li><a href="#faq-update">Do I need to update my browser?</a></li>
+          <li><a href="#faq-firewall">I have a firewall that allows filtering of SSLv2 traffic. Should I filter that traffic?</a></li>
+          <li><a href="#faq-detect">Can I detect if someone has exploited this against me?</a></li>
+          <li><a href="#faq-pci">My HTTPS server is certified PCI compliant, so I already know I have SSLv2 disabled. Do I still need to take action?</a></li>
+          <li><a href="#faq-legacy">I have an old embedded device that doesn&rsquo;t allow me to disable SSLv2, and I have to keep it running. What do I do?</a></li>
+          <li><a href="#faq-ssllabs">SSLLabs says I have SSLv2 disabled. That means I&rsquo;m safe, right?</a></li>
+          <li><a href="#faq-nmap">Why does your tool say I support SSLv2, but nmap says I don't?</a></li>
+          <li><a href="#faq-code">Are you planning to release the code for your implementation of the attack?</a></li>
+          <li><a href="#faq-factors">What factors contributed to DROWN?</a></li>
+          <li><a href="#faq-references">Where else can I learn about DROWN?</a></li>
+        </ul>
+
+        <h4><a name="faq-acronym"></a>What does DROWN stand for?</h4>
+
+        <p>DROWN stands for <b>D</b>ecrypting <b>R</b>SA with <b>O</b>bsolete and <b>W</b>eakened e<b>N</b>cryption.</p>
+
+        <h4><a name="faq-details"></a>What are the technical details?</h4>
+
+        <p>For the complete details, see
+        our <a href="/drown-attack-paper.pdf">full technical
+        paper</a>.  We also provide a brief technical summary
+        below:</p>
+
+        <p>In technical terms, DROWN is a new form of cross-protocol
+        <a href=http://crypto.stackexchange.com/questions/12688/can-you-explain-bleichenbachers-cca-attack-on-pkcs1-v1-5>Bleichenbacher
+        padding oracle attack</a>.  It allows an attacker to decrypt
+        intercepted TLS connections by making specially crafted
+        connections to an SSLv2 server that uses the same private
+        key.</p>
+
+        <p>The attacker begins by observing roughly several hundred connections
+        between the victim client and server. The attacker will
+        eventually be able to decrypt one of them. Collecting this
+        many connections might involve intercepting traffic for a long
+        time or tricking the user into visiting a website that quickly
+        makes many connections to another site in the background. The
+        connections can use any version of the SSL/TLS protocol,
+        including TLS 1.2, so long as they employ the commonly used
+        RSA key exchange method. In an RSA key exchange, the client
+        picks a random session key and sends it to the server,
+        encrypted using RSA and the server&rsquo;s public key.</p>
+
+        <p>Next, the attacker repeatedly connects to the SSLv2 server
+        and sends specially crafted handshake messages with
+        modifications to the RSA ciphertext from the victim&rsquo;s
+        connections. (This is possible because
+        <a href=https://en.wikipedia.org/wiki/Homomorphic_encryption#Unpadded_RSA>unpadded
+        RSA is <i>malleable</i></a>.) The way the server responds to
+        each of these probes depends on whether the modified
+        ciphertext decrypts to a plaintext message with the right
+        form. Since the attacker doesn&rsquo;t know the server&rsquo;s private
+        key, he doesn&rsquo;t know exactly what the plaintext will be, but
+        the way that the server responds ends up leaking information
+        to the attacker about the secret keys used for the victim&rsquo;s
+        TLS connections.</p>
+
+        <p>The way this information is leaked can take two forms:</p>
+
+        <ul>
+          <li><p>In the most general variant of DROWN, the attack
+          exploits a fundamental weakness in the SSLv2 protocol that
+          relates to export-grade cryptography that was introduced to
+          comply with 1990s-era U.S. government restrictions.  The
+          attacker&rsquo;s probes use a cipher that involves only 40 bits of
+          RSA encrypted secret key material. The attacker can tell
+          whether his modified ciphertext was validly formed by
+          comparing the server&rsquo;s response to all 2<sup>40</sup>
+          possibilities&mdash;a moderately large computation, but one
+          that we show can be inexpensively performed with
+          GPUs. Overall, roughly 40,000 probe connections and
+          2<sup>50</sup> computation is needed to decrypt one out of 900 TLS
+          connections from the victim.
+          Running the computations for the full attack
+          on Amazon EC2 costs about $440.</p></li>
+
+          <li><p>A majority of servers vulnerable to DROWN are also
+          affected by an OpenSSL bug that results in a significantly
+          cheaper version of the attack. In this special case, the
+          attacker can craft his probe messages so that he immediately
+          learns whether they had the right form without any large
+          computation.  In this case, the attacker needs about 17,000
+          probe connections in total to obtain the key for one out of 260 TLS
+          connections from the victim,
+          and the computation takes under a minute on a
+          fast PC.</p></li>
+
+          <p>This special case stems from the complexity introduced by
+          export-grade cryptography.  The OpenSSL bug allows the
+          attacker to mix export-grade and non-export-grade crypto
+          parameters in order to exploit unexpected paths in the
+          code.</p>
+
+          <p>This form of the attack is fast enough to allow an online
+          man-in-the-middle (MitM) style of attack, where the attacker
+          can impersonate a vulnerable server to the victim client.
+          Among other advantages, such an attacker can force the
+          client and server to use RSA key exchange (and can then
+          decrypt the connection) even if they would normally prefer a
+          different cipher.  This lets the attacker target and break
+          connections between modern browsers and servers that prefer
+          perfect-forward-secret key exchange methods, such as DHE and
+          ECDH.</p>
+
+          <p>We were able to execute this form of the attack in under
+          a minute on a single PC.</p>
+        </ul>
+
+        <h4><a name="faq-contact"></a>How can I contact the DROWN research team?</h4>
+
+        <p>DROWN was developed by researchers at Tel Aviv University,
+        M&uuml;nster University of Applied Sciences, Ruhr University
+        Bochum, the University of Pennsylvania, the Hashcat project,
+        the University of Michigan, Two Sigma, Google, and the OpenSSL
+        project:
+          <a>Nimrod&nbsp;Aviram</a>,
+          <a href="https://www.fh-muenster.de/hochschule/aktuelles/news/index.php?newsId=91">Sebastian&nbsp;Schinzel</a>,
+          <a href="https://www.nds.rub.de/chair/people/jsomorovsky/">Juraj&nbsp;Somorovsky</a>,
+          <a href="https://www.cis.upenn.edu/~nadiah/">Nadia&nbsp;Heninger</a>,
+          <a>Maik&nbsp;Dankel</a>,
+          <a href="https://hashcat.net/">Jens&nbsp;Steube</a>,
+          <a href="https://www.seas.upenn.edu/~lukev/">Luke&nbsp;Valenta</a>,
+          <a href="https://davidadrian.org/">David&nbsp;Adrian</a>,
+          <a href="https://jhalderm.com/">J.&nbsp;Alex&nbsp;Halderman</a>,
+          <a>Viktor&nbsp;Dukhovni</a>,
+          <a href="http://research.google.com/pubs/author58129.html">Emilia&nbsp;K&auml;sper</a>,
+          <a href="https://cohney.info/">Shaanan&nbsp;Cohney</a>,
+          <a>Susanne&nbsp;Engels</a>,
+          <a href="https://www.emsec.rub.de/chair/_staff/christof-paar/">Christof&nbsp;Paar</a>, and
+          <a href="https://www.eng.tau.ac.il/~shavitt/">Yuval&nbsp;Shavitt</a>
+        </p>
+
+        <p>The team can be contacted at <a href=mailto:mail@drownattack.com><b>mail@drownattack.com</b></a>.</p>
+
+        <h4><a name="faq-cve"></a>Is there a CVE for DROWN?</h4>
+
+        <p>Yes.  The DROWN attack itself was
+        assigned <a href="https://www.openssl.org/news/secadv/20160301.txt">CVE-2016-0800</a>.</p>
+
+        <p>DROWN is made worse by two additional OpenSSL
+        implementation vulnerabilities. <a href="https://www.openssl.org/news/secadv/20160128.txt">CVE-2015-3197</a>,
+        which affected OpenSSL versions prior to 1.0.2f and 1.0.1r,
+        allows a DROWN attacker to connect to the server with disabled
+        SSLv2 ciphersuites, provided that support for SSLv2 itself is
+        enabled. <a href="https://www.openssl.org/news/secadv/20160301.txt">CVE-2016-0703</a>, which affected OpenSSL
+        versions prior to 1.0.2a, 1.0.1m, 1.0.0r, and 0.9.8zf, greatly
+        reduces the time and cost of carrying out the DROWN
+        attack.</p>
+
+        <h4><a name="faq-practical"></a>How easy is it to carry out the attack? Is it practical?</h4>
+
+        <p>Yes. We&rsquo;ve been able to execute the attack against OpenSSL
+        versions that are vulnerable to CVE-2016-0703 in under a
+        minute using a single PC. Even for servers that don&rsquo;t
+        have these particular bugs, the general variant of the attack,
+        which works against any SSLv2 server, can be conducted in
+        under 8 hours at a total cost of $440.</p>
+
+        <h4><a name="faq-sites"></a>What popular sites are affected?</h4>
+
+        <p><a href="/top-sites.html">Here are some examples</a>.
+
+        <h4><a name="faq-exploited"></a>Is the vulnerability currently being exploited by attackers?</h4>
+
+        <p>We have no reason to believe that DROWN has been exploited
+        in the wild prior to this disclosure. Since the details of the
+        vulnerability are now public, attackers may start exploiting
+        it at any time, and we recommend taking the
+        countermeasures <a href="#mitigation">explained above</a> as
+        soon as possible.</p>
+
+        <h4><a name="faq-whycare"></a>SSLv2 has been known to be insecure for 20 years. What&rsquo;s the big deal?</h4>
+
+        <p>Indeed, SSLv2 has long known to be weak when clients and
+        servers use it to communicate, and so nearly every modern
+        client uses a more recent protocol.  DROWN shows
+        that <i>merely allowing SSLv2</i>, even if no legitimate
+        clients ever use it, is a threat to modern servers and
+        clients.  It allows an attacker to <i>decrypt modern TLS
+        connections</i> between up-to-date clients and servers by
+        sending probes to any server that supports SSLv2 using the
+        same private key.</p>
+
+        <h4><a name="faq-privatekey"></a>Does DROWN allow an attacker to steal the server&rsquo;s private key?</h4>
+
+        <p>No. DROWN allows an attacker to decrypt one connection at a
+        time. The attacker does not learn the server&rsquo;s private
+        key.</p>
+
+        <h4><a name="faq-mitm"></a>Can DROWN be also used to perform MitM attacks?</h4>
+
+        <p>Yes. Some variants of the attack can be used to perform
+        MitM attacks against TLS or QUIC. More details can be found in
+        sections 5.3 and 7 of
+        the <a href="/drown-attack-paper.pdf">technical paper</a>.</p>
+
+        <h4><a name="faq-pfs"></a>Does Perfect Forward Secrecy (PFS) prevent DROWN?</h4>
+
+        <p>Surprisingly, no. The active MitM form of the attack allows an
+        attacker to target servers and clients that prefer non-RSA key
+        exchange methods. See sections 5.3 and 7 of
+        the <a href="/drown-attack-paper.pdf">technical paper</a>.</p>
+
+        <h4><a name="faq-cert"></a>Do I need to get a new certificate for my server?</h4>
+
+        <p>Probably not. As the attacker does not learn the server&rsquo;s
+        private key, there&rsquo;s no need to obtain new certificates. The
+        only action required is disabling SSLv2 as per
+        the <a href="#mitigation">countermeasures explained
+        above</a>. If you cannot confidently determine that SSLv2 is
+        disabled on every device or server that uses your server&rsquo;s
+        private key, you should generate a fresh key for the server
+        and obtain a new certificate.</p>
+
+        <h4><a name="faq-update"></a>Do I need to update my browser?</h4>
+
+        <p>No.  There is nothing practical that web browsers or other
+        client software can do to prevent DROWN. Only server operators
+        are able to take action to protect against the attack.</p>
+
+        <h4><a name="faq-firewall"></a>I have a firewall that allows filtering of SSLv2
+        traffic. Should I filter that traffic?</h4>
+
+        <p>Yes, that&rsquo;s a reasonable precaution, although it will also
+        prevent our scanners from being able to
+        help you identify vulnerable servers. You might consider first
+        running the test suite to identify vulnerable servers and only
+        then filtering SSLv2 traffic. You should also use
+        the <a href="#mitigation">countermeasures explained
+        above</a>.</p>
+
+        <h4><a name="faq-detect"></a>Can I detect if someone has exploited this against me?</h4>
+
+        <p>Possibly. If you run a server and can be certain no one
+        made a large number of SSLv2 connections to any of your
+        servers (for example, by examining IDS or server logs), then
+        you weren&rsquo;t attacked.  Your logs may contain a small number of
+        SSLv2 connections from the Internet-wide scans that we
+        conducted over the past few months to measure the prevalence
+        of the vulnerability.</p>
+
+        <h4><a name="faq-pci"></a>My HTTPS server is certified PCI compliant, so I already
+        know I have SSLv2 disabled. Do I still need to take
+        action?</h4>
+
+        <p>Yes. Even if you&rsquo;re certain that you have SSLv2 disabled on
+        your HTTPS server, you may be reusing your private key on
+        another server (such as an email server) that does support
+        SSLv2. We recommend manually inspecting all servers that use
+        your private key.  In addition, you can check whether your
+        private key is exposed elsewhere on the Internet using the form
+        above.</p>
+
+        <h4><a name="faq-legacy"></a>I have an old embedded device that doesn&rsquo;t allow me to
+        disable SSLv2, and I have to keep it running. What do I
+        do?</h4>
+
+        <p>Security against DROWN is not possible for that embedded
+        device. If you must keep that device running, make sure it
+        uses a different RSA private key than any other servers and
+        devices. You can also limit the scope of attack by using a
+        firewall to filter SSLv2 traffic from outside your
+        organization. In all circumstances, maintaining support for
+        SSLv2 should be a last resort.</p>
+
+        <h4><a name="faq-ssllabs"></a>SSLLabs says I have SSLv2 disabled. That means I&rsquo;m safe,
+        right?</h4>
+
+        <p>Unfortunately, no. Although <a href="https://www.ssllabs.com/ssltest/">SSLLabs</a>
+        provides an invaluable suite of security tests, right now it
+        only checks whether your HTTPS server directly allows SSLv2.
+        You&rsquo;re just as much at risk if your site&rsquo;s certificate or key
+        is used anywhere else on a server that does support SSLv2.
+        Common examples include SMTP, IMAP, and POP mail servers, and
+        secondary HTTPS servers used for specific web
+        applications. SSLLabs doesn&rsquo;t yet check for this kind of
+        cross-server exposure to DROWN, but our <a href="#test">DROWN
+        check tool</a> attempts to.</p>
+
+        <p><a name="scanner"></a>You can also download and run our
+        <a href=https://github.com/nimia/public_drown_scanner>scanner utility</a>.
+        This utility only detects SSLv2
+        support <i>on a single port</i>. It <i>cannot detect the common
+        scenario</i>, explained above, where a web server that doesn't
+        support SSLv2 is vulnerable because it shares its public key with
+        an email server that does. We strongly recommend using the online
+        scanner above, when at all possible.
+        </p>
+
+        <h4><a name="faq-nmap"></a>Why does your tool say I support SSLv2, but nmap says I don't?</h4>
+
+        <p><a name="nmap"></a>Due to CVE-2015-3197, OpenSSL may still accept
+        SSLv2 connections even if all SSLv2 ciphers are disabled.</p>
+
+        <h4><a name="faq-code"></a>Are you planning to release the code for your
+        implementation of the attack?</h4>
+
+        <p>Not in the immediate future.  There are still too many
+        servers vulnerable to the attack.</p>
+
+
+        <h4><a name="faq-factors"></a>What factors contributed to DROWN?</h4>
+
+        <p>For the third time in a year, a major Internet security
+        vulnerability has resulted from
+         <a href="https://en.wikipedia.org/wiki/Export_of_cryptography_from_the_United_States">
+        the way cryptography</a>
+        <a href="http://privacyink.org/pdf/export_control.pdf"> was weakened</a>
+        by U.S. government policies that
+        restricted exporting strong cryptography until the late
+        1990s. Although these restrictions, evidently designed to make
+        it easier for NSA to decrypt the communication of people
+        abroad, were relaxed nearly 20 years ago, the weakened
+        cryptography remains in the protocol specifications and
+        continues to be supported by many servers today, adding
+        complexity&mdash;and the potential for catastrophic
+        failure&mdash;to some of the Internet&rsquo;s most important
+        security features.</p>
+
+         <p>The U.S. government deliberately weakened three kinds of
+        cryptographic primitives: RSA encryption, Diffie-Hellman key
+        exchange, and symmetric
+        ciphers. <a href="https://mitls.org/pages/attacks/SMACK#freak">FREAK</a>
+        exploited export-grade RSA,
+        and <a href="https://weakdh.org">Logjam</a> exploited
+        export-grade Diffie-Hellman. Now, DROWN exploits export-grade
+        symmetric ciphers, demonstrating that all three kinds of
+        deliberately weakened crypto have come to put the security of
+        the Internet at risk decades later.</p>
+
+        <p>Today, some policy makers are calling for new
+        <a href="http://hdl.handle.net/1721.1/97690">restrictions on the design of cryptography</a>
+        in order to
+        prevent law enforcement from &ldquo;going dark.&rdquo; While
+        we believe that advocates of such backdoors are acting out of
+        a good faith desire to protect their countries, history&rsquo;s
+        technical lesson is clear: weakening cryptography carries
+        enormous risk to all of our security.</p>
+
+        <h4><a name="faq-references"></a>Where else can I learn about DROWN?</h4>
+
+        <ul>
+          <li><a href="http://blog.cryptographyengineering.com/2016/03/attack-of-week-drown.html">Matt Green: Attack of the week: DROWN</a></li>
+		  <li><a href="https://blog.qualys.com/securitylabs/2016/03/01/drown-abuses-ssl-v2-to-attack-rsa-keys-and-tls">Ivan Ristic: DROWN Abuses SSL v2 to Attack TLS</a></li>
+          <li><a href="https://www.openssl.org/blog/blog/2016/03/01/an-openssl-users-guide-to-drown/">OpenSSL Blog: An OpenSSL User's Guide to DROWN</a></li>
+          <li><a href="https://www.openssl.org/news/secadv/20160301.txt">OpenSSL Security Advisory [1st March 2016]</a></li>
+          <li><a href="http://arstechnica.com/security/2016/03/more-than-13-million-https-websites-imperiled-by-new-decryption-attack/">Ars Technica: More than 11 million HTTPS websites imperiled by new decryption attack</a></li>
+        </ul>
+
+      </section>
+
+      <div class="footer-logo"></div>
+
+      <footer>
+        <p class="text-muted">Last updated July 1, 2016.  The DROWN
+        website and logo (<a href="/media/img/DROWN_logo.svg">svg</a>;
+        free to use under
+        a <a href="//creativecommons.org/publicdomain/zero/1.0/">CC0</a>
+        license) were designed
+        by <a href="http://sarahmadden.com/">Sarah Madden</a>.
+        Additional development for this website was done by Christian
+        Dresen of M&uuml;nster University of Applied Sciences.
+        | <a href="/imprint">Imprint</a></p>
+      </footer>
+
+      <script src="//ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+      <script type="text/javascript">
+        // This is for a Gauges analytics account that I can give everyone accounts to. -- AH
+        var _gauges = _gauges || [];
+        (function() {
+          var t   = document.createElement('script');
+          t.type  = 'text/javascript';
+          t.async = true;
+          t.id    = 'gauges-tracker';
+          t.setAttribute('data-site-id', '56ccfb3c4b2ffa7a33003cfa');
+          t.setAttribute('data-track-path', 'https://track.gaug.es/track.gif');
+          t.src = 'https://d36ee2fcip1434.cloudfront.net/track.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(t, s);
+        })();
+      </script>
+  </body>
+</html>
