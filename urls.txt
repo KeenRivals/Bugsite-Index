@@ -1,0 +1,14 @@
+http://backronym.fail
+http://badlock.org
+http://breachattack.com
+https://drownattack.com
+https://factorable.net
+https://freakattack.com
+https://gotofail.com
+http://heartbleed.com
+https://httpoxy.org
+https://imagetragick.com
+https://poodle.io
+https://sweet32.info
+https://weakdh.org
+http://security.360.cn/cve/CVE-2016-6304/

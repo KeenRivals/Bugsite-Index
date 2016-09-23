@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="description" content="">
+    <meta name="author" content="Codenomicon Ltd. http://www.codenomicon.com/">
+
+    <title>Heartbleed Bug</title>
+
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,400,400italic" type="text/css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" type='text/css'>
+    <link rel="stylesheet" href="/heartbleed.css" type='text/css'>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="//oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="//oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="container">
+      <h1>The Heartbleed Bug</h1>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-lg-push-8 col-md-push-8 col-sm-push-8" style="padding-top: 30px; text-align: center;">
+          <img class="logo" src="heartbleed.png" alt="Heartbleed Bug" />
+        </div>
+        <div class="col-lg-8 col-md-8 col-sm-8 col-lg-pull-4 col-md-pull-4 col-sm-pull-4">
+          <p>The Heartbleed Bug is a serious vulnerability in the popular OpenSSL cryptographic software library. This weakness allows stealing the information protected, under normal conditions, by the SSL/TLS encryption used to secure the Internet. SSL/TLS provides communication security and privacy over the Internet for applications such as web, email, instant messaging (IM) and some virtual private networks (VPNs).</p>
+          <p>The Heartbleed bug allows anyone on the Internet to read the memory of the systems protected by the vulnerable versions of the OpenSSL software. This compromises the secret keys used to identify the service providers and to encrypt the traffic, the names and passwords of the users and the actual content. This allows attackers to eavesdrop on communications, steal data directly from the services and users and to impersonate services and users.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-6">
+          <h3>What leaks in practice?</h3>
+          <p>We have tested some of our own services from attacker's perspective. We attacked ourselves from outside, without leaving a trace. Without using any privileged information or credentials we were able steal from ourselves the secret keys used for our X.509 certificates, user names and passwords, instant messages, emails and business critical documents and communication.</p>
+        </div>
+
+        <div class="col-lg-6 col-md-6 col-sm-6">
+          <h3>How to stop the leak?</h3>
+          <p>As long as the vulnerable version of OpenSSL is in use it can be abused. <a href="https://www.openssl.org/news/secadv_20140407.txt">Fixed OpenSSL</a> has been released and now it has to be deployed. Operating system vendors and distribution, appliance vendors, independent software vendors have to adopt the fix and notify their users. Service providers and users have to install the fix as it becomes available for the operating systems, networked appliances and software they use.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+          <hr />
+          <h3>Q&amp;A</h3>
+          <h4>What is the CVE-2014-0160?</h4>
+          <p>CVE-2014-0160 is the official reference to this bug. CVE (Common Vulnerabilities and Exposures) is the Standard for Information Security Vulnerability Names maintained by <a href="http://cve.mitre.org/">MITRE</a>. Due to co-incident discovery a duplicate CVE, CVE-2014-0346, which was assigned to us, should not be used, since others independently went public with the CVE-2014-0160 identifier.</p>
+
+          <h4>Why it is called the Heartbleed Bug?</h4>
+          <p>Bug is in the OpenSSL's implementation of the TLS/DTLS (transport layer security protocols) heartbeat extension (RFC6520). When it is exploited it leads to the leak of memory contents from the server to the client and from the client to the server.</p>
+
+          <h4>What makes the Heartbleed Bug unique?</h4>
+          <p>Bugs in single software or library come and go and are fixed by new versions. However this bug has left large amount of private keys and other secrets exposed to the Internet. Considering the long exposure, ease of exploitation and attacks leaving no trace this exposure should be taken seriously.</p>
+
+          <h4>Is this a design flaw in SSL/TLS protocol specification?</h4>
+          <p>No. This is implementation problem, i.e. programming mistake in popular OpenSSL library that provides cryptographic services such as SSL/TLS to the applications and services.</p>
+
+          <h4>What is being leaked?</h4>
+          <p>Encryption is used to protect secrets that may harm your privacy or security if they leak. In order to coordinate recovery from this bug we have classified the compromised secrets to four categories: 1) primary key material, 2) secondary key material and 3) protected content and 4) collateral.</p>
+
+          <h4>What is leaked primary key material and how to recover?</h4>
+          <p>These are the crown jewels, the encryption keys themselves. Leaked secret keys allow the attacker to decrypt any past and future traffic to the protected services and to impersonate the service at will. Any protection given by the encryption and the signatures in the X.509 certificates can be bypassed. Recovery from this leak requires patching the vulnerability, revocation of the compromised keys and reissuing and redistributing new keys. Even doing all this will still leave any traffic intercepted by the attacker in the past still vulnerable to decryption. All this has to be done by the owners of the services.</p>
+
+          <h4>What is leaked secondary key material and how to recover?</h4>
+          <p>These are for example the user credentials (user names and passwords) used in the vulnerable services. Recovery from this leak requires owners of the service first to restore trust to the service according to steps described above. After this users can start changing their passwords and possible encryption keys according to the instructions from the owners of the services that have been compromised. All session keys and session cookies should be invalidated and considered compromised.</p>
+
+          <h4>What is leaked protected content and how to recover?</h4>
+          <p>This is the actual content handled by the vulnerable services. It may be personal or financial details, private communication such as emails or instant messages, documents or anything seen worth protecting by encryption. Only owners of the services will be able to estimate the likelihood what has been leaked and they should notify their users accordingly. Most important thing is to restore trust to the primary and secondary key material as described above. Only this enables safe use of the compromised services in the future.</p>
+
+          <h4>What is leaked collateral and how to recover?</h4>
+          <p>Leaked collateral are other details that have been exposed to the attacker in the leaked memory content. These may contain technical details such as memory addresses and security measures such as canaries used to protect against overflow attacks. These have only contemporary value and will lose their value to the attacker when OpenSSL has been upgraded to a fixed version.</p>
+
+          <h4>Recovery sounds laborious, is there a short cut?</h4>
+          <p>After seeing what we saw by "attacking" ourselves, with ease, we decided to take this very seriously. We have gone laboriously through patching our own critical services and are dealing with possible compromise of our primary and secondary key material. All this just in case we were not first ones to discover this and this could have been exploited in the wild already.</p>
+
+          <h4>How revocation and reissuing of certificates works in practice?</h4>
+          <p>If you are a service provider you have signed your certificates with a Certificate Authority (CA). You need to check your CA how compromised keys can be revoked and new certificate reissued for the new keys. Some CAs do this for free, some may take a fee.</p>
+
+          <h4>Am I affected by the bug?</h4>
+          <p>You are likely to be affected either directly or indirectly. OpenSSL is the most popular open source cryptographic library and TLS (transport layer security) implementation used to encrypt traffic on the Internet. Your popular social site, your company's site, commerce site, hobby site, site you install software from or even sites run by your government might be using vulnerable OpenSSL. Many of online services use TLS to both to identify themselves to you and to protect your privacy and transactions. You might have networked appliances with logins secured by this buggy implementation of the TLS. Furthermore you might have client side software on your computer that could expose the data from your computer if you connect to compromised services.</p>
+
+          <h4>How widespread is this?</h4>
+          <p>The most notable software using OpenSSL are the open source web servers like Apache and nginx. The combined market share of just those two out of the active sites on the Internet was over 66% according to <a href="http://news.netcraft.com/archives/2014/04/02/april-2014-web-server-survey.html">Netcraft's April 2014 Web Server Survey</a>. Furthermore OpenSSL is used to protect for example email servers (SMTP, POP and IMAP protocols), chat servers (XMPP protocol), virtual private networks (SSL VPNs), network appliances and wide variety of client side software. Fortunately many large consumer sites are saved by their conservative choice of SSL/TLS termination equipment and software. Ironically smaller and more progressive services or those who have upgraded to latest and best encryption will be affected most. Furthermore OpenSSL is very popular in client software and somewhat popular in networked appliances which have most inertia in getting updates.</p>
+
+          <h4>What versions of the OpenSSL are affected?</h4>
+          <p>Status of different versions:</p>
+
+          <ul>
+            <li>OpenSSL 1.0.1 through 1.0.1f (inclusive) are vulnerable</li>
+            <li>OpenSSL 1.0.1g is NOT vulnerable</li>
+            <li>OpenSSL 1.0.0 branch is NOT vulnerable</li>
+            <li>OpenSSL 0.9.8 branch is NOT vulnerable</li>
+          </ul>
+
+          <p>Bug was introduced to OpenSSL in December 2011 and has been out in the wild since OpenSSL release 1.0.1 on 14th of March 2012. OpenSSL 1.0.1g released on 7th of April 2014 fixes the bug.</p>
+
+          <h4>How common are the vulnerable OpenSSL versions?</h4>
+          <p>The vulnerable versions have been out there for over two years now and they have been rapidly adopted by modern operating systems. A major contributing factor has been that TLS versions 1.1 and 1.2 came available with the first vulnerable OpenSSL version (1.0.1) and security community has been pushing the TLS 1.2 due to earlier attacks against TLS (such as the <a href="http://en.wikipedia.org/wiki/Transport_Layer_Security#BEAST_attack">BEAST</a>).</p>
+
+          <h4>How about operating systems?</h4>
+          <p>Some operating system distributions that have shipped with potentially vulnerable OpenSSL version:</p>
+
+          <ul>
+            <li>Debian Wheezy (stable), OpenSSL 1.0.1e-2+deb7u4</li>
+            <li>Ubuntu 12.04.4 LTS, OpenSSL 1.0.1-4ubuntu5.11</li>
+            <li>CentOS 6.5, OpenSSL 1.0.1e-15</li>
+            <li>Fedora 18, OpenSSL 1.0.1e-4</li>
+            <li>OpenBSD 5.3 (OpenSSL 1.0.1c 10 May 2012) and 5.4 (OpenSSL 1.0.1c 10 May 2012)</li>
+            <li>FreeBSD 10.0 - OpenSSL 1.0.1e 11 Feb 2013</li>
+            <li>NetBSD 5.0.2 (OpenSSL 1.0.1e)</li>
+            <li>OpenSUSE 12.2 (OpenSSL 1.0.1c)</li>
+          </ul>
+
+          <p>Operating system distribution with versions that are not vulnerable:</p>
+
+          <ul>
+            <li>Debian Squeeze (oldstable), OpenSSL 0.9.8o-4squeeze14</li>
+            <li>SUSE Linux Enterprise Server</li>
+            <li>FreeBSD 8.4 - OpenSSL 0.9.8y 5 Feb 2013</li>
+            <li>FreeBSD 9.2 - OpenSSL 0.9.8y 5 Feb 2013</li>
+            <li>FreeBSD 10.0p1 - OpenSSL 1.0.1g (At 8 Apr 18:27:46 2014 UTC)</li>
+            <li>FreeBSD Ports - OpenSSL 1.0.1g (At 7 Apr 21:46:40 2014 UTC)</li>
+          </ul>
+
+          <h4>How can OpenSSL be fixed?</h4>
+          <p>Even though the actual code fix may appear trivial, OpenSSL team is the expert in fixing it properly so fixed version 1.0.1g or newer should be used. If this is not possible software developers can recompile OpenSSL with the handshake removed from the code by compile time option <code>-DOPENSSL_NO_HEARTBEATS</code>.</p>
+
+          <h4>Should heartbeat be removed to aid in detection of vulnerable services?</h4>
+          <p>Recovery from this bug might have benefitted if the new version of the OpenSSL would both have fixed the bug and disabled heartbeat temporarily until some future version. Majority, if not almost all, of TLS implementations that responded to the heartbeat request at the time of discovery were vulnerable versions of OpenSSL. If only vulnerable versions of OpenSSL would have continued to respond to the heartbeat for next few months then large scale coordinated response to reach owners of vulnerable services would become more feasible. However, swift response by the Internet community in developing online and standalone detection tools quickly surpassed the need for removing heartbeat altogether.</p>
+
+          <h4>Can I detect if someone has exploited this against me?</h4>
+          <p>Exploitation of this bug does not leave any trace of anything abnormal happening to the logs.</p>
+
+          <h4>Can IDS/IPS detect or block this attack?</h4>
+          <p>Although the heartbeat can appear in different phases of the connection setup, intrusion detection and prevention systems (IDS/IPS) rules to detect heartbeat have been developed. Due to encryption differentiating between legitimate use and attack cannot be based on the content of the request, but the attack may be detected by comparing the size of the request against the size of the reply. This implies that IDS/IPS can be programmed to detect the attack but not to block it unless heartbeat requests are blocked altogether.</p>
+
+          <h4>Has this been abused in the wild?</h4>
+          <p>We don't know. Security community should deploy TLS/DTLS honeypots that entrap attackers and to alert about exploitation attempts.</p>
+
+          <h4>Can attacker access only 64k of the memory?</h4>
+          <p>There is no total of 64 kilobytes limitation to the attack, that limit applies only to a single heartbeat. Attacker can either keep reconnecting or during an active TLS connection keep requesting arbitrary number of 64 kilobyte chunks of memory content until enough secrets are revealed.</p>
+
+          <h4>Is this a MITM bug like Apple's goto fail bug was?</h4>
+          <p>No, this does not require a man in the middle attack (MITM). Attacker can directly contact the vulnerable service or attack any user connecting to a malicious service. However in addition to direct threat the theft of the key material allows man in the middle attackers to impersonate compromised services.</p>
+
+          <h4>Does TLS client certificate authentication mitigate this?</h4>
+          <p>No, heartbeat request can be sent and is replied to during the handshake phase of the protocol. This occurs prior to client certificate authentication.</p>
+
+          <h4>Does OpenSSL's FIPS mode mitigate this?</h4>
+          <p>No, OpenSSL Federal Information Processing Standard (FIPS) mode has no effect on the vulnerable heartbeat functionality.</p>
+
+          <h4>Does Perfect Forward Secrecy (PFS) mitigate this?</h4>
+          <p>Use of Perfect Forward Secrecy (PFS), which is unfortunately rare but powerful, should protect past communications from retrospective decryption. Please see <a href="https://twitter.com/ivanristic/status/453280081897467905">https://twitter.com/ivanristic/status/453280081897467905</a> how leaked tickets may affect this.</p>
+
+          <h4>Can heartbeat extension be disabled during the TLS handshake?</h4>
+          <p>No, vulnerable heartbeat extension code is activated regardless of the results of the handshake phase negotiations. Only way to protect yourself is to upgrade to fixed version of OpenSSL or to recompile OpenSSL with the handshake removed from the code.</p>
+
+          <h4>Who found the Heartbleed Bug?</h4>
+          <p>This bug was independently discovered by a team of security engineers (Riku, Antti and Matti) at <a href="http://www.codenomicon.com/">Codenomicon</a> and Neel Mehta of Google Security, who first reported it to the OpenSSL team. Codenomicon team found heartbleed bug while improving the SafeGuard feature in Codenomicon's Defensics security testing tools and reported this bug to the NCSC-FI for vulnerability coordination and reporting to OpenSSL team.</p>
+
+          <h4>What is the Defensics SafeGuard?</h4>
+          <p>The SafeGuard feature of the Codenomicon's Defensics security testtools automatically tests the target system for weaknesses that compromise the integrity, privacy or safety. The SafeGuard is systematic solution to expose failed cryptographic certificate checks, privacy leaks or authentication bypass weaknesses that have exposed the Internet users to man in the middle attacks and eavesdropping. In addition to the Heartbleed bug the new Defensics TLS Safeguard feature can detect for instance the exploitable security flaw in widely used GnuTLS open source software implementing SSL/TLS functionality and the <a href="http://gotofail.com/">"goto fail;"</a> bug in Apple's TLS/SSL implementation that was patched in February 2014.</p>
+
+          <h4>Who coordinates response to this vulnerability?</h4>
+          <p>Immediately after our discovery of the bug on 3rd of April 2014, <a href="https://www.cert.fi/en/index.html">NCSC-FI</a> took up the task of verifying it, analyzing it further and reaching out to the authors of OpenSSL, software, operating system and appliance vendors, which were potentially affected. However, this vulnerability had been found and details released independently by others before this work was completed. Vendors should be notifying their users and service providers. Internet service providers should be notifying their end users where and when potential action is required.</p>
+
+          <h4>Is there a bright side to all this?</h4>
+          <p>For those service providers who are affected this is a good opportunity to upgrade security strength of the secret keys used. A lot of software gets updates which otherwise would have not been urgent. Although this is painful for the security community, we can rest assured that infrastructure of the cyber criminals and their secrets have been exposed as well.</p>
+
+          <h4>What can be done to prevent this from happening in future?</h4>
+          <p>The security community, we included, must learn to find these inevitable human mistakes sooner. Please support the development effort of software you trust your privacy to. <a href="https://www.openssl.org/support/donations.html">Donate money to the OpenSSL project.</a></p>
+
+          <h4>Where to find more information?</h4>
+          <p>This Q&amp;A was published as a follow-up to the OpenSSL advisory, since this vulnerability became public on 7th of April 2014. The OpenSSL project has made a statement at <a href="https://www.openssl.org/news/secadv_20140407.txt">https://www.openssl.org/news/secadv_20140407.txt</a>. NCSC-FI published an advisory at <a href="https://www.cert.fi/en/reports/2014/vulnerability788210.html">https://www.cert.fi/en/reports/2014/vulnerability788210.html</a>. Individual vendors of operating system distributions, affected owners of Internet services, software packages and appliance vendors may issue their own advisories.</p>
+
+          <h4>References</h4>
+          <ul>
+            <li>CVE-2014-0160</li>
+            <li>NCSC-FI case# 788210</li>
+            <li><a href="https://www.openssl.org/news/secadv_20140407.txt">OpenSSL Security Advisory</a> <small>(published 7th of April 2014, ~17:30 UTC)</small></li>
+            <li><a href="http://blog.cloudflare.com/staying-ahead-of-openssl-vulnerabilities">CloudFlare: Staying ahead of OpenSSL vulnerabilities</a> <small>(published 7th of April 2014, ~18:00 UTC)</small></li>
+            <li><a href="http://heartbleed.com/">heartbleed.com</a> <small>(published 7th of April 2014, ~19:00 UTC)</small></li>
+            <li><a href="http://www.ubuntu.com/usn/usn-2165-1/">Ubuntu / Security Notice USN-2165-1</a></li>
+            <li><a href="http://www.freebsd.org/security/advisories/FreeBSD-SA-14:06.openssl.asc">FreeBSD / SA-14:06.openssl</a></li>
+            <li><a href="http://www.freshports.org/security/openssl/">FreshPorts / openssl 1.0.1_10</a></li>
+            <li><a href="https://blog.torproject.org/blog/openssl-bug-cve-2014-0160">Tor Project / OpenSSL bug CVE-2014-0160</a></li>
+            <li><a href="https://rhn.redhat.com/errata/RHSA-2014-0376.html">RedHat / RHSA-2014:0376-1</a></li>
+            <li><a href="http://lists.centos.org/pipermail/centos-announce/2014-April/020249.html">CentOS / CESA-2014:0376</a></li>
+            <li><a href="https://lists.fedoraproject.org/pipermail/announce/2014-April/003205.html">Fedora / Status on CVE-2014-0160</a></li>
+            <li><a href="http://www.kb.cert.org/vuls/id/720951">CERT/CC (USA)</a></li>
+            <li><a href="https://www.cert.fi/en/reports/2014/vulnerability788210.html">NCSC-FI (Finland)</a></li>
+            <li><a href="https://www.cert.at/warnings/all/20140408.html">CERT.at (Austria)</a></li>
+            <li><a href="http://www.circl.lu/pub/tr-21/">CIRCL (Luxembourg)</a></li>
+            <li><a href="http://www.cert.ssi.gouv.fr/site/CERTFR-2014-ALE-003/index.html">CERT-FR (France)</a></li>
+            <li><a href="https://www.jpcert.or.jp/english/at/2014/at140013.html">JPCERT/CC (Japan)</a></li>
+            <li><a href="https://www.cert.se/2014/04/ny-sarbarhet-i-openssl-1-0-1">CERT-SE (Sweden)</a></li>
+            <li><a href="https://www.nsm.stat.no/Arbeidsomrader/Internettsikkerhet-NorCERT/Forsideartikler-NorCERT/Alvorlig-sarbarhet-i-SSL/">NorCERT (Norway)</a></li>
+            <li><a href="https://www.ncsc.nl/dienstverlening/expertise-advies/factsheets/factsheet-heartbleed-ernstige-kwetsbaarheid-in-openssl.html">NCSC-NL (Netherlands)</a></li>
+            <li><a href="http://www.cert.org.cn/publish/main/9/2014/20140410091311360563426/20140410091311360563426_.html">CNCERT/CC (People's Republic of China)</a></li>
+            <li><a href="http://www.publicsafety.gc.ca/cnt/rsrcs/cybr-ctr/2014/av14-017-eng.aspx">Public Safety Canada</a></li>
+            <li><a href="https://cert.litnet.lt/lt/dokumentai/heartbleed-openssl-pazeidziamumas">LITNET CERT (Lithuania)</a></li>
+            <li><a href="http://www.mycert.org.my/en/services/advisories/mycert/2014/main/detail/963/index.html">MyCERT (Malaysia)</a></li>
+            <li><a href="http://www.cert.org.mx/boletin/?vulne=6487">UNAM-CERT (Mexico)</a></li>
+            <li><a href="http://www.singcert.org.sg/alerts/21-latest/607-singcert-openssl-heartbleed-bug">SingCERT (Singapore)</a></li>
+            <li><a href="http://www.qcert.org/sites/default/files/public/alert_details_9042014_heartbleed.pdf">Q-CERT (Qatar)</a></li>
+          </ul>
+
+          <p><br/><small>Heartbleed logo is free to use, rights waived via <a href="http://creativecommons.org/publicdomain/zero/1.0/">CC0</a>.
+            <span class="download"><a href="/heartbleed.svg">[download logo in SVG format]</a></span></small></p>
+
+          <p class="timestamp">Page updated 2014-04-29 07:05 UTC. <!-- r64 --></p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="container">
+      <p><a class="codenomicon" title="Codenomicon - April 2014" href="http://www.codenomicon.com/">Codenomicon - April 2014</a></p>
+    </footer>
+
+  </body>
+</html>

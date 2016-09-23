@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<!--[if lt IE 10 ]> <html class="old-ie"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="not-ie"> <!--<![endif]-->
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+		<meta name="keywords" content="TLS freak attack zmap" />
+		<meta name="description" content="Tracking the FREAK Attack" />
+		<title>Tracking the FREAK Attack</title>
+		<link rel="stylesheet" type="text/css" href="bootstrap.css"/>
+		<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+		<script src="test.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+		<style type="text/css">
+			.vuln { color: #E62E00; }
+		</style>
+
+		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]> <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script> <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script> <![endif]-->
+
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="page-header" id="banner">
+					<h1>Tracking the FREAK Attack</h1>
+				</div>
+				<div class="alert alert-danger hidden" role="alert" id="vulnerable_notify">
+					<b>Warning!</b> Your browser is vulnerable to the FREAK attack.
+					It can be tricked into using weak encryption if you visit a vulnerable website.
+					We encourage you to update your browser right away.
+				</div>
+				<div class="alert alert-danger hidden" role="alert" id="rsaexport_notify" >
+					<b>Warning!</b> Your browser offers RSA_EXPORT cipher suites.
+					It can be tricked into using weak encryption if you visit a vulnerable website.			
+					We encourage you to update your browser right away.
+				</div>
+				<div class="alert alert-info hidden" role="alert" id="safe_notify">
+					<b>Good News!</b> Your browser appears to be safe from the FREAK attack.
+				</div>
+				<div class="alert alert-warning hidden" role="alert" id="manual_check" >
+					<b>Whoops!</b> Your browser might be incompatible with our automatic vulnerability test.
+					If <a href="https://cve.freakattack.com">this link loads without errors</a>, you're vulnerable.
+				</div>
+
+				<p>On Tuesday, March 3, 2015, researchers announced a new SSL/TLS vulnerability called the FREAK attack. It allows an attacker to intercept HTTPS connections between vulnerable clients and servers and force them to use weakened encryption, which the attacker can break to steal or manipulate sensitive data. This site is dedicated to tracking the impact of the attack and helping users test whether they&rsquo;re vulnerable.</p>
+
+				<p>The FREAK attack was <a href="http://smacktls.com">discovered</a> by <a href="http://prosecco.inria.fr/personal/karthik">Karthikeyan Bhargavan</a> at INRIA in Paris and the <a href="http://mitls.org">miTLS team</a>.	 Further disclosure was coordinated by <a href="http://blog.cryptographyengineering.com/">Matthew Green</a>. This report is maintained by computer scientists at the University of Michigan, including <a href="https://zakird.com/">Zakir Durumeric</a>, <a href="https://davidadrian.org/">David Adrian</a>, Ariana Mirian, <a href="http://mdbailey.ece.illinois.edu/">Michael Bailey</a>, and <a href="https://jhalderm.com/">J. Alex Halderman</a>. The team can be contacted at <a href="mailto:freakattack@umich.edu">freakattack@umich.edu</a>.</p>
+
+				<p>For additional details about the attack and its implications, see <a href="http://blog.cryptographyengineering.com/2015/03/attack-of-week-freak-or-factoring-nsa.html">this post by Matt Green</a>, <a href="https://www.smacktls.com/">this site by the discoverers</a>, <a href="http://www.washingtonpost.com/blogs/the-switch/wp/2015/03/03/freak-flaw-undermines-security-for-apple-and-google-users-researchers-discover/">this Washington Post article</a>, and <a href="https://freedom-to-tinker.com/blog/felten/freak-attack-the-chickens-of-90s-crypto-restriction-come-home-to-roost/">this post by Ed Felten</a>.</p>
+
+				<hr/>
+				<a name="affected"> </a>
+				<h2>Who is vulnerable?</h2>
+
+				<p>The FREAK attack is possible when a vulnerable browser connects to a susceptible web server&mdash;a server that accepts &ldquo;export-grade&rdquo; encryption.</p>
+
+				<h4><b>Servers</b></h4>
+
+				<p>Servers that accept RSA_EXPORT cipher suites put their users at risk from the FREAK attack.	Using Internet-wide scanning, we have been performing daily tests of all HTTPS servers at public IP addresses to determine whether they allow this weakened encryption.	 More than a third of all servers with browser-trusted certificates are at risk.</p>
+
+				<div class="row">
+					<div class="col-md-8 col-md-offset-1">
+						<table class="table table-condensed">
+							 <thead>
+								 <th></th>
+								 <th><span class="pull-right">Currently Vulnerable</span></th>
+								 <th><span class="pull-right">Change Since Mar.&nbsp;3</span></th>
+							 </thead>
+							 <tr>
+								 <td>HTTPS servers at <a href="http://www.alexa.com/topsites">Alexa</a> Top 1 Million domain names</td>
+								 <td><span class="pull-right vuln">8.5&#37;</span></td>
+								 <td><span class="pull-right">down from 9.6&#37;</span></td>
+							 </tr>
+							 <tr>
+								 <td>HTTPS servers with browser-trusted certificates</td>
+								 <td><span class="pull-right vuln">6.5&#37;</span></td>
+								 <td><span class="pull-right">down from 36.7&#37;</span></td>
+							 </tr>
+							 <tr>
+								 <td>All HTTPS servers</td>
+								 <td><span class="pull-right vuln">11.8&#37;</span></td>
+								 <td><span class="pull-right">down from 26.3&#37;</span></td>
+							 </tr>
+						 </table>
+					</div>
+				</div>
+
+				<p>See below for a list of <a href="index.html#alexa">vulnerable popular domains</a>.	 You can test servers using the <a href="https://tools.keycdn.com/freak">SSL FREAK Check</a> tool or the Qualys SSL Labs&rsquo; <a href="https://www.ssllabs.com/ssltest/">SSL Server Test</a>, which can also identify other security problems.</p>
+
+				<h4><b>Clients</b></h4>
+
+				<p><b>Update (Mar.&nbsp;5):</b> &nbsp; Browsers are vulnerable to the FREAK attack because of bugs that allow an attacker to force them to use weak, export-grade encryption.	 One example is the OpenSSL bug described in <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0204">CVE-2015-0204</a>, but some other TLS libraries have similar problems. Far more browsers are vulnerable to the FREAK attack than was initially thought when the attack was announced, including:
+
+				<div class="row">
+					<div class="col-md-6 col-md-offset-1">
+						<table class="table table-condensed">
+							<thead><td><b>Vulnerable Browser</b></td><td><b>Status</b></td>
+							 <tr><td><span class=vuln>Internet Explorer</span></td><td><a href="https://technet.microsoft.com/en-US/library/security/MS15-031">Patch available now</a> &mdash; <a href="https://technet.microsoft.com/en-us/library/security/3046015">Security advisory</a></td></tr>
+							 <tr><td><span class=vuln>Chrome on Mac OS</span></td><td>Patch available now</td></tr>
+							 <tr><td><span class=vuln>Chrome on Android</span></td><td>Patch available now</td></tr>
+                             <tr><td><span class=vuln>Safari on Mac OS</span></td><td><a href="https://support.apple.com/en-us/HT204413">Patch available now</a></td></tr>
+                             <tr><td><span class=vuln>Safari on iOS</span></td><td><a href="https://support.apple.com/en-us/HT204423">iOS 8 Patch available now</a></td></tr>
+							 <tr><td><span class=vuln>Stock Android Browser</span></td><td></td>Patch available now</tr>
+							 <tr><td><span class=vuln>Blackberry Browser</span></td><td></td></tr>
+							 <tr><td><span class=vuln>Opera on Mac OS</span></td><td>Patch available now</td></tr>
+						 </table>
+					</div>
+				</div>
+
+				<p>You can check whether your browser is vulnerable using our <b><a href="clienttest.html">FREAK Client Test Tool</a></b>.</p>
+
+				<p>Chrome for Windows and all modern versions of Firefox are known to be safe.  However, even if your browser is safe, certain third-party software, including some anti-virus products and adware programs, can expose you to the attack by intercepting TLS connections from the browser.  If you are using a safe browser but our client test says you&rsquo;re vulnerable, this is a likely cause.</p>
+
+				<p>In addition to browsers, many mobile apps, embedded systems, and other software products also use TLS.	 These are also potentially vulnerable if they rely on unpatched libraries or offer RSA_EXPORT cipher suites.</p>
+
+				<hr/>
+				<a name="sysadmin"></a>
+				<h2>What should I do?</h2>	
+
+				<h4><b>If you run a server &hellip;</b></h4>
+
+				<p>You should immediately disable support for TLS export cipher suites.	 While you&rsquo;re at it, you should also disable other cipher suites that are known to be insecure and enable forward secrecy.	For instructions on how to secure popular HTTPS server software, we recommend Mozilla&rsquo;s <a href="https://wiki.mozilla.org/Security/Server_Side_TLS#Recommended_configurations">security configuration guide</a> and their <a href="https://mozilla.github.io/server-side-tls/ssl-config-generator/">SSL configuration generator</a>. We also recommend testing your configuration with the Qualys SSL Labs <a href="https://www.ssllabs.com/ssltest/">SSL Server Test</a> tool.</p>
+
+				<h4><b>If you use a browser &hellip;</b></h4>
+
+				<p>Make sure you have the most recent version of your browser installed, and check for updates frequently.	Updates that fix the FREAK attack should be available for all major browsers soon.</p>
+
+				<h4><b>If you&rsquo;re a sysadmin or developer &hellip;</b></h4>
+
+				<p>Make sure any TLS libraries you use are up to date.	Unpatched <a href="https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2015-0204">OpenSSL</a>, <a href="https://technet.microsoft.com/en-us/library/security/3046015">Microsoft Schannel</a>, and Apple SecureTransport all suffer from the vulnerability.	 Note that these libraries are used internally by many other programs, such as <tt>wget</tt> and <tt>curl</tt>.	 You also need to ensure that your software does not offer export cipher suites, even as a last resort, since they can be exploited even if the TLS library is patched.	 We have provided <a href="clienttest.html">tools for software developers</a> that may be helpful for testing.</p>
+
+<!--				<hr/>
+				<a name="howworks"></a>
+				<h2>How does the attack work?</h2>
+
+				<p>When browsers were introduced in the 1990s, it was illegal for U.S. companies to export strong cryptography, so SSL/TLS (the crypto standards used for HTTPS sites) include the ability to use deliberately weaked crypto when domestic servers communicate with exported clients.	 One of the restrictions was that exported software wasn&rsquo;t allowed to encrypt with RSA keys stronger than 512 bits.	 To work around this, the standards include key-exchange modes called EXPORT_RSA cipher suites.	 In the EXPORT_RSA modes, the server sends the client a temporary 512-bit RSA public key, signed with the stronger public key in its certificate.	 The client checks the signature and then uses the temporary RSA key to send the server a random session key that&rsquo;s used to encrypt the rest of the connection.	 Twenty years ago, 512-bit RSA keys were strong enough to deter casual attacks, but we can assume that NSA and other intelligence agencies could readily factor them and decrypt the connection data.</p>
+
+				<p>Fast-forward to today.	 It&rsquo;s not a problem anymore to export strong cryptography, but SSL and TLS continue to support EXPORT_RSA for compatibility with very old clients.	(According to our data, more than a third of browser-trusted sites accept EXPORT_RSA modes, but only if the client doesn&rsquo;t support anything stronger.)	While the standards recommend that servers should regenerate temporary RSA keys frequently, most real server implementations (like Apache and Nginx) only generate a new key when the server restarts, which means they are likely to use the same key for weeks or months.</p>
+
+				As <a href="http://blog.cryptographyengineering.com/2015/03/attack-of-week-freak-or-factoring-nsa.html">Nadia Heninger has shown</a>, thanks to two decades of Moore&rsquo;s Law, factoring 512-bit RSA keys now takes about 7 hours on EC2 and costs about $100.
+
+
+				Unforutnately, if the client and server are both willing to use EXPORT_RSA as a fallback, an attacker can force them to use it.	 
+
+	
+				However, if both the browser and the server are willing to accept EXPORT_RSA, an attacker can trick them both into using it.
+				
+-->
+				<hr/>
+				<a name="alexa"></a>
+				<h2>Popular sites that are susceptible to FREAK</h2>
+				<p>The following sites from the <a href="http://www.alexa.com/topsites">Alexa</a> Top 10,000 websites permit RSA_EXPORT cipher suites, which potentially puts their users at risk from the FREAK attack. This list is current as of March 10 at 8:00&nbsp;AM EST.	We urge these sites to drop support for export cipher suites as soon as possible.</p>
+
+				<table class="table table-condensed">
+					<thead><th>Alexa Rank</td><th>Domain</th><th>Address Tested</th></thead>
+
+<tr><td>55</td><td>ziddu.com</td><td>84.45.63.57</td></tr>
+<tr><td>164</td><td>coccoc.com</td><td>123.30.175.29</td></tr>
+<tr><td>227</td><td>ppomppu.co.kr</td><td>110.45.151.210</td></tr>
+<tr><td>265</td><td>groupon.com</td><td>184.26.43.170</td></tr>
+<tr><td>273</td><td>jabong.com</td><td>23.203.7.176</td></tr>
+<tr><td>446</td><td>4shared.com</td><td>208.88.224.138</td></tr>
+<tr><td>453</td><td>npr.org</td><td>216.35.221.76</td></tr>
+<tr><td>601</td><td>airtel.in</td><td>125.19.135.93</td></tr>
+<tr><td>615</td><td>kohls.com</td><td>23.202.240.45</td></tr>
+<tr><td>722</td><td>adplxmd.com</td><td>205.186.187.178</td></tr>
+<tr><td>740</td><td>tinyurl.com</td><td>23.194.152.87</td></tr>
+<tr><td>784</td><td>mit.edu</td><td>23.6.64.128</td></tr>
+<tr><td>798</td><td>saramin.co.kr</td><td>182.162.86.29</td></tr>
+<tr><td>831</td><td>suning.com</td><td>112.84.133.57</td></tr>
+<tr><td>865</td><td>itau.com.br</td><td>172.224.255.170</td></tr>
+<tr><td>913</td><td>huaban.com</td><td>60.191.100.98</td></tr>
+<tr><td>937</td><td>vi-view.com</td><td>50.97.32.135</td></tr>
+<tr><td>1040</td><td>jobrapido.com</td><td>46.105.106.82</td></tr>
+<tr><td>1093</td><td>wiocha.pl</td><td>195.225.138.230</td></tr>
+<tr><td>1107</td><td>axisbank.com</td><td>119.226.139.40</td></tr>
+<tr><td>1209</td><td>jcpenney.com</td><td>23.202.220.215</td></tr>
+<tr><td>1247</td><td>mgid.com</td><td>208.94.232.200</td></tr>
+<tr><td>1259</td><td>globososo.com</td><td>184.173.140.162</td></tr>
+<tr><td>1301</td><td>binaryprofessional.com</td><td>50.7.157.122</td></tr>
+<tr><td>1303</td><td>refinery29.com</td><td>50.22.34.142</td></tr>
+<tr><td>1332</td><td>vente-privee.com</td><td>185.45.180.3</td></tr>
+<tr><td>1336</td><td>wowhead.com</td><td>23.6.67.58</td></tr>
+<tr><td>1369</td><td>dhgate.com</td><td>124.42.15.198</td></tr>
+<tr><td>1370</td><td>adxcore.com</td><td>188.165.36.101</td></tr>
+<tr><td>1495</td><td>estadao.com.br</td><td>23.6.72.37</td></tr>
+<tr><td>1543</td><td>sweet-page.com</td><td>50.97.32.133</td></tr>
+<tr><td>1556</td><td>jcrew.com</td><td>23.199.196.136</td></tr>
+<tr><td>1565</td><td>zdnet.com</td><td>50.112.160.88</td></tr>
+<tr><td>1569</td><td>bmi.ir</td><td>89.235.64.67</td></tr>
+<tr><td>1658</td><td>cornell.edu</td><td>128.253.173.244</td></tr>
+<tr><td>1663</td><td>vesti.ru</td><td>80.247.32.206</td></tr>
+<tr><td>1665</td><td>uludagsozluk.com</td><td>188.132.225.181</td></tr>
+<tr><td>1671</td><td>lg.com</td><td>165.244.62.23</td></tr>
+<tr><td>1702</td><td>umich.edu</td><td>141.211.243.44</td></tr>
+<tr><td>1780</td><td>extra.com.br</td><td>23.194.154.91</td></tr>
+<tr><td>1791</td><td>ibtimes.co.uk</td><td>64.147.114.55</td></tr>
+<tr><td>1835</td><td>syosetu.com</td><td>111.64.91.10</td></tr>
+<tr><td>1852</td><td>jiameng.com</td><td>117.78.2.204</td></tr>
+<tr><td>1871</td><td>thrillist.com</td><td>50.57.33.153</td></tr>
+<tr><td>1885</td><td>dealmoon.com</td><td>198.23.88.242</td></tr>
+<tr><td>1891</td><td>ihg.com</td><td>23.202.251.213</td></tr>
+<tr><td>1899</td><td>mashreghnews.ir</td><td>94.182.146.23</td></tr>
+<tr><td>1920</td><td>ohmyzip.com</td><td>216.176.192.139</td></tr>
+<tr><td>1925</td><td>alice.it</td><td>217.169.121.227</td></tr>
+<tr><td>1955</td><td>duba.com</td><td>114.112.93.100</td></tr>
+<tr><td>1962</td><td>ana.co.jp</td><td>202.224.1.7</td></tr>
+<tr><td>1973</td><td>gg.com.ua</td><td>213.227.192.135</td></tr>
+<tr><td>1986</td><td>miui.com</td><td>42.62.48.148</td></tr>
+<tr><td>1999</td><td>copyscape.com</td><td>212.100.239.219</td></tr>
+<tr><td>2017</td><td>accountonline.com</td><td>192.193.8.101</td></tr>
+<tr><td>2028</td><td>timesjobs.com</td><td>115.112.206.11</td></tr>
+<tr><td>2061</td><td>eltiempo.com</td><td>200.41.9.39</td></tr>
+<tr><td>2077</td><td>leparisien.fr</td><td>95.131.142.225</td></tr>
+<tr><td>2110</td><td>epnet.com</td><td>140.234.254.41</td></tr>
+<tr><td>2132</td><td>bigrock.in</td><td>103.21.58.212</td></tr>
+<tr><td>2143</td><td>delfi.lt</td><td>91.234.200.110</td></tr>
+<tr><td>2161</td><td>pontofrio.com.br</td><td>23.193.175.4</td></tr>
+<tr><td>2215</td><td>unam.mx</td><td>132.248.10.44</td></tr>
+<tr><td>2227</td><td>indiocasino.com</td><td>212.64.147.151</td></tr>
+<tr><td>2235</td><td>gobizkorea.com</td><td>211.119.134.217</td></tr>
+<tr><td>2302</td><td>sedo.com</td><td>82.98.86.183</td></tr>
+<tr><td>2308</td><td>jstor.org</td><td>198.108.24.38</td></tr>
+<tr><td>2357</td><td>doctissimo.fr</td><td>85.116.34.4</td></tr>
+<tr><td>2361</td><td>wannonce.com</td><td>188.165.15.58</td></tr>
+<tr><td>2377</td><td>lolking.net</td><td>23.6.67.58</td></tr>
+<tr><td>2391</td><td>56.com</td><td>59.32.213.232</td></tr>
+<tr><td>2399</td><td>itv.com</td><td>193.35.9.65</td></tr>
+<tr><td>2403</td><td>incruit.com</td><td>121.254.160.232</td></tr>
+<tr><td>2411</td><td>rotoworld.com</td><td>64.210.192.54</td></tr>
+<tr><td>2418</td><td>famitsu.com</td><td>202.90.182.200</td></tr>
+<tr><td>2421</td><td>mafengwo.cn</td><td>119.254.76.148</td></tr>
+<tr><td>2430</td><td>tradeindia.com</td><td>14.140.161.58</td></tr>
+<tr><td>2519</td><td>taikang.com</td><td>116.58.220.1</td></tr>
+<tr><td>2701</td><td>dailybasis.com</td><td>68.169.73.82</td></tr>
+<tr><td>2709</td><td>beitaichufang.com</td><td>182.18.17.202</td></tr>
+<tr><td>2720</td><td>eleconomista.es</td><td>217.116.23.3</td></tr>
+<tr><td>2727</td><td>suntimes.com</td><td>64.94.90.42</td></tr>
+<tr><td>2740</td><td>talktalk.co.uk</td><td>62.24.150.2</td></tr>
+<tr><td>2756</td><td>mk.co.kr</td><td>220.73.139.201</td></tr>
+<tr><td>2780</td><td>made-in-china.com</td><td>72.32.82.237</td></tr>
+<tr><td>2802</td><td>337.com</td><td>174.36.254.166</td></tr>
+<tr><td>2804</td><td>twitcasting.tv</td><td>202.234.23.144</td></tr>
+<tr><td>2822</td><td>gocomics.com</td><td>66.6.101.183</td></tr>
+<tr><td>2835</td><td>casasbahia.com.br</td><td>23.194.147.107</td></tr>
+<tr><td>2842</td><td>hotelurbano.com</td><td>54.174.71.24</td></tr>
+<tr><td>2877</td><td>giga.de</td><td>80.86.80.168</td></tr>
+<tr><td>2883</td><td>marksandspencer.com</td><td>23.203.7.229</td></tr>
+<tr><td>2907</td><td>coolenjoy.net</td><td>222.237.78.174</td></tr>
+<tr><td>2952</td><td>seobook.com</td><td>207.97.249.100</td></tr>
+<tr><td>2967</td><td>weathernews.jp</td><td>203.216.211.69</td></tr>
+<tr><td>2995</td><td>www.net.cn</td><td>42.156.140.7</td></tr>
+<tr><td>3100</td><td>olleh.com</td><td>183.110.184.90</td></tr>
+<tr><td>3114</td><td>sidereel.com</td><td>173.247.105.225</td></tr>
+<tr><td>3116</td><td>nsw.gov.au</td><td>203.3.232.71</td></tr>
+<tr><td>3164</td><td>motorola.com</td><td>144.188.128.101</td></tr>
+<tr><td>3178</td><td>infibeam.com</td><td>180.179.101.143</td></tr>
+<tr><td>3236</td><td>usajobs.gov</td><td>23.47.34.35</td></tr>
+<tr><td>3237</td><td>santander.com.br</td><td>172.224.248.145</td></tr>
+<tr><td>3240</td><td>wechat.com</td><td>203.205.142.141</td></tr>
+<tr><td>3272</td><td>ehanex.com</td><td>203.251.153.26</td></tr>
+<tr><td>3303</td><td>sbicard.com</td><td>14.140.196.129</td></tr>
+<tr><td>3346</td><td>jorudan.co.jp</td><td>210.168.27.165</td></tr>
+<tr><td>3351</td><td>1hai.cn</td><td>222.73.36.200</td></tr>
+<tr><td>3382</td><td>enuri.com</td><td>124.243.126.244</td></tr>
+<tr><td>3416</td><td>afreeca.com</td><td>121.125.76.89</td></tr>
+<tr><td>3451</td><td>hola.com</td><td>62.22.171.50</td></tr>
+<tr><td>3461</td><td>trafficshop.com</td><td>78.140.142.21</td></tr>
+<tr><td>3483</td><td>khan.co.kr</td><td>203.234.148.252</td></tr>
+<tr><td>3502</td><td>19lou.com</td><td>115.236.99.92</td></tr>
+<tr><td>3535</td><td>afkarnews.ir</td><td>5.144.129.189</td></tr>
+<tr><td>3550</td><td>icbc.com.cn</td><td>202.99.30.211</td></tr>
+<tr><td>3588</td><td>lenskart.com</td><td>54.254.151.162</td></tr>
+<tr><td>3599</td><td>delfi.lv</td><td>62.63.137.4</td></tr>
+<tr><td>3601</td><td>yinyuetai.com</td><td>117.79.131.138</td></tr>
+<tr><td>3621</td><td>pc6.com</td><td>218.6.111.42</td></tr>
+<tr><td>3638</td><td>persianv.com</td><td>5.144.130.216</td></tr>
+<tr><td>3680</td><td>dominos.co.in</td><td>202.87.34.218</td></tr>
+<tr><td>3695</td><td>honda.com</td><td>164.109.25.194</td></tr>
+<tr><td>3699</td><td>kuwo.cn</td><td>221.238.18.58</td></tr>
+<tr><td>3703</td><td>wmmail.ru</td><td>185.15.210.21</td></tr>
+<tr><td>3711</td><td>tribalfusion.com</td><td>204.11.109.195</td></tr>
+<tr><td>3714</td><td>am15.net</td><td>144.76.226.147</td></tr>
+<tr><td>3744</td><td>dinodirect.com</td><td>184.173.225.136</td></tr>
+<tr><td>3761</td><td>nordstromrack.com</td><td>23.193.174.147</td></tr>
+<tr><td>3783</td><td>mediaite.com</td><td>69.60.14.234</td></tr>
+<tr><td>3792</td><td>standardbank.co.za</td><td>196.8.136.20</td></tr>
+<tr><td>3796</td><td>hypebeast.com</td><td>50.112.144.237</td></tr>
+<tr><td>3979</td><td>backlinkwatch.com</td><td>74.204.189.20</td></tr>
+<tr><td>4041</td><td>juntadeandalucia.es</td><td>217.12.24.33</td></tr>
+<tr><td>4088</td><td>lan.com</td><td>67.15.147.205</td></tr>
+<tr><td>4092</td><td>sec.gov</td><td>23.203.5.89</td></tr>
+<tr><td>4099</td><td>gingersoftware.com</td><td>173.231.146.230</td></tr>
+<tr><td>4100</td><td>marketgid.com</td><td>87.242.88.80</td></tr>
+<tr><td>4195</td><td>nespresso.com</td><td>91.209.84.237</td></tr>
+<tr><td>4206</td><td>gearbest.com</td><td>50.97.75.179</td></tr>
+<tr><td>4240</td><td>key-find.com</td><td>50.97.32.136</td></tr>
+<tr><td>4248</td><td>rincondelvago.com</td><td>198.64.137.53</td></tr>
+<tr><td>4291</td><td>cjmall.com</td><td>210.122.101.150</td></tr>
+<tr><td>4322</td><td>topshop.com</td><td>23.194.147.74</td></tr>
+<tr><td>4345</td><td>delfi.ee</td><td>185.20.100.249</td></tr>
+<tr><td>4379</td><td>pearson.com</td><td>159.182.33.151</td></tr>
+<tr><td>4382</td><td>funweek.it</td><td>151.1.71.171</td></tr>
+<tr><td>4383</td><td>linkprice.com</td><td>222.236.44.131</td></tr>
+<tr><td>4440</td><td>virtualedge.com</td><td>74.205.242.20</td></tr>
+<tr><td>4453</td><td>yes24.com</td><td>61.111.13.101</td></tr>
+<tr><td>4454</td><td>pcfaster.com</td><td>180.76.2.25</td></tr>
+<tr><td>4456</td><td>veoh.com</td><td>69.167.127.57</td></tr>
+<tr><td>4467</td><td>ets.org</td><td>144.81.88.152</td></tr>
+<tr><td>4491</td><td>rs-online.com</td><td>80.169.5.117</td></tr>
+<tr><td>4531</td><td>alternet.org</td><td>198.16.5.137</td></tr>
+<tr><td>4557</td><td>ria.com</td><td>213.95.148.25</td></tr>
+<tr><td>4558</td><td>mamaclub.com</td><td>61.64.53.205</td></tr>
+<tr><td>4591</td><td>lefrecce.it</td><td>23.194.156.12</td></tr>
+<tr><td>4592</td><td>sofmap.com</td><td>61.204.171.132</td></tr>
+<tr><td>4624</td><td>propellerads.com</td><td>78.140.145.202</td></tr>
+<tr><td>4677</td><td>entekhab.ir</td><td>94.182.146.40</td></tr>
+<tr><td>4697</td><td>eldiario.es</td><td>37.46.75.24</td></tr>
+<tr><td>4725</td><td>pearltrees.com</td><td>93.184.35.40</td></tr>
+<tr><td>4744</td><td>gongkong.com</td><td>59.151.1.94</td></tr>
+<tr><td>4746</td><td>subscribe.ru</td><td>81.9.34.190</td></tr>
+<tr><td>4753</td><td>e-rewards.com</td><td>63.241.211.118</td></tr>
+<tr><td>4767</td><td>sleazyneasy.com</td><td>68.169.101.206</td></tr>
+<tr><td>4803</td><td>kaixin001.com</td><td>220.181.103.141</td></tr>
+<tr><td>4880</td><td>ip138.com</td><td>61.140.13.81</td></tr>
+<tr><td>4884</td><td>katestube.com</td><td>64.188.53.206</td></tr>
+<tr><td>4960</td><td>nova.cz</td><td>88.86.114.130</td></tr>
+<tr><td>4962</td><td>usnetads.com</td><td>74.208.192.200</td></tr>
+<tr><td>4987</td><td>filmstarts.de</td><td>62.39.143.50</td></tr>
+<tr><td>4992</td><td>mangocity.com</td><td>121.34.253.140</td></tr>
+<tr><td>5015</td><td>hostgator.in</td><td>103.21.59.167</td></tr>
+<tr><td>5082</td><td>youmaker.com</td><td>64.62.138.65</td></tr>
+<tr><td>5135</td><td>ohio.gov</td><td>156.63.96.228</td></tr>
+<tr><td>5136</td><td>jahannews.com</td><td>87.107.52.140</td></tr>
+<tr><td>5153</td><td>dereferer.org</td><td>195.234.228.80</td></tr>
+<tr><td>5169</td><td>fishmpegs.com</td><td>68.169.73.82</td></tr>
+<tr><td>5197</td><td>googleping.com</td><td>208.109.97.183</td></tr>
+<tr><td>5248</td><td>trafficholder.com</td><td>64.111.214.2</td></tr>
+<tr><td>5284</td><td>markt.de</td><td>213.95.6.42</td></tr>
+<tr><td>5368</td><td>alriyadh.com</td><td>89.189.232.23</td></tr>
+<tr><td>5446</td><td>gem.pl</td><td>85.232.225.226</td></tr>
+<tr><td>5587</td><td>voici.fr</td><td>89.31.150.122</td></tr>
+<tr><td>5650</td><td>orange.es</td><td>62.36.20.46</td></tr>
+<tr><td>5671</td><td>lufax.com</td><td>211.95.2.97</td></tr>
+<tr><td>5757</td><td>techgig.com</td><td>115.112.206.15</td></tr>
+<tr><td>5824</td><td>vikatan.com</td><td>180.150.140.172</td></tr>
+<tr><td>5855</td><td>umeng.com</td><td>211.151.151.6</td></tr>
+<tr><td>5941</td><td>porsche.com</td><td>84.21.48.97</td></tr>
+<tr><td>5956</td><td>designspiration.net</td><td>64.207.147.221</td></tr>
+<tr><td>5960</td><td>draftkings.com</td><td>23.203.3.237</td></tr>
+<tr><td>5972</td><td>alltop.com</td><td>184.106.130.115</td></tr>
+<tr><td>5977</td><td>startlap.com</td><td>77.111.91.52</td></tr>
+<tr><td>5978</td><td>canadiantire.ca</td><td>205.210.17.105</td></tr>
+<tr><td>5991</td><td>33lc.com</td><td>183.136.217.16</td></tr>
+<tr><td>6002</td><td>seoul.co.kr</td><td>211.169.247.231</td></tr>
+<tr><td>6018</td><td>labirint.ru</td><td>194.84.83.148</td></tr>
+<tr><td>6024</td><td>83suncity.com</td><td>122.152.179.70</td></tr>
+<tr><td>6034</td><td>24ur.com</td><td>91.202.65.130</td></tr>
+<tr><td>6051</td><td>sciencealert.com</td><td>119.81.53.4</td></tr>
+<tr><td>6052</td><td>germanbankersecrets.org</td><td>50.7.157.122</td></tr>
+<tr><td>6054</td><td>dreammail.jp</td><td>106.186.45.12</td></tr>
+<tr><td>6056</td><td>dir.bg</td><td>194.145.63.12</td></tr>
+<tr><td>6061</td><td>yootheme.com</td><td>188.226.251.160</td></tr>
+<tr><td>6095</td><td>elnuevodia.com</td><td>196.32.153.146</td></tr>
+<tr><td>6135</td><td>game321.com</td><td>37.58.67.11</td></tr>
+<tr><td>6164</td><td>totheglory.im</td><td>38.83.103.226</td></tr>
+<tr><td>6371</td><td>auto-profit-replicator.com</td><td>198.154.200.85</td></tr>
+<tr><td>6443</td><td>hanjin.co.kr</td><td>203.251.153.29</td></tr>
+<tr><td>6448</td><td>cr173.com</td><td>218.6.111.42</td></tr>
+<tr><td>6478</td><td>infor.pl</td><td>193.164.157.245</td></tr>
+<tr><td>6495</td><td>findthebest.com</td><td>50.18.121.78</td></tr>
+<tr><td>6526</td><td>beyazperde.com</td><td>62.39.143.50</td></tr>
+<tr><td>6564</td><td>stamps.com</td><td>216.52.211.93</td></tr>
+<tr><td>6622</td><td>mps.it</td><td>195.7.19.86</td></tr>
+<tr><td>6648</td><td>makeupalley.com</td><td>69.60.134.134</td></tr>
+<tr><td>6715</td><td>leggo.it</td><td>85.18.214.165</td></tr>
+<tr><td>6732</td><td>plan-q-secret.com</td><td>188.165.35.54</td></tr>
+<tr><td>6745</td><td>rtl.be</td><td>81.92.238.91</td></tr>
+<tr><td>6772</td><td>cue-monitor.jp</td><td>210.227.82.43</td></tr>
+<tr><td>6774</td><td>wsodownloads.info</td><td>185.66.140.67</td></tr>
+<tr><td>6819</td><td>femina.hu</td><td>195.228.155.84</td></tr>
+<tr><td>6833</td><td>ad-center.com</td><td>208.99.88.30</td></tr>
+<tr><td>6860</td><td>soaindo.com</td><td>119.81.21.170</td></tr>
+<tr><td>6893</td><td>todaysppc.com</td><td>61.100.186.155</td></tr>
+<tr><td>6984</td><td>correos.es</td><td>193.148.158.218</td></tr>
+<tr><td>7006</td><td>daniweb.com</td><td>74.53.219.188</td></tr>
+<tr><td>7037</td><td>nissan.co.jp</td><td>150.63.3.21</td></tr>
+<tr><td>7039</td><td>myfxbook.com</td><td>108.163.193.212</td></tr>
+<tr><td>7072</td><td>rzeczpospolita.pl</td><td>217.149.245.170</td></tr>
+<tr><td>7079</td><td>savenkeep.com</td><td>81.88.48.82</td></tr>
+<tr><td>7099</td><td>advego.ru</td><td>95.163.127.68</td></tr>
+<tr><td>7123</td><td>trojmiasto.pl</td><td>193.104.50.210</td></tr>
+<tr><td>7252</td><td>themarysue.com</td><td>69.60.24.234</td></tr>
+<tr><td>7257</td><td>freedigitalphotos.net</td><td>95.138.157.18</td></tr>
+<tr><td>7304</td><td>lordandtaylor.com</td><td>69.10.139.22</td></tr>
+<tr><td>7345</td><td>geeksforgeeks.org</td><td>119.18.54.25</td></tr>
+<tr><td>7360</td><td>madewell.com</td><td>23.202.222.232</td></tr>
+<tr><td>7400</td><td>uninstallmaster.com</td><td>50.97.32.152</td></tr>
+<tr><td>7412</td><td>planalto.gov.br</td><td>189.9.37.9</td></tr>
+<tr><td>7426</td><td>dip.jp</td><td>61.197.187.238</td></tr>
+<tr><td>7529</td><td>telenet.be</td><td>84.116.34.18</td></tr>
+<tr><td>7545</td><td>hellomagazine.com</td><td>62.22.15.85</td></tr>
+<tr><td>7566</td><td>subtitles.at</td><td>212.124.121.146</td></tr>
+<tr><td>7581</td><td>fbdownloader.com</td><td>54.245.81.123</td></tr>
+<tr><td>7608</td><td>copytraderpro.com</td><td>50.7.157.122</td></tr>
+<tr><td>7629</td><td>brown.edu</td><td>128.148.252.129</td></tr>
+<tr><td>7668</td><td>ripoffreport.com</td><td>192.225.215.36</td></tr>
+<tr><td>7711</td><td>n4hr.com</td><td>184.173.179.185</td></tr>
+<tr><td>7722</td><td>vw.com.tr</td><td>217.68.221.221</td></tr>
+<tr><td>7730</td><td>minijuegos.com</td><td>217.13.124.222</td></tr>
+<tr><td>7758</td><td>deser.pl</td><td>80.252.0.132</td></tr>
+<tr><td>7766</td><td>calcalist.co.il</td><td>192.115.80.66</td></tr>
+<tr><td>7774</td><td>5pao.com</td><td>125.90.204.47</td></tr>
+<tr><td>7775</td><td>coach.com</td><td>23.202.227.155</td></tr>
+<tr><td>7796</td><td>linksys.com</td><td>66.161.11.90</td></tr>
+<tr><td>7813</td><td>networksolutionsemail.com</td><td>205.178.146.50</td></tr>
+<tr><td>7818</td><td>qianxs.com</td><td>211.144.120.28</td></tr>
+<tr><td>7841</td><td>wikimart.ru</td><td>195.208.182.2</td></tr>
+<tr><td>7859</td><td>nielsen.com</td><td>138.108.20.122</td></tr>
+<tr><td>7872</td><td>coocan.jp</td><td>202.248.237.141</td></tr>
+<tr><td>7889</td><td>cnsnews.com</td><td>199.175.56.184</td></tr>
+<tr><td>7895</td><td>chanet.com.cn</td><td>211.151.83.246</td></tr>
+<tr><td>7915</td><td>streetdirectory.com</td><td>54.169.90.138</td></tr>
+<tr><td>7944</td><td>davidsbridal.com</td><td>208.74.49.181</td></tr>
+<tr><td>7955</td><td>eurobank.gr</td><td>193.58.70.3</td></tr>
+<tr><td>7963</td><td>priberam.pt</td><td>62.28.135.67</td></tr>
+<tr><td>7985</td><td>themalaysianinsider.com</td><td>203.223.159.194</td></tr>
+<tr><td>8008</td><td>x3xtube.com</td><td>64.111.213.29</td></tr>
+<tr><td>8017</td><td>gyakorikerdesek.hu</td><td>91.198.131.12</td></tr>
+<tr><td>8019</td><td>jeep.com</td><td>129.9.76.228</td></tr>
+<tr><td>8024</td><td>vno.co.kr</td><td>121.162.155.183</td></tr>
+<tr><td>8035</td><td>macmillandictionary.com</td><td>195.138.194.22</td></tr>
+<tr><td>8099</td><td>gaymaletube.com</td><td>64.188.56.183</td></tr>
+<tr><td>8107</td><td>rzd.ru</td><td>217.175.140.90</td></tr>
+<tr><td>8163</td><td>newsen.com</td><td>27.1.17.140</td></tr>
+<tr><td>8165</td><td>netcombo.com.br</td><td>201.6.19.16</td></tr>
+<tr><td>8220</td><td>escapadarural.com</td><td>176.31.247.181</td></tr>
+<tr><td>8221</td><td>lyricsmode.com</td><td>178.18.22.163</td></tr>
+<tr><td>8247</td><td>pinkvilla.com</td><td>174.129.200.25</td></tr>
+<tr><td>8286</td><td>sensacine.com</td><td>62.39.143.50</td></tr>
+<tr><td>8308</td><td>element14.com</td><td>83.100.177.204</td></tr>
+<tr><td>8373</td><td>ucr.edu</td><td>138.23.226.208</td></tr>
+<tr><td>8388</td><td>unext.jp</td><td>125.63.43.46</td></tr>
+<tr><td>8455</td><td>restorationhardware.com</td><td>23.202.240.45</td></tr>
+<tr><td>8479</td><td>yengo.com</td><td>27.254.59.193</td></tr>
+<tr><td>8485</td><td>lfmall.co.kr</td><td>121.50.21.220</td></tr>
+<tr><td>8531</td><td>jn.pt</td><td>80.251.169.144</td></tr>
+<tr><td>8568</td><td>gordonua.com</td><td>91.224.10.20</td></tr>
+<tr><td>8601</td><td>bluetradingonline.net</td><td>50.7.157.122</td></tr>
+<tr><td>8652</td><td>wordtracker.com</td><td>148.251.89.68</td></tr>
+<tr><td>8660</td><td>mbusa.com</td><td>141.113.146.23</td></tr>
+<tr><td>8685</td><td>ui.ac.id</td><td>152.118.24.181</td></tr>
+<tr><td>8734</td><td>ynetnews.com</td><td>192.115.80.66</td></tr>
+<tr><td>8745</td><td>parsine.com</td><td>94.182.146.66</td></tr>
+<tr><td>8779</td><td>photo.net</td><td>64.95.64.39</td></tr>
+<tr><td>8794</td><td>baharnews.ir</td><td>87.107.133.77</td></tr>
+<tr><td>8813</td><td>omniboxes.com</td><td>50.97.32.151</td></tr>
+<tr><td>8847</td><td>senate.gov</td><td>23.202.229.166</td></tr>
+<tr><td>8851</td><td>diegrossechance.net</td><td>50.7.157.122</td></tr>
+<tr><td>8870</td><td>deichmann.com</td><td>145.253.207.220</td></tr>
+<tr><td>8875</td><td>iesa.co</td><td>50.31.86.60</td></tr>
+<tr><td>8881</td><td>vertex42.com</td><td>216.177.136.65</td></tr>
+<tr><td>8889</td><td>streamay.com</td><td>198.12.83.146</td></tr>
+<tr><td>8950</td><td>doortodoor.co.kr</td><td>61.33.235.20</td></tr>
+<tr><td>8991</td><td>ecpic.com.cn</td><td>112.64.185.50</td></tr>
+<tr><td>9016</td><td>transrush.com</td><td>113.106.94.46</td></tr>
+<tr><td>9093</td><td>real.gr</td><td>62.1.44.131</td></tr>
+<tr><td>9158</td><td>ntt.com</td><td>210.226.39.112</td></tr>
+<tr><td>9242</td><td>translate.ru</td><td>62.152.52.123</td></tr>
+<tr><td>9266</td><td>ddo.jp</td><td>219.94.135.204</td></tr>
+<tr><td>9315</td><td>cpmfx.com</td><td>81.4.124.18</td></tr>
+<tr><td>9324</td><td>femina.mk</td><td>217.16.95.60</td></tr>
+<tr><td>9348</td><td>ytn.co.kr</td><td>183.111.158.30</td></tr>
+<tr><td>9352</td><td>numbeo.com</td><td>176.9.57.206</td></tr>
+<tr><td>9358</td><td>kotree.com</td><td>121.254.168.49</td></tr>
+<tr><td>9411</td><td>iporter.com</td><td>222.239.73.34</td></tr>
+<tr><td>9467</td><td>bharatiyamobile.com</td><td>72.167.40.178</td></tr>
+<tr><td>9470</td><td>wileyplus.com</td><td>199.171.200.191</td></tr>
+<tr><td>9480</td><td>automaticmobilecash.com</td><td>75.98.168.189</td></tr>
+<tr><td>9494</td><td>bolsademulher.com</td><td>178.32.160.243</td></tr>
+<tr><td>9502</td><td>brokenlinkcheck.com</td><td>96.43.131.30</td></tr>
+<tr><td>9516</td><td>hitosara.com</td><td>125.63.40.49</td></tr>
+<tr><td>9554</td><td>sd864.com</td><td>203.175.171.38</td></tr>
+<tr><td>9587</td><td>dream-demo.com</td><td>198.154.224.109</td></tr>
+<tr><td>9597</td><td>closermag.fr</td><td>83.231.216.103</td></tr>
+<tr><td>9598</td><td>webike.net</td><td>125.206.119.33</td></tr>
+<tr><td>9674</td><td>lifemedia.jp</td><td>210.131.1.196</td></tr>
+<tr><td>9755</td><td>kproxy.com</td><td>76.73.41.170</td></tr>
+<tr><td>9759</td><td>resona-gr.co.jp</td><td>202.211.194.111</td></tr>
+<tr><td>9797</td><td>benchmark.pl</td><td>195.138.211.170</td></tr>
+<tr><td>9850</td><td>183.com.cn</td><td>211.156.219.109</td></tr>
+<tr><td>9919</td><td>imovelweb.com.br</td><td>152.186.33.197</td></tr>
+<tr><td>9934</td><td>heydouga.com</td><td>65.39.253.110</td></tr>
+<tr><td>9944</td><td>geo-online.co.jp</td><td>203.131.196.197</td></tr>
+<tr><td>9978</td><td>shafaf.ir</td><td>94.182.146.19</td></tr>
+<tr><td>9985</td><td>navercorp.com</td><td>125.209.210.19</td></tr>
+</table>
+
+<p>The complete list of Alex Top 1&nbsp;Million domains with servers that permit RSA_EXPORT cipher suites is <a href="vulnerable.txt">available here</a>.</p><br/>
+
+<br/>
+</div>
+</div> <!-- /.container -->
+<script type="text/javascript">
+	var _gauges = _gauges || [];
+	(function() {
+		var t		= document.createElement('script');
+		t.type	= 'text/javascript';
+		t.async = true;
+		t.id		= 'gauges-tracker';
+		t.setAttribute('data-site-id', '54f5f3315dd0530cb6003500');
+		t.setAttribute('data-track-path', 'https://track.gaug.es/track.gif');
+		t.src = 'https://track.gaug.es/track.js';
+		var s = document.getElementsByTagName('script')[0];
+		s.parentNode.insertBefore(t, s);
+	})();
+		</script>
+	</body>
+</html>
+

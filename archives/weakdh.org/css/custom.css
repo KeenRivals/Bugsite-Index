@@ -1,0 +1,19 @@
+.center-image.img-responsive {
+    margin: 0 auto;
+}
+
+a {
+  color: #23527C;
+}
+
+a:link {
+  color: #23527C;
+}
+
+a:focus {
+  color: #23527C;
+}
+
+a:hover {
+  color: #23527C;
+}

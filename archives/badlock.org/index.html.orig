@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="description" content="">
+    <meta name="author" content="SerNet GmbH https://www.sernet.de">
+
+    <meta property="og:image" content="http://badlock.org/badlock.png"/>
+    <meta property="og:title" content="Badlock Bug"/>
+    <meta property="og:site_name" content="badlock.org"/>   
+    <meta property="og:url" content="http://badlock.org/"/>
+    <meta property="og:type" content="website"/>   
+    <meta property="og:description" content="Badlock Bug">
+
+    <title>Badlock Bug</title>
+
+    <link rel="stylesheet" href="bootstrap.css" type='text/css'>
+    <link rel="stylesheet" href="badlock.css" type='text/css'>
+    <link rel="icon" type="image/png" href="favicon.png" />
+
+  </head>
+
+  <body>
+
+    <div class="container">
+      <h1>Badlock Bug</h1>
+
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-4 col-lg-push-8 col-md-push-8 col-sm-push-8" style="padding-top: 30px; margin-bottom: 30px; text-align: center;">
+          <img class="logo" src="badlock.png" alt="Badlock Bug" />
+        </div>
+        <div class="col-lg-8 col-md-8 col-sm-8 col-lg-pull-4 col-md-pull-4 col-sm-pull-4">
+	  <p>On April 12th, 2016 Badlock, a crucial security bug in <a href="https://www.microsoft.com/windows" target="_blank">Windows</a> and <a href="https://www.samba.org" target="_blank">Samba</a> was disclosed.</p>
+	  <p><a href="https://www.samba.org/samba/history/security.html">Samba 4.4.2, 4.3.8 and 4.2.11 Security Releases are available.</a></p>
+	  <p>Please update your systems. We are pretty sure that there will be exploits soon.</p>
+	   <p>Engineers at Microsoft and the Samba Team worked together during the past months to get this problem fixed.</p>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12">
+          <hr />
+          <h3><b>Q<font face="Arial,Helvetica">&amp;</font>A</b></h3>
+          <h4><b>Is there a CVE for Badlock?</b></h4>
+   		 	<p>Yes. Badlock for Samba is referenced by <a href="https://www.samba.org/samba/security/CVE-2016-2118.html">CVE-2016-2118</a> (SAMR and LSA man in the middle attacks possible) and for Windows by <a href="https://technet.microsoft.com/library/security/MS16-047">CVE-2016-0128 / MS16-047</a> (Windows SAM and LSAD Downgrade Vulnerability).</p>
+   		 	<p>There are additional CVEs related to Badlock. Those are:</p>
+   		 	<ul>
+	   		 	<li><a href="https://www.samba.org/samba/security/CVE-2015-5370.html">CVE-2015-5370</a> (Multiple errors in DCE-RPC code)</li>
+	   		 	<li><a href="https://www.samba.org/samba/security/CVE-2016-2110.html">CVE-2016-2110</a> (Man in the middle attacks possible with NTLMSSP)</li>
+	   		 	<li><a href="https://www.samba.org/samba/security/CVE-2016-2111.html">CVE-2016-2111</a> (NETLOGON Spoofing Vulnerability)</li>   				
+	   		 	<li><a href="https://www.samba.org/samba/security/CVE-2016-2112.html">CVE-2016-2112</a> (LDAP client and server don't enforce integrity)</li>
+	   		 	<li><a href="https://www.samba.org/samba/security/CVE-2016-2113.html">CVE-2016-2113</a> (Missing TLS certificate validation)</li>    			
+	   		 	<li><a href="https://www.samba.org/samba/security/CVE-2016-2114.html">CVE-2016-2114</a> ("server signing = mandatory" not enforced)</li>
+    			<li><a href="https://www.samba.org/samba/security/CVE-2016-2115.html">CVE-2016-2115</a> (SMB IPC traffic is not integrity protected)</li>
+    		</ul>
+	     <h4><b>What can attackers gain?</b></h4>
+   			<p>The security vulnerabilities can be mostly categorised as man-in-the-middle or denial of service attacks.</p>
+   			<ol>
+	   			<li><b>Man-in-the-middle (MITM) attacks:</b><br />
+		   			There are several MITM attacks that can be performed against a variety of protocols used by Samba. These would permit execution of arbitrary Samba network calls using the context of the intercepted user. <br /><br />
+		   			Impact examples of intercepting administrator network traffic:
+		   			<ul>
+			   			<li>Samba AD server - view or modify secrets within an AD database, including user password hashes, or shutdown critical services.</li>
+			   			<li>standard Samba server - modify user permissions on files or directories.</li>
+			   		</ul>
+			   	</li>
+			   	<br />
+			   	<li><b>Denial-of-Service (DoS) attacks:</b><br />
+			   	Samba services are vulnerable to a denial of service from an attacker with remote network connectivity to the Samba service.</li>
+			   	</ol>   		 
+		<h4><b>Who is affected?</b></h4>
+			<p>Affected versions of Samba are:</p>
+				<ul>
+					<li>3.6.x,</li>
+					<li>4.0.x,</li>
+					<li>4.1.x,</li>
+					<li>4.2.0-4.2.9,</li>
+					<li>4.3.0-4.3.6,</li>
+					<li>4.4.0</li>
+				</ul>
+		<p>Earlier versions have not been assessed.</p>  
+		<h4><b>How can I fix my systems?</b></h4>
+			<p>Please apply the patches provided by the Samba Team and SerNet for EnterpriseSAMBA / SAMBA+ immediately.</p>
+			<p>Patched versions are (both the interim and final security release have the patches):</p> 
+			<ul> 
+				<li>4.2.10 / 4.2.11,</li>
+				<li>4.3.7 / 4.3.8,</li>
+				<li>4.4.1 / 4.4.2.</li>
+			</ul>
+			<p>With the release of Samba 4.4.0 on March 22nd the 4.1 release branch has been marked DISCONTINUED (see <a href="https://wiki.samba.org/index.php/Samba_Release_Planning">Samba Release Planning</a>). Please be aware that Samba 4.1 and below are therefore out of support, even for security fixes. There will be no official security releases for Samba 4.1 and below published by the Samba Team or SerNet (for EnterpriseSAMBA). We strongly advise users to upgrade to a supported release.</p>
+			<p>Some vendors may choose to ship 4.4.1, 4.3.7, and 4.2.10 versions and add regression patches on top of them, due to wide scale and complexity of this release. Some may also just backport the patches to older releases. Please contact your Samba supplier for details.</p> 
+		<h4><b>What further improvements after patching are suggested?</b></h4>
+			<p>
+				<ol>
+					<li><b>Mitigations for man-in-the-middle (MITM) attacks:</b> 
+						<p>Network protections that could be used MITM attacks include DHCP snooping, ARP Inspection and 802.1x.</p>
+						<p>It is recommended that administrators set these additional options, if compatible with their network environment:</p>
+						<p><em>server signing = mandatory<br />
+						ntlm auth = no</em></p>
+						<p>Without server signing = mandatory, Man in the Middle attacks are still possible against our file server and classic/NT4-like/Samba3 Domain controller. (It is now enforced on Samba's AD DC.) Note that this has heavy impact on the file server performance, so you need to decide between performance and security. These man in the Middle attacks for smb file servers are well known for decades.</p>
+						<p>Without 'ntlm auth = no', there may still be clients not using NTLMv2, and these observed passwords may be brute-forced easily using cloud-computing resources or rainbow tables.</p>
+					</li>
+					<li><b>Mitigations for denial-of-service (DoS) attack:</b>
+						<p>Apply firewall rules on the server to permit connectivity only from trusted addresses.</p>
+						<p>Will encryption protect against these attacks?</p>
+						<p>The SMB protocol, by default, only encrypts credentials and commands while files are transferred in plaintext. It is recommended that in security / privacy sensitive scenarios encryption is used to protect all communications.</p>
+						<p>Samba added encryption in version 3.2 in 2008, but only for Samba clients. Microsoft added SMB encryption support to SMB 3.0 in Windows 8 and Windows Server 2012. However, both of these types of encryption only protect communications, such a file transfers, after SMB negotiation and commands have been completed. It is this phase that contains the fixed vulnerabilities.</p>
+						<p>Samba/SMB encryption is good practice but is not sufficient for protection against these vulnerabilities. Network-level encryption, such as IPSec, is required for full protection as a workaround.</p></li>
+</ol> 
+		<h4><b>How bad is Badlock?</b></h4>
+			<p>The severity of Badlock according to the Common Vulnerability Scoring System (CVSS):</p>
+			<p>CVSS:3.0/AV:A/AC:H/PR:N/UI:R/S:U/C:H/I:H/A:H/E:P/RL:O/RC:C<br />
+				Base: 7.1 (High); Temporal: 6.4 (Medium)</p> 
+		<h4><b>Is this vulnerability exploited currently?</b></h4>
+			<p>It may be possible since we already have several PoC (none of them will be released in the near future).</p> 
+		<h4><b>What does "Badlock" stand for?</b></h4>
+			<p>"Badlock" was meant to be a rather generic name and does not point to any specifics.</p> 
+		<h4><b>What is the story behind Badlock?</b></h4>
+
+<p>We recommend these articles to get insight into the story behind Badlock: 
+<ul>
+<li><a href="http://www.heise.de/ct/artikel/Badlock-Why-the-Windows-and-Samba-Vulnerability-is-Important-3175176.html"> "Badlock – Why the Windows and Samba Vulnerability is Important" </a> by Peter Siering and Fabian Scherschel (Translation) for c’t (2016-04-15)
+	</li> 
+	 <li><a href="http://rhelblog.redhat.com/2016/04/15/how-badlock-was-discovered-and-fixed/">"How Badlock Was Discovered and Fixed"</a> by Alexander Bokovoy (Red Hat / Samba Team, 2016-04-15)</li> 	
+	 </ul>
+		<h4><b>Yet Another Bug With A Logo?</b></h4>
+   		 	<p>What branded bugs are able to achieve is best said with one word: Awareness. Furthermore names for bugs can serve as unique identifiers, other than different CVE/MS bug IDs.</p>
+   		 	<p>It is a thin line between drawing attention to a severe vulnerability that should be taken seriously and overhyping it. This process didn't start with the branding - it started a while ago with everyone working on fixes. The main goal of this announcement was to give a heads up. Vendors and distributors of Samba are being informed before a security fix is released in any case. This is part of any Samba security release process. </p>
+	  <h4><b>Who found the Badlock Bug?</b></h4>
+	     <p>Badlock was discovered by Stefan Metzmacher. He's a member of the international <a href="http://samba.team" target="_blank">Samba Core Team</a> and works at <a title="SerNet" href="https://www.sernet.de/en/" target="_blank">SerNet</a> on Samba. He reported the bug to Microsoft and has been working closely with them to fix the problem.</p> 
+	     <h4><b>Where to find more information?</b></h4>
+	     <p>
+		     <ul>
+			     <li><a href="https://www.samba.org/samba/latest_news.html#4.4.2">Announcement at samba.org with further details</a></li>
+			     <li><a href="http://rhelblog.redhat.com/2016/04/15/how-badlock-was-discovered-and-fixed/">"How Badlock Was Discovered and Fixed"</a> by Alexander Bokovoy (Red Hat / Samba Team)</li>
+			     <li><a href="http://www.heise.de/ct/artikel/Badlock-Why-the-Windows-and-Samba-Vulnerability-is-Important-3175176.html">"Badlock – Why the Windows and Samba Vulnerability is Important"</a> by Peter Siering / Fabian Scherschel (c't)</li>
+			  </ul>
+	     <p>This page will get updates, check the <a title="Samba Core Team" href="https://www.samba.org">samba.org</a> page as well. </p>
+           <hr />
+	    <p><small>Badlock logo is free to use, rights waived via <a href="http://creativecommons.org/publicdomain/zero/1.0/" target="_href">CC0</a>.
+            <span class="download"><a href="badlock.svg" target="_href">[download logo in SVG format]</a></span></small></p>
+            <p><small>We are grateful to the <a title="The Heartbleed Bug" href="http://heartbleed.com" target="_href">Heartbleed team</a> to use their template.</small></p>
+          <p class="timestamp">Last updated 2016-04-19 09:00 UTC.</p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="container">
+      <p><a title="SerNet" href="https://www.sernet.de/en/" target="_blank">SerNet</a>
+         - April 2016</p>
+    </footer>
+  </body>
+</html>
+

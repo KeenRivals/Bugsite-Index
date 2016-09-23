@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>httpoxy</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="img/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="img/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="manifest.json">
+    <link rel="mask-icon" href="img/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#ffffff">
+
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="canonical" href="index.html">
+
+    <meta name="description"
+          content="httpoxy is a vulnerability in PHP and CGI web applications that allows remote attackers to proxy requests
+">
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-80908130-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+</head>
+
+  <body>
+    <div class="container">
+      <header class="row">
+    <h1 class="m-b-0">
+        <object type="image/svg+xml" data="img/logo.svg"><img src="img/logo.png" alt="httpoxy" /></object>
+    </h1>
+</header>
+
+
+      <div class="row">
+        <div class="col-md-3 col-md-push-9" id="sidebar">
+          
+          <div id="toc">
+
+  <h6 id="recommended-reading">Recommended reading</h6>
+
+  <ul>
+    <li><a href="index.html#top">Summary</a></li>
+    <li><a href="index.html#affected-summary">What Is Affected</a></li>
+    <li><a href="index.html#fix-now">Immediate Mitigation</a></li>
+    <li><a href="index.html#prevent">Prevention</a></li>
+  </ul>
+
+  <h6 id="interesting-but-once-youve-mitigated">Interesting, but once you’ve mitigated</h6>
+
+  <ul>
+    <li><a href="index.html#how-it-works">How It Works</a></li>
+    <li><a href="index.html#why">Why It Happened</a></li>
+    <li><a href="index.html#history">History of httpoxy</a></li>
+    <li><a href="index.html#cve">CVEs</a></li>
+  </ul>
+
+</div>
+
+        </div>
+        <div class="col-md-9 col-md-pull-3" id="content-container">
+          <h2 id="top">
+            A CGI application vulnerability
+            <small class="text-muted">for PHP, Go, Python and&nbsp;others</small>
+          </h2>
+
+          <p class="lead"><em>httpoxy</em> is a set of vulnerabilities that affect application code running in CGI, or CGI-like environments. It comes
+down to a simple namespace conflict:</p>
+
+<ul class="lead">
+  <li>RFC 3875 (CGI) puts the HTTP <code class="highlighter-rouge">Proxy</code> header from a request into the environment variables as <code class="highlighter-rouge">HTTP_PROXY</code></li>
+  <li><code class="highlighter-rouge">HTTP_PROXY</code> is a popular environment variable used to configure an outgoing proxy</li>
+</ul>
+
+<p class="lead">This leads to a remotely exploitable vulnerability. If you’re running PHP or CGI, you should <strong><em>block the <code class="highlighter-rouge">Proxy</code> header</em></strong>
+now. <a href="index.html#fix-now">Here’s how.</a></p>
+
+<p>httpoxy is a vulnerability for server-side web applications. If you’re not deploying code, you don’t need to worry.</p>
+
+<h4 id="what-can-happen-if-my-web-application-is-vulnerable">What can happen if my web application is vulnerable?</h4>
+
+<p>If a vulnerable HTTP client makes an outgoing HTTP connection, while running in a server-side CGI application, an
+attacker may be able to:</p>
+
+<ul>
+  <li>Proxy the outgoing HTTP requests made by the web application</li>
+  <li>Direct the server to open outgoing connections to an address and port of their choosing</li>
+  <li>Tie up server resources by forcing the vulnerable software to use a malicious proxy</li>
+</ul>
+
+<p>httpoxy is extremely easy to exploit in basic form. And we expect security
+researchers to be able to scan for it quickly. Luckily, if you read on and
+find you are affected, <a href="index.html#fix-now">easy mitigations</a> are available.</p>
+
+<h2 id="affected-summary" class="section">What Is Affected</h2>
+
+<p>A few things are necessary to be vulnerable:</p>
+
+<ul>
+  <li>Code running under a CGI-like context, where <code class="highlighter-rouge">HTTP_PROXY</code> becomes a real or emulated environment variable</li>
+  <li>An HTTP client that trusts <code class="highlighter-rouge">HTTP_PROXY</code>, and configures it as the proxy</li>
+  <li>That client, used within a request handler, making an HTTP (as opposed to HTTPS) request</li>
+</ul>
+
+<p>For example, the confirmed cases we’ve found so far:</p>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Language</th>
+      <th>Environment</th>
+      <th>HTTP client</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>PHP</td>
+      <td>php-fpm <br /> mod_php</td>
+      <td>Guzzle 4+ <br /> Artax</td>
+    </tr>
+    <tr>
+      <td>Python</td>
+      <td>wsgiref.handlers.CGIHandler <br /> twisted.web.twcgi.CGIScript</td>
+      <td>requests</td>
+    </tr>
+    <tr>
+      <td>Go</td>
+      <td>net/http/cgi</td>
+      <td>net/http</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>But obviously there may be languages we haven’t considered yet. CGI is a common standard, and
+<code class="highlighter-rouge">HTTP_PROXY</code> seems to be becoming more popular over time. Take the below as a sample of the most
+commonly affected scenarios:</p>
+
+<h3 id="php">PHP</h3>
+
+<ul>
+  <li>Whether you are vulnerable depends on your specific application code and PHP libraries, but the problem
+seems fairly widespread</li>
+  <li>Just <em>using</em> one of the vulnerable libraries, while processing a user’s request, is exploitable.</li>
+  <li>If you’re using a vulnerable library, this vulnerability will affect any version of PHP
+    <ul>
+      <li>It even affects alternative PHP runtimes such as HHVM deployed under FastCGI</li>
+    </ul>
+  </li>
+  <li>It is present in Guzzle, Artax, and probably many, many libraries
+    <ul>
+      <li>Guzzle versions after 4.0.0rc2 are vulnerable, Guzzle 3 and below is not.</li>
+      <li>Another example is in Composer’s StreamContextBuilder utility class</li>
+    </ul>
+  </li>
+</ul>
+
+<p>So, for example, if you are using a Drupal module that uses Guzzle 6 and makes an outgoing HTTP request (for example,
+to check a weather API), you are vulnerable to the request that plugin makes being “httpoxied”.</p>
+
+<h3 id="python">Python</h3>
+
+<ul>
+  <li>Python code <em>must be deployed under CGI to be vulnerable</em>. Usually, that’ll mean the vulnerable code
+will use a CGI handler like <code class="highlighter-rouge">wsgiref.handlers.CGIHandler</code>
+    <ul>
+      <li>This is not considered a normal way of deploying Python webapps (most people are using WSGI or FastCGI, both of which are
+not affected), so vulnerable Python applications will probably be much rarer than vulnerable PHP applications.</li>
+      <li>wsgi, for example, is not vulnerable, because os.environ is not polluted by CGI data</li>
+    </ul>
+  </li>
+  <li>Vulnerable versions of the requests library will trust and use <code class="highlighter-rouge">os.environ['HTTP_PROXY']</code>, without checking if CGI is in use</li>
+</ul>
+
+<h3 id="go">Go</h3>
+
+<ul>
+  <li>Go code <em>must be deployed under CGI to be vulnerable</em>. Usually, that’ll mean the vulnerable code uses
+the <code class="highlighter-rouge">net/http/cgi</code> package.
+    <ul>
+      <li>As with Python, this is not considered a usual way of deploying Go as a web application, so this vulnerability should be
+relatively rare</li>
+      <li>Go’s <code class="highlighter-rouge">net/http/fcgi</code> package, by comparison, does not set actual environment variables, so it is <em>not</em> vulnerable</li>
+    </ul>
+  </li>
+  <li>Vulnerable versions of <code class="highlighter-rouge">net/http</code> will trust and use <code class="highlighter-rouge">HTTP_PROXY</code> for outgoing requests, without checking if CGI is in use</li>
+</ul>
+
+<h2 id="fix-now" class="section">Immediate Mitigation</h2>
+
+<p class="lead">The best immediate mitigation is to block <code class="highlighter-rouge">Proxy</code> request headers as early as possible, and before they hit your
+application. This is easy and safe.</p>
+
+<ul>
+  <li>It’s safe because the <code class="highlighter-rouge">Proxy</code> header is undefined by the IETF, and isn’t listed on the
+<a href="http://www.iana.org/assignments/message-headers/message-headers.xhtml">IANA’s registry of message headers</a>. This means
+<strong>there is no standard use for the header at all</strong>; not even a provisional use-case.</li>
+  <li>Standards-compliant HTTP clients and servers will never read or send this header.</li>
+  <li>You can either strip the header or completely block requests attempting to use it.</li>
+  <li>You should try to do your mitigation as <em>early</em> and as far <em>upstream</em> as you can.
+    <ul>
+      <li>Do it “at the edge”, where HTTP requests first enter your system.</li>
+      <li>That way, you can fix lots of vulnerable software at once.</li>
+      <li>Everything behind a reverse proxy or application firewall that strips the <code class="highlighter-rouge">Proxy</code> header is safe!</li>
+    </ul>
+  </li>
+</ul>
+
+<p>How you block a <code class="highlighter-rouge">Proxy</code> header depends on the specifics of your setup. The earliest convenient place to block the header
+might be at a web application firewall device, or directly on the webserver running Apache or NGINX. Here are a few of
+the more common mitigations:</p>
+
+<h3 id="mitigate-nginx">NGINX/FastCGI</h3>
+
+<p>Use this to block the header from being passed on to PHP-FPM, PHP-PM etc.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>fastcgi_param HTTP_PROXY "";
+</code></pre>
+</div>
+
+<p>In FastCGI configurations, PHP is vulnerable (but many other languages that use NGINX FastCGI are not).</p>
+
+<p>For specific NGINX coverage, we recommend that you read the official <a href="https://www.nginx.com/blog/mitigating-the-httpoxy-vulnerability-with-nginx">NGINX blog post</a>
+on this vulnerability. The blog post provides a graphic depiction of how
+httpoxy works and more extensive mitigation information for NGINX.</p>
+
+<h3 id="mitigate-apache">Apache</h3>
+
+<p>For specific Apache coverage (and details for other Apache software projects like Tomcat), we strongly recommend
+you read the <a href="https://www.apache.org/security/asf-httpoxy-response.txt">Apache Software Foundation’s official advisory</a> on
+the matter. The very basic mitigation information you’ll find below is covered in much greater depth there.</p>
+
+<p>If you’re using Apache HTTP Server with <code class="highlighter-rouge">mod_cgi</code>, languages like Go and Python may be vulnerable (the <code class="highlighter-rouge">HTTP_PROXY</code> env var
+is “real”). And <code class="highlighter-rouge">mod_php</code> is affected due to the nature of PHP. If you are using <strong>mod_headers</strong>, you can unset the
+<code class="highlighter-rouge">Proxy</code> header before further processing with this directive:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>RequestHeader unset Proxy early
+</code></pre>
+</div>
+
+<p>Example for using this in <code class="highlighter-rouge">.htaccess</code> files:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&lt;IfModule mod_headers.c&gt;
+   RequestHeader unset Proxy
+&lt;/IfModule&gt;
+</code></pre>
+</div>
+
+<p>If you are using <strong>mod_security</strong>, you can use a <code class="highlighter-rouge">SecRule</code> to deny traffic with a <code class="highlighter-rouge">Proxy</code> header. Here’s an example,
+vary the action to taste, and make sure <code class="highlighter-rouge">SecRuleEngine</code> is on. The 1000005 ID has been assigned to this issue.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>SecRule &amp;REQUEST_HEADERS:Proxy "@gt 0" "id:1000005,log,deny,msg:'httpoxy denied'"
+</code></pre>
+</div>
+
+<p>Finally, if you’re using Apache Traffic Server, it’s not itself affected, but you can use it to strip the <code class="highlighter-rouge">Proxy</code> header; very helpful
+for any services sitting behind it. Again, see the <a href="https://www.apache.org/security/asf-httpoxy-response.txt">ASF’s guidance</a>,
+but one possible configuration is:</p>
+
+<ul>
+  <li>
+    <p>Within <code class="highlighter-rouge">plugin.config</code>, inside the configuration directory (e.g. <code class="highlighter-rouge">/usr/local/etc/trafficserver</code> or <code class="highlighter-rouge">/etc/trafficserver</code>),
+add the following directive:</p>
+
+    <div class="highlighter-rouge"><pre class="highlight"><code>header_rewrite.so strip_proxy.conf
+</code></pre>
+    </div>
+  </li>
+  <li>
+    <p>Add the following to a new file named <code class="highlighter-rouge">strip_proxy.conf</code> in the same directory:</p>
+
+    <div class="highlighter-rouge"><pre class="highlight"><code>cond %{READ_REQUEST_HDR_HOOK}
+rm-header Proxy
+</code></pre>
+    </div>
+  </li>
+</ul>
+
+<h3 id="mitigate-haproxy">HAProxy</h3>
+
+<p>This will strip the header off requests:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>http-request del-header Proxy
+</code></pre>
+</div>
+
+<h3 id="mitigate-varnish">Varnish</h3>
+
+<p>For Varnish, the following should unset the header. Add it to the pre-existing vcl_recv section:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>sub vcl_recv {
+    [...]
+    unset req.http.proxy;
+    [...]
+}
+</code></pre>
+</div>
+
+<h3 id="mitigate-relayd">OpenBSD relayd</h3>
+
+<p>For relayd, the following should remove the header. Add it to a pre-existing filter:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>http protocol httpfilter {
+        match request header remove "Proxy"
+}
+</code></pre>
+</div>
+
+<h3 id="mitigate-lighttpd">lighttpd</h3>
+
+<h4 id="section">&lt;= 1.4.40</h4>
+
+<p>To reject requests containing a <code class="highlighter-rouge">Proxy</code> header</p>
+
+<ul>
+  <li>
+    <p>Create <code class="highlighter-rouge">/path/to/deny-proxy.lua</code>, read-only to lighttpd, with the content:</p>
+
+    <div class="highlighter-rouge"><pre class="highlight"><code>if (lighty.request["Proxy"] == nil) then return 0 else return 403 end
+</code></pre>
+    </div>
+  </li>
+  <li>
+    <p>Modify <code class="highlighter-rouge">lighttpd.conf</code> to load <code class="highlighter-rouge">mod_magnet</code> and run the above lua code:</p>
+
+    <div class="highlighter-rouge"><pre class="highlight"><code>server.modules += ( "mod_magnet" )
+magnet.attract-raw-url-to = ( "/path/to/deny-proxy.lua" )
+</code></pre>
+    </div>
+  </li>
+</ul>
+
+<h4 id="lighttpd2-development">lighttpd2 (development)</h4>
+
+<p>To strip the <code class="highlighter-rouge">Proxy</code> header from the request, add the following to <code class="highlighter-rouge">lighttpd.conf</code>:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>req_header.remove "Proxy";
+</code></pre>
+</div>
+
+<h3 id="mitigate-iis">Microsoft IIS with PHP or a CGI framework</h3>
+
+<p>For detailed information about mitigating httpoxy on IIS, you should
+head to the official <a href="https://support.microsoft.com/en-us/kb/3179800">Microsoft article KB3179800</a>, which covers
+the below mitigations in greater detail.</p>
+
+<p>Also important to know: httpoxy does not affect any Microsoft Web Frameworks, e.g. not ASP.NET nor Active Server Pages.
+But if you have installed PHP or any other third party framework on top of IIS, we recommend applying mitigation steps
+to protect from httpoxy attacks. You can either block requests containing a <code class="highlighter-rouge">Proxy</code> header, or clear the header. (The header
+is safe to block, because browsers will not generally send it at all).</p>
+
+<p>To <em>block</em> requests that contain a <code class="highlighter-rouge">Proxy</code> header (the preferred solution), run the following command line.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>appcmd set config /section:requestfiltering /+requestlimits.headerLimits.[header='proxy',sizelimit='0']
+</code></pre>
+</div>
+
+<p><strong>Note:</strong> <code class="highlighter-rouge">appcmd.exe</code> is not typically in the path and can be found in the <code class="highlighter-rouge">%systemroot%\system32\inetsrv</code> directory</p>
+
+<p>To <em>clear</em> the value of the header, use the following URL Rewrite rule:</p>
+
+<div class="language-xml highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;system.webServer&gt;</span>
+    <span class="nt">&lt;rewrite&gt;</span>
+        <span class="nt">&lt;rules&gt;</span>
+            <span class="nt">&lt;rule</span> <span class="na">name=</span><span class="s">"Erase HTTP_PROXY"</span> <span class="na">patternSyntax=</span><span class="s">"Wildcard"</span><span class="nt">&gt;</span>
+                <span class="nt">&lt;match</span> <span class="na">url=</span><span class="s">"*.*"</span> <span class="nt">/&gt;</span>
+                <span class="nt">&lt;serverVariables&gt;</span>
+                    <span class="nt">&lt;set</span> <span class="na">name=</span><span class="s">"HTTP_PROXY"</span> <span class="na">value=</span><span class="s">""</span> <span class="nt">/&gt;</span>
+                <span class="nt">&lt;/serverVariables&gt;</span>
+                <span class="nt">&lt;action</span> <span class="na">type=</span><span class="s">"None"</span> <span class="nt">/&gt;</span>
+            <span class="nt">&lt;/rule&gt;</span>
+        <span class="nt">&lt;/rules&gt;</span>
+    <span class="nt">&lt;/rewrite&gt;</span>
+<span class="nt">&lt;/system.webServer&gt;</span>
+</code></pre>
+</div>
+
+<p><strong>Note:</strong> URL Rewrite is a downloadable add-in for IIS and is not included in a default IIS installation.</p>
+
+<h3 id="hiawatha">Hiawatha</h3>
+
+<p>You can block any request containing a <code class="highlighter-rouge">Proxy</code> header (or ban the sending client) via the UrlToolkit:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>UrlToolkit {
+  ToolkitID = block_httpoxy
+  Header Proxy .* DenyAccess
+}
+</code></pre>
+</div>
+
+<p>See more information at the <a href="https://www.hiawatha-webserver.org/weblog/115">hiawatha blog</a></p>
+
+<h3 id="litespeed-web-server">LiteSpeed Web Server</h3>
+
+<p>Upgrade to <code class="highlighter-rouge">&gt;= 5.0.19</code> or <code class="highlighter-rouge">&gt;= 5.1.7</code> to mitigate. You can do this manually with one of these commands, or you’ll get
+an upgrade notification soon.</p>
+
+<div class="language-sh highlighter-rouge"><pre class="highlight"><code>/usr/local/lsws/admin/misc/lsup.sh -v 5.0.19 <span class="c"># or</span>
+/usr/local/lsws/admin/misc/lsup.sh -v 5.1.7
+</code></pre>
+</div>
+
+<p>See more information at the <a href="http://blog.litespeedtech.com/2016/07/18/the-httpoxy-vulnerability-has-been-taken-care-of-by-litespeed-automatically/">litespeed blog</a></p>
+
+<h3 id="other-cgi-software-and-applications">Other CGI software and applications</h3>
+
+<p>Please let us know of other places where httpoxy is found. We’d be happy to help you communicate fixes for your platform,
+server or library if you are affected. Contact <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#099;&#111;&#110;&#116;&#097;&#099;&#116;&#064;&#104;&#116;&#116;&#112;&#111;&#120;&#121;&#046;&#111;&#114;&#103;&#063;&#115;&#117;&#098;&#106;&#101;&#099;&#116;&#061;&#070;&#105;&#120;">contact@httpoxy.org</a> or
+<a href="https://twitter.com/httpoxy">@httpoxy</a> to let us know. Or make a PR against the <a href="https://github.com/httpoxy/httpoxy-org">httpoxy-org repo</a>.</p>
+
+<h2 id="php-nope" class="section">Ineffective fixes in PHP</h2>
+
+<p>Userland PHP fixes don’t work. Don’t bother:</p>
+
+<ul>
+  <li>Using <code class="highlighter-rouge">unset($_SERVER['HTTP_PROXY'])</code> does not affect the value returned from <code class="highlighter-rouge">getenv()</code>, so is not an effective
+mitigation</li>
+  <li>Using <code class="highlighter-rouge">putenv('HTTP_PROXY=')</code> does not work either (to be precise: it only works if that value is coming from an
+actual environment variable rather than a header – so, it cannot be used for mitigation)</li>
+</ul>
+
+<h2 id="prevent" class="section">Prevention</h2>
+
+<h3 id="summary">Summary</h3>
+
+<ul>
+  <li>If you can avoid it, do not deploy into environments where the CGI data is merged into the actual environment variables</li>
+  <li>Use and expect <code class="highlighter-rouge">CGI_HTTP_PROXY</code> to set the proxy for a CGI application’s internal requests, if necessary
+    <ul>
+      <li>You can still support <code class="highlighter-rouge">HTTP_PROXY</code>, but you must assert that CGI is not in use</li>
+      <li>In PHP, check <code class="highlighter-rouge">PHP_SAPI == 'cli'</code></li>
+      <li>
+        <p>Otherwise, a simple check is to not trust <code class="highlighter-rouge">HTTP_PROXY</code> if <code class="highlighter-rouge">REQUEST_METHOD</code> is also set. RFC 3875 seems to require
+this meta-variable:</p>
+
+        <blockquote class="blockquote">
+          <p class="m-b-0">
+ The <code class="highlighter-rouge">REQUEST_METHOD</code> meta-variable MUST be set to the method which should be used by the script to process the request
+</p>
+        </blockquote>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="dont-trust-httpproxy-under-cgi">Don’t Trust <code class="highlighter-rouge">HTTP_PROXY</code> Under CGI</h3>
+
+<p>To put it plainly: there is no way to trust the value of an <code class="highlighter-rouge">HTTP_</code> env var in a CGI environment. They cannot be
+distinguished from request headers according to the specification. So, <em>any</em> usage of <code class="highlighter-rouge">HTTP_PROXY</code> in a CGI context is
+suspicious.</p>
+
+<p>If you need to configure the proxy of a CGI application via an environment variable, use a variable name that will
+never conflict with request headers. That is: one that does not begin with <code class="highlighter-rouge">HTTP_</code>. We strongly recommend you go for
+<code class="highlighter-rouge">CGI_HTTP_PROXY</code>. (As seen in Ruby and libwww-perl’s mitigations for this issue.)</p>
+
+<h3 id="prevent-php">PHP</h3>
+
+<p>CLI-only code may safely trust <code class="highlighter-rouge">$_SERVER['HTTP_PROXY']</code> or <code class="highlighter-rouge">getenv('HTTP_PROXY')</code>. But bear in mind that code written
+for the CLI context often ends up running in a SAPI eventually, particularly utility or library code. And, with open
+source code, that might not even be your doing. So, if you are going to rely on <code class="highlighter-rouge">HTTP_PROXY</code> at all, you should guard
+that code with a check of the <code class="highlighter-rouge">PHP_SAPI</code> constant.</p>
+
+<h3 id="network-configuration-as-prevention">Network Configuration as Prevention</h3>
+
+<p>A defense-in-depth strategy that can combat httpoxy (and entire classes of other security problems) is to severely restrict
+the outgoing requests your web application can make to an absolute minimum. For example, if a web application is
+firewalled in such a way that it <em>cannot</em> make outgoing HTTP requests, an attacker will not be able to receive
+the “misproxied” requests (because the web application is prevented from connecting to the attacker).</p>
+
+<h3 id="https">HTTPS</h3>
+
+<p>And, of course, another defense-in-depth strategy that works is to use HTTPS for internal requests, not just for
+securing your site’s connections to the outside world. Those aren’t affected by <code class="highlighter-rouge">HTTP_PROXY</code>.</p>
+
+<h2 id="how-it-works" class="section">How It Works</h2>
+
+<p>Using PHP as an example, because it is illustrative. PHP has a method called <code class="highlighter-rouge">getenv()</code><sup id="fnref:php-getenv"><a href="index.html#fn:php-getenv" class="footnote">1</a></sup>.</p>
+
+<p>There is a common vulnerability in many PHP libraries and applications, introduced by confusing
+<code class="highlighter-rouge">getenv</code> for a method that only returns environment variables. In fact, getenv() is closer to the
+<code class="highlighter-rouge">$_SERVER</code> superglobal: it contains both environment variables and user-controlled data.</p>
+
+<p>Specifically, when PHP is running under a CGI-like server, the HTTP request headers (data supplied
+ by the client) are merged into the <code class="highlighter-rouge">$_SERVER</code> superglobal under keys beginning with <code class="highlighter-rouge">HTTP_</code>. This is
+ the same information that <code class="highlighter-rouge">getenv</code> reads from.</p>
+
+<p>When a user sends a request with a <code class="highlighter-rouge">Proxy</code> header, the header appears to the PHP application as <code class="highlighter-rouge">getenv('HTTP_PROXY')</code>.
+Some common PHP libraries have been trusting this value, even when run in a CGI/SAPI environment.</p>
+
+<p>Reading and trusting <code class="highlighter-rouge">$_SERVER['HTTP_PROXY']</code> is exactly the same vulnerability, but tends to happen much less often
+(perhaps because of getenv’s name, perhaps because the semantics of the <code class="highlighter-rouge">$_SERVER</code> superglobal are better understood among
+the community).</p>
+
+<h3 id="examples">Minimal example code</h3>
+
+<p>Note that these examples require deployment into a vulnerable environment before there is actually a vulnerability
+(e.g. php-fpm, or Apache’s <code class="highlighter-rouge">ScriptAlias</code>)</p>
+
+<h4 id="php-1">PHP</h4>
+
+<div class="language-php highlighter-rouge"><pre class="highlight"><code><span class="nv">$client</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GuzzleHttp\Client</span><span class="p">();</span>
+<span class="nv">$client</span><span class="o">-&gt;</span><span class="na">get</span><span class="p">(</span><span class="s1">'http://api.internal/?secret=foo'</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<h4 id="python-1">Python</h4>
+
+<div class="language-python highlighter-rouge"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">wsgiref.handlers</span> <span class="kn">import</span> <span class="n">CGIHandler</span>
+<span class="k">def</span> <span class="nf">application</span><span class="p">(</span><span class="n">environ</span><span class="p">,</span> <span class="n">start_response</span><span class="p">):</span>
+    <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">"http://api.internal/?secret=foo"</span><span class="p">)</span>
+<span class="n">CGIHandler</span><span class="p">()</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">application</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<h4 id="go-1">Go</h4>
+
+<div class="language-go highlighter-rouge"><pre class="highlight"><code><span class="n">cgi</span><span class="o">.</span><span class="n">Serve</span><span class="p">(</span><span class="x">
+    </span><span class="n">http</span><span class="o">.</span><span class="n">HandlerFunc</span><span class="p">(</span><span class="k">func</span><span class="p">(</span><span class="n">w</span><span class="x"> </span><span class="n">http</span><span class="o">.</span><span class="n">ResponseWriter</span><span class="p">,</span><span class="x"> </span><span class="n">r</span><span class="x"> </span><span class="o">*</span><span class="n">http</span><span class="o">.</span><span class="n">Request</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+        </span><span class="n">res</span><span class="p">,</span><span class="x"> </span><span class="n">_</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">http</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="s">"http://api.internal/?secret=foo"</span><span class="p">)</span><span class="x">
+        </span><span class="c">// [...]</span><span class="x">
+</span></code></pre>
+</div>
+
+<p>More complete PoC repos (using Docker, and testing with an actual listener for the proxied request) have been prepared
+under the <a href="https://github.com/httpoxy">httpoxy Github organization</a>.</p>
+
+<h2 id="why" class="section">Why It Happened</h2>
+
+<p>Under the CGI spec, headers are provided mixed into the environment variables. (These are formally known as
+“Protocol-Specific Meta-Variables”<sup id="fnref:meta-variables"><a href="index.html#fn:meta-variables" class="footnote">2</a></sup>). That’s just the way the spec works, not a failure or bug.</p>
+
+<p>The goal of the code, in most of the vulnerabilities, is to find the correct proxy to use, when auto-configuring a
+client for the internal  HTTP request made shortly after. This task in Ruby could be completed by
+the <code class="highlighter-rouge">find_proxy</code> method of <code class="highlighter-rouge">URI::Generic</code>, which notes:</p>
+
+<blockquote class="blockquote">
+  <p class="m-b-0">
+
+<code class="highlighter-rouge">http_proxy</code> and <code class="highlighter-rouge">HTTP_PROXY</code> are treated specially under the CGI environment, because <code class="highlighter-rouge">HTTP_PROXY</code> may be set by Proxy:
+header. So <code class="highlighter-rouge">HTTP_PROXY</code> is not used. <code class="highlighter-rouge">http_proxy</code> is not used too if the variable is case insensitive. <code class="highlighter-rouge">CGI_HTTP_PROXY</code>
+can be used instead.
+
+</p>
+  <footer class="blockquote-footer">
+From the <cite title="Source Title"><a href="http://ruby-doc.org/stdlib-2.3.1/libdoc/uri/rdoc/URI/Generic.html#method-i-find_proxy">Ruby stdlib documentation</a></cite>
+</footer>
+</blockquote>
+
+<p>Other instances of the same vulnerability are present in other languages. For example, when
+using Go’s <code class="highlighter-rouge">net/http/cgi</code> module, and deploying as a CGI application. This indicates the vulnerability
+is a standard danger in CGI environments.</p>
+
+<h2 id="history" class="section">History of httpoxy</h2>
+
+<p>This bug was first discovered over 15 years ago. The timeline goes something like:</p>
+
+<dl class="dl-horizontal row">
+ <dt class="col-sm-3">March 2001</dt>
+ <dd class="col-sm-9">
+    <p>The issue is discovered in libwww-perl and fixed. Reported by Randal L. Schwartz. <sup id="fnref:perl-bug"><a href="index.html#fn:perl-bug" class="footnote">3</a></sup></p>
+  </dd>
+ <dt class="col-sm-3">April 2001</dt>
+ <dd class="col-sm-9">
+    <p>The issue is discovered in curl, and fixed there too (albeit probably not for Windows). Reported by Cris Bailiff. <sup id="fnref:curl-bug"><a href="index.html#fn:curl-bug" class="footnote">4</a></sup></p>
+  </dd>
+ <dt class="col-sm-3">July 2012</dt>
+ <dd class="col-sm-9">
+    <p>In implementing <code class="highlighter-rouge">HTTP_PROXY</code> for <code class="highlighter-rouge">Net::HTTP</code>, the Ruby team notice and avoid the potential issue. Nice work Akira Tanaka! <sup id="fnref:ruby-ref"><a href="index.html#fn:ruby-ref" class="footnote">5</a></sup></p>
+  </dd>
+ <dt class="col-sm-3">November 2013</dt>
+ <dd class="col-sm-9">
+    <p>The issue is mentioned on the NGINX mailing list. The user humbly points out the issue: “unless
+     I’m missing something, which is very possible”. No, Jonathan Matthews, you were exactly right! <sup id="fnref:nginx-ref"><a href="index.html#fn:nginx-ref" class="footnote">6</a></sup></p>
+  </dd>
+ <dt class="col-sm-3">February 2015</dt>
+ <dd class="col-sm-9">
+    <p>The issue is mentioned on the Apache httpd-dev mailing list. Spotted by Stefan Fritsch. <sup id="fnref:apache-ref"><a href="index.html#fn:apache-ref" class="footnote">7</a></sup></p>
+  </dd>
+ <dt class="col-sm-3">July 2016</dt>
+ <dd class="col-sm-9">
+    <p>Scott Geary, an engineer at Vend, found an instance of the bug in the wild. The Vend security team found the vulnerability
+  was still exploitable in PHP, and present in many modern languages and libraries. We started to disclose to security response teams.</p>
+  </dd>
+</dl>
+
+<p>So, the bug was lying dormant for years, like a latent infection: pox. We imagine that many people may have found the issue over
+the years, but never investigated its scope in other languages and libraries. If you’ve found a historical discussion
+of interest that we’ve missed, let us know.</p>
+
+<h2 id="cve" class="section">CVEs</h2>
+
+<p>httpoxy has a number of CVEs assigned. These cover the cases where</p>
+
+<ul>
+  <li>a language or CGI implementation makes the <code class="highlighter-rouge">Proxy</code> header available in such a way that the application cannot tell whether
+it is a real environment variable, or</li>
+  <li>an application trusts the value of the <code class="highlighter-rouge">HTTP_PROXY</code> environment variable by default in a CGI environment (but only where that application should have been
+able to tell it came from a request)</li>
+</ul>
+
+<p>The assigned CVEs so far:</p>
+
+<ul>
+  <li>CVE-2016-5385: PHP</li>
+  <li>CVE-2016-5386: Go</li>
+  <li>CVE-2016-5387: Apache HTTP Server</li>
+  <li>CVE-2016-5388: Apache Tomcat</li>
+  <li>CVE-2016-6286: spiffy-cgi-handlers for CHICKEN</li>
+  <li>CVE-2016-6287: CHICKEN’s http-client</li>
+  <li>CVE-2016-1000104: mod_fcgi</li>
+  <li>CVE-2016-1000105: Nginx cgi script</li>
+  <li>CVE-2016-1000107: Erlang inets</li>
+  <li>CVE-2016-1000108: YAWS</li>
+  <li>CVE-2016-1000109: HHVM FastCGI</li>
+  <li>CVE-2016-1000110: Python CGIHandler</li>
+  <li>CVE-2016-1000111: Python Twisted</li>
+  <li>CVE-2016-1000212: lighttpd</li>
+</ul>
+
+<p>We suspect there may be more CVEs coming for httpoxy, as less common software is checked over. If you
+want to get a CVE assigned for an httpoxy issue, there are a couple of options:</p>
+
+<ul>
+  <li>For open source code projects, you can use the <a href="https://distributedweaknessfiling.org/">Distributed Weakness Filing Project</a> (DWF).
+They have a simple way to report (public) issues using the form at <a href="https://iwantacve.org/">iwantacve.org</a></li>
+  <li>For closed source code projects, you can talk to <a href="https://cve.mitre.org/cve/cna.html">MITRE, or one of their participating CNAs/vendors/coordinators</a>.</li>
+</ul>
+
+<h2 class="section" id="thanks-and-further-coverage">Thanks and Further Coverage</h2>
+
+<p>We’ll be linking to official announcements from affected teams here, as they become available.</p>
+
+<ul>
+  <li><a href="https://www.kb.cert.org/vuls/id/797896">The CERT vulnerability note - VU#797896</a></li>
+  <li><a href="https://access.redhat.com/security/vulnerabilities/httpoxy">Red Hat advisory</a></li>
+  <li><a href="https://www.apache.org/security/asf-httpoxy-response.txt">The Apache Software Foundation advisory</a></li>
+  <li><a href="https://support.microsoft.com/en-us/kb/3179800">Microsoft advisory KB3179800</a></li>
+  <li><a href="https://www.nginx.com/blog/mitigating-the-httpoxy-vulnerability-with-nginx/">NGINX blog post</a></li>
+  <li><a href="https://www.drupal.org/SA-CORE-2016-003">Drupal advisory</a></li>
+  <li><a href="https://www.fastly.com/security-advisories/vulnerability-use-httpproxy-cgi">Fastly advisory</a></li>
+  <li><a href="https://blog.cloudflare.com/cloudflare-sites-protected-from-httpoxy/">Cloudflare blog post</a></li>
+  <li><a href="https://blogs.akamai.com/2016/07/akamai-mitigates-httpoxy-vulnerability.html">Akamai blog post</a></li>
+  <li><a href="http://blog.litespeedtech.com/2016/07/18/the-httpoxy-vulnerability-has-been-taken-care-of-by-litespeed-automatically/">LiteSpeed blog post</a></li>
+</ul>
+
+<p>Over the past two weeks, the Vend security team worked to disclose the issue responsibly to as many affected parties as we
+could. We’d like to thank the members of:</p>
+
+<ul>
+  <li>The Red Hat Product Security team, who provided extremely useful advice and access to their experience disclosing
+widespread vulnerabilities - if you’re sitting on a big or complicated disclosure, they’re a great resource to reach
+out to for help.</li>
+  <li>The language and implementation teams, who kept to disclosure norms and provided lively discussion.</li>
+</ul>
+
+<p>There’s an <a href="extra.html">extra</a> page with some meta-discussion on the whole named disclosure thing and contact details.
+The content on this page is licensed as <a href="http://creativecommons.org/publicdomain/zero/1.0/">CC0</a> (TL;DR: use what you
+like, no permission/attribution necessary).</p>
+
+<p>I’ve put together some more opinionated notes on httpoxy on <a href="https://medium.com/@nzdominic">my Medium account</a>.</p>
+
+<p>Regards,<br />
+Dominic Scheirlinck and the httpoxy disclosure team</p>
+
+<p><small>
+    Page updated at 2016-08-02 00:59 UTC
+</small></p>
+
+<h2 class="section" id="references">References</h2>
+
+<div class="footnotes">
+  <ol>
+    <li id="fn:php-getenv">
+
+      <p><a href="https://secure.php.net/getenv">The PHP documentation manual page for getenv</a> <a href="index.html#fnref:php-getenv" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:meta-variables">
+
+      <p><a href="https://tools.ietf.org/html/rfc3875#section-4.1.18">RFC 3875 4.1.18: Protocol-Specific Meta-Variables</a> <a href="index.html#fnref:meta-variables" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:perl-bug">
+
+      <p>The fix applied correctly handles cases with case-insensitive environment variables.
+<a href="http://www.nntp.perl.org/group/perl.libwww/2001/03/msg2249.html">libwww-perl-5.51 announcement</a> <a href="index.html#fnref:perl-bug" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:curl-bug">
+
+      <p>The <a href="https://sourceforge.net/p/curl/bugs/66/">fix applied to Curl</a> does not
+correctly handle cases with case-insensitive environment variables - it specifically mentions the fix would not
+be enough for “NT” (Windows). The commit itself carries the prescient message “<a href="https://github.com/curl/curl/commit/18f044f19d26f2b6dcd41796966f488a62a1bdca">since it might become
+a security problem</a>.” <a href="index.html#fnref:curl-bug" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:ruby-ref">
+
+      <p>The <a href="https://bugs.ruby-lang.org/issues/6546">mitigation in Ruby</a>, like that for libwww-perl, correctly handles
+case-insensitive environment variables. <a href="index.html#fnref:ruby-ref" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:nginx-ref">
+
+      <p>The <a href="https://forum.nginx.org/read.php?2,244407,244485#msg-244485">NGINX mailing list</a> even had a PHP-specific
+explanation. <a href="index.html#fnref:nginx-ref" class="reversefootnote">&#8617;</a></p>
+    </li>
+    <li id="fn:apache-ref">
+
+      <p><a href="http://mail-archives.apache.org/mod_mbox/httpd-dev/201502.mbox/%3C2651807.jIIY3NPtlf@k%3E">Discussed</a> in reference to CGI specifically. <a href="index.html#fnref:apache-ref" class="reversefootnote">&#8617;</a></p>
+    </li>
+  </ol>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"
+        integrity="sha384-8gBf6Y4YYq7Jx97PIqmTwLPin4hxIzQw5aDmUg/DDhul9fFpbbLcLh3nTIIDJKhx"
+        crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    if (!navigator.userAgent.match(/Version\/[\d\.]+.*Safari/)) {
+        $(window).scroll(function() {
+            if ($(window).scrollTop() >= 306) {
+                $('#toc').addClass('fixed');
+            } else {
+                $('#toc').removeClass('fixed');
+            }
+        });
+    }
+</script>
+
+  </body>
+</html>

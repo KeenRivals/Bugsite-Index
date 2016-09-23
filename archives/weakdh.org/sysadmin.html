@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<!--[if lt IE 10 ]> <html class="old-ie"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="not-ie"> <!--<![endif]-->
+	<head>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+		<meta name="keywords" content="TLS logjam attack diffie-hellman zmap" />
+		<meta name="description" content="Logjam: PFS Deployment Guide" />
+		<title>Logjam: PFS Deployment Guide</title>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
+		<link rel="stylesheet" type="text/css" href="css/custom.css"/>
+		<style type="text/css">
+			li:not(:last-child) {
+			    margin-bottom: 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-10 col-md-offset-1">
+				<div class="page-header" id="banner">
+					<h1>Guide to Deploying Diffie-Hellman for TLS</h1>
+				</div>
+				<p>Our study finds that the current real-world deployment of Diffie-Hellman is less secure than previously believed.
+					This page explains how to properly deploy Diffie-Hellman on your server.</p>
+
+					<p>We have three recommendations for correctly deploying Diffie-Hellman for TLS:</p>
+				<ol>
+                    <li><b>Disable Export Cipher Suites.</b> Even though modern browsers no longer support export suites,
+						the <a href="https://freakattack.com/">FREAK</a> and <a href="logjam.html">Logjam</a> attacks allow a man-in-the-middle attacker to trick browsers into using export-grade
+						cryptography, after which the TLS connection can be decrypted. Export ciphers are a remnant of 1990s-era policy that
+						prevented strong cryptographic protocols from being exported from United States. No modern clients rely on
+						export suites and there is little downside in disabling them.</li>
+					<li><b>Deploy (Ephemeral) Elliptic-Curve Diffie-Hellman (ECDHE).</b> Elliptic-Curve Diffie-Hellman (ECDH) key exchange avoids
+					all known feasible cryptanalytic attacks, and modern web browsers now prefer ECDHE over the original, finite field, Diffie-Hellman.
+					The discrete log algorithms we used to attack standard Diffie-Hellman groups do not gain as strong of an advantage from precomputation,
+					and individual servers do not need to generate unique elliptic curves.
+					</li>
+					<li><b>Use a Strong,
+					Diffie Hellman
+					Group.</b> A few 1024-bit groups
+					are used by millions of
+					servers, which makes them an
+					optimal target for
+					precomputation, and potential
+					eavesdropping. Administrators
+					should use
+					2048-bit or stronger
+					Diffie-Hellman groups with
+					"safe" primes.</li>
+				</ol>
+				<p>Steps (1) and (2) can be accomplished simultaneously by configuring your server to only use modern, secure cipher suites.
+                We describe how to define modern ciphers and to generate a Diffie-Hellman group for popular servers below. You can test your server using the tool below, or by using the <a href="https://ssllabs.com/ssltest/">Qualsys SSL Server Test</a>. If you have information on how to patch other software, please <a href="mailto:weakdh-team@umich.edu">let us know</a>.</p>
+
+                <a name="tlstest"></a>
+				<h3>Server Test</h3>
+
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+        <iframe id="test-iframe" src="servercheck.html" width="100%" frameborder="0"></iframe>
+				<br/>
+
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+
+				<h3>Using a Strong DH Group</h3>
+				<p>You will first need to generate a new Diffie-Hellman group, regardless of the server software you use. Modern browsers, including Google Chrome,
+					Mozilla Firefox, and Microsoft Internet Explorer have increased the minimum group size to 1024-bit. We recommend that you generate a 2048-bit group.
+					The simplest way of generating a new group is to use OpenSSL:
+                </p>
+    			<pre>openssl dhparam -out dhparams.pem 2048</pre>
+                <h3>Common Server Products</h3>
+                    For each sever product, we provide two configuration options: (1) safe cipher suites that you should use, and (2) how to specify the Diffie Hellman parameters you generated above. The selected ciphers are based on Mozilla's Moderate Cipher List.
+                    <a name="apache"></a>
+                    <h4>Apache HTTP Server (mod_ssl)</h4>
+                    <p>SSL parameters can globally be set in <tt>httpd.conf</tt> or within specific virtual hosts.</p>
+
+                <p>Cipher Suites </p>
+					<p>Disable support for SSLv2 and SSLv3 and enable support for TLS, explicitly allow/disallow specific ciphers in the given order : </p>
+<pre>
+SSLProtocol             all -SSLv2 -SSLv3
+
+SSLCipherSuite          ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA
+
+SSLHonorCipherOrder     on
+</pre>
+                <p>DH Parameters</p> <p>In newer versions of Apache (2.4.8 and newer) and OpenSSL 1.0.2 or later,
+                you can directly specify your DH params file as follows: </p>
+                <pre>SSLOpenSSLConfCmd DHParameters "<em>{path to dhparams.pem}</em>"</pre>
+                <p>If you are using Apache with LibreSSL, or Apache 2.4.7 and OpenSSL 0.9.8a or later, 
+                you can append the DHparams you generated
+                earlier to the end of your certificate file.</p>
+
+				<p>Reload configuration</p>
+				<pre>sudo service apache2 reload</pre>
+                <br/>
+
+                <a name="nginx"></a>
+                <h4>nginx</h4>
+				<p>To be placed in the website configuration <tt>server</tt>
+					block in <tt>/etc/nginx/sites-enabled/default</tt> :
+                <p>Cipher Suites </p>
+<pre>ssl_ciphers 'ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA';
+
+ssl_prefer_server_ciphers on;</pre>
+                <p>DH parameters </p>
+                <pre>ssl_dhparam <em>{path to dhparams.pem}</em></pre>
+
+				<p>Reload configuration</p>
+				<pre>sudo nginx -s reload</pre>
+                <br/>
+
+            <a name="iis"></a>
+            <h4>Microsoft IIS</h4>
+            <ol>
+                <li>Open the Group Policy Object Editor (i.e. run <tt>gpedit.msc</tt> in the command prompt). </li>
+                <li>  Expand Computer Configuration, Administrative
+                Templates, Network, and then click SSL Configuration
+                Settings. </li>
+                <li>  Under SSL Configuration Settings, open the SSL
+                Cipher Suite Order setting.</li>
+								<li>Set up a strong cipher suite order.  See this list of Microsoft's <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/aa374757%28v=vs.85%29.aspx">supported ciphers</a> and Mozilla's <a href="https://wiki.mozilla.org/Security/Server_Side_TLS">TLS configuration instructions</a>.</li>
+            </ol>
+
+            <a name="lighttpd"></a>
+            <h4>Lighttpd</h4>
+            <p>Changes should be made in <tt> /etc/lighttpd/lighttpd.conf</tt> <br> Cipher Suites </p>
+<pre>
+ssl.cipher-list = "ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA "
+</pre>
+            <p>DH parameters </p>
+<pre>
+ssl.dh-file="<em>{path to dhparams.pem}</em>"
+</pre>
+
+			 <p>Reload configuration</p>
+			 <pre>sudo service lighttpd restart</pre>
+             <br/>
+
+            <a name="tomcat"></a>
+            <h4>Apache Tomcat</h4>
+            <p>In the <tt>server.xml</tt> file (for JSSE) <br> Cipher Suites</p>
+<pre>
+&lt;Connector
+ciphers="TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,TLS_DHE_DSS_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_SHA256,TLS_ECDHE_ECDSA_WITH_AES_128_SHA256,TLS_ECDHE_RSA_WITH_AES_128_SHA,TLS_ECDHE_ECDSA_WITH_AES_128_SHA,TLS_ECDHE_RSA_WITH_AES_256_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_SHA384,TLS_ECDHE_RSA_WITH_AES_256_SHA,TLS_ECDHE_ECDSA_WITH_AES_256_SHA,TLS_DHE_RSA_WITH_AES_128_SHA256,TLS_DHE_RSA_WITH_AES_128_SHA,TLS_DHE_DSS_WITH_AES_128_SHA256,TLS_DHE_RSA_WITH_AES_256_SHA256,TLS_DHE_DSS_WITH_AES_256_SHA,TLS_DHE_RSA_WITH_AES_256_SHA"
+/&gt;
+</pre>
+            <p>Note: To be able to use the 256 bit AES Ciphers, it is necessary
+            to install the JCE Unlimited Strength Jurisdiction Policy Files,
+            which can be found <a href = "http://www.oracle.com/technetwork/java/javase/downloads/index.html">here.</a>
+            </p>
+
+        <!-- <p>DH Parameters</p>
+        <pre>
+SSLDHParametersFile <em>{path to dhparams.pem}</em>
+</pre>
+			 <p>Reload configuration</p>
+			 Version specific, consult documentation for your version.
+             </br>-->
+
+                <a name="postfix"></a>
+                <h4>Postfix SMTP</h4>
+                <p>Both parameters should be set in <tt>/etc/postfix/main.cf</tt>.</p>
+                <p>Cipher suites</p>
+<pre>smtpd_tls_exclude_ciphers = aNULL, eNULL, EXPORT, DES, RC4, MD5, PSK, aECDH, EDH-DSS-DES-CBC3-SHA, EDH-RSA-DES-CBC3-SHA, KRB5-DES, CBC3-SHA</pre>
+
+                <p>DH params</p>
+<pre>smtpd_tls_dh1024_param_file = $<em>{config_directory}</em>/dhparams.pem</pre>
+
+				<p>Reload configuration</p>
+				<pre>sudo postfix reload</pre>
+                <br/>
+
+                <a name="sendmail"></a>
+                <h4>Sendmail</h4>
+                <p>These changes can be made in the LOCAL_CONFIG section of your
+                <tt>/etc/mail/sendmail.mc</tt></p><p>Cipher Suites </p>
+<pre>
+O CipherList=ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA
+</pre>
+                <p>DH Parameters </p>
+<pre>O DHParameters=<em>{path to dhparams.pem}</em></pre>
+
+				<p>Reload configuration</p>
+				<pre>sudo service sendmail restart</pre>
+                <br/>
+
+                <a name="dovecot"></a>
+                <h4>Dovecot</h4>
+                <p>These changes should be made in <tt>/etc/dovecot.conf</tt></p>
+                <p>Cipher Suites</p>
+<pre>
+ssl_cipher_list=ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA
+ssl_prefer_server_ciphers = yes (Dovecot 2.2.6 or greater)
+</pre>
+                <p>DH parameters </p>
+                <pre>
+#regenerates every week
+ssl_dh_parameters_length = 2048
+                </pre>
+
+				<p>Reload configuration</p>
+				<pre>sudo doveadm reload</pre>
+             <br/>
+
+                <a name="haproxy"></a>
+                <h4>HAProxy</h4>
+                <p>These changes should be made in the global section of your configuration.</p>
+                <p>Cipher Suites</p>
+<pre>
+ssl-default-bind-ciphers ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-SHA256:AES256-SHA256:AES128-SHA:AES256-SHA:AES:CAMELLIA:DES-CBC3-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5:!PSK:!aECDH:!EDH-DSS-DES-CBC3-SHA:!EDH-RSA-DES-CBC3-SHA:!KRB5-DES-CBC3-SHA
+</pre>
+                <p>DH Parameters</p>
+		<p>
+                Append the DH parameter file generated using OpenSSL
+                to your certificate (crt file).
+                </p>
+                <p>
+                Note: while there is configuration option
+                named <tt>tune.ssl.default-dh-param</tt> to set the
+                maximum size of primes used for DHE, placing custom
+                parameters in your certificate file overrides it.
+                <p>
+
+                <p>Reload configuration</p>
+                <pre>sudo haproxy -f haproxy.cfg -p $(&lt;/var/run/haproxy-private.pid) -st $(&lt;/var/run/haproxy-private.pid)</pre>
+
+             <br/>
+
+						<h4>Amazon Elastic Load Balancing</h4>
+						<p>
+							The latest set of predefined SSL parameters (2015-05) use ECDHE ciphers, not
+							DHE, and are therefore not vulnerable to Logjam. See the <a
+							href="http://docs.aws.amazon.com/ElasticLoadBalancing/latest/DeveloperGuide/elb-security-policy-table.html">Amazon
+							documentation.</a>
+						</p>
+                        <br/>
+                        <a name="openssh"></a>
+						<h4>OpenSSH</h4>
+
+                        <p> The SSH protocol is safe from the LogJam attack in
+                        which an active attacker can force the connection down
+                        to export-grade cryptography. However, many SSH
+                        implementations, including OpenSSH use fixed primes,
+                        including the 1024-bit Oakley Group 2. There are a
+                        couple of options. The first and easiest option is to
+                        force clients to use elliptic-curve Diffie-Hellman.
+                        Specificially, Curve 25519.
+                        This can be accomplished by setting your Key Exchange
+                        algorithms as follows:</p>
+
+                        <pre>KexAlgorithms curve25519-sha256@libssh.org</pre>
+
+                        <p>If you want to continue to support non-elliptic-curve Diffie-Hellman, at the very least,
+                        you should disable Group 1 support, by removing the <tt>diffie-hellman-group1-sha1</tt>
+                        Key Exchange. It is fine to leave <tt>diffie-hellman-group14-sha1</tt>, which uses a 2048-bit
+                        prime.</p>
+                        
+                        <p>It is also an option to generate new Diffie-Hellman groups:</p>
+                        <pre>ssh-keygen -G moduli-2048.candidates -b 2048
+ssh-keygen -T moduli-2048 -f moduli-2048.candidates</pre>
+                        <p>You then need to install <tt>moduli-2048</tt> to your system's moduli file. In Debian/Ubuntu,
+                        this is located at <tt>/etc/ssh/moduli</tt>. SSH chooses (practically randomly) from this
+                        file, so you should replace your existing moduli file with the new groups you generated instead
+                        of appending these new groups.
+                       
+          </div>
+	     </div>
+		</div> <!-- /.container -->
+		<script type="text/javascript">
+		  var _gauges = _gauges || [];
+		  (function() {
+		    var t   = document.createElement('script');
+		    t.type  = 'text/javascript';
+		    t.async = true;
+		    t.id    = 'gauges-tracker';
+		    t.setAttribute('data-site-id', '5556395a92c6ac24af010c1a');
+		    t.setAttribute('data-track-path', 'https://track.gaug.es/track.gif');
+		    t.src = 'https://track.gaug.es/track.js';
+		    var s = document.getElementsByTagName('script')[0];
+		    s.parentNode.insertBefore(t, s);
+		  })();
+		</script>
+
+  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+  <script src="URI.js"></script>
+  <script src="resize.js"></script>
+  </body>
+</html>

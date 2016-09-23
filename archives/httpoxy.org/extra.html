@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+    <title>httpoxy</title>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" href="img/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="img/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="manifest.json">
+    <link rel="mask-icon" href="img/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="theme-color" content="#ffffff">
+
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="canonical" href="extra.html">
+
+    <meta name="description"
+          content="httpoxy is a vulnerability in PHP and CGI web applications that allows remote attackers to proxy requests
+">
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+        ga('create', 'UA-80908130-1', 'auto');
+        ga('send', 'pageview');
+    </script>
+</head>
+
+  <body>
+    <div class="container">
+      <header class="row">
+    <h1 class="m-b-0">
+        <object type="image/svg+xml" data="img/logo.svg"><img src="img/logo.png" alt="httpoxy" /></object>
+    </h1>
+</header>
+
+
+      <div class="row">
+        <h2 id="yet-another-named-disclosure">Yet Another Named Disclosure</h2>
+
+<p>We think it’s worthwhile to give a name to a vulnerability that’s broadly spread throughout an ecosystem (in this case PHP),
+and poorly documented. Especially when its age shows it to be prone to reoccur.</p>
+
+<p>httpoxy has existed (and been known about)
+for a long time, yet new occurrences of the vulnerability were still being introduced as late as 2016. Indeed, we found a
+large number of feature requests for HTTP clients to <em>add</em> the ability to read <code class="highlighter-rouge">HTTP_PROXY</code> in Github issues.</p>
+
+<p>Consider the fact that LWP, curl and Ruby teams all noticed at some point over the last 15
+years, yet thousands of applications remain vulnerable today. We can only think that’s because their finding wasn’t
+loudly and urgently transmitted to everyone else using CGI. So, we think this calls for a slightly “louder” fix.</p>
+
+<h2 id="disclosure-research-team">Disclosure Research Team</h2>
+
+<h5 id="vend">Vend</h5>
+<ul>
+  <li>Dominic Scheirlinck</li>
+  <li>Richard Rowe</li>
+  <li>Morgan Pyne</li>
+  <li>Scott Geary</li>
+</ul>
+
+<h5 id="red-hat-product-security">Red Hat Product Security</h5>
+<ul>
+  <li>Kurt Seifried</li>
+</ul>
+
+<p>Thanks to everyone else who had suggestions and helped us prepare this site.</p>
+
+<h2 id="licensing">Licensing</h2>
+
+<div class="row">
+    <div class="col-sm-9">
+        <p xmlns:dct="http://purl.org/dc/terms/">
+            To the extent possible under law, <a rel="dct:publisher" href="index.html"><span property="dct:title">Dominic
+            Scheirlinck</span> and <span property="dct:title">Vend Limited</span></a> have waived all copyright and related or
+            neighboring rights to <span property="dct:title">the httpoxy disclosure page (and logo)</span>. (aka <abbr>CCO</abbr>).
+        </p>
+        <p>
+            This means you can use the logo without attribution if you'd like, and you don't need to ask for permission.
+        </p>
+        <p>
+            If you would like to give attribution, the logo was designed by <a href="http://www.nicolahorlor.com/">Nicola Horlor</a>
+            and the team at <a href="https://www.vendhq.com/">Vend</a>, an online retail point-of-sale company.
+        </p>
+    </div>
+    <div class="col-sm-3">
+        <a rel="license" href="http://creativecommons.org/publicdomain/zero/1.0/">
+            <img src="https://licensebuttons.net/p/zero/1.0/88x31.png" style="border-style: none;" alt="CC0" />
+        </a>
+    </div>
+</div>
+
+<h2 id="contact">Contact</h2>
+
+<p>We are available for comment at <a href="&#109;&#097;&#105;&#108;&#116;&#111;:&#099;&#111;&#110;&#116;&#097;&#099;&#116;&#064;&#104;&#116;&#116;&#112;&#111;&#120;&#121;&#046;&#111;&#114;&#103;&#063;&#115;&#117;&#098;&#106;&#101;&#099;&#116;&#061;&#080;&#114;&#101;&#115;&#115;">contact@httpoxy.org</a>, or
+<a href="https://twitter.com/httpoxy">@httpoxy</a> on Twitter.</p>
+
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"
+        integrity="sha384-8gBf6Y4YYq7Jx97PIqmTwLPin4hxIzQw5aDmUg/DDhul9fFpbbLcLh3nTIIDJKhx"
+        crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    if (!navigator.userAgent.match(/Version\/[\d\.]+.*Safari/)) {
+        $(window).scroll(function() {
+            if ($(window).scrollTop() >= 306) {
+                $('#toc').addClass('fixed');
+            } else {
+                $('#toc').removeClass('fixed');
+            }
+        });
+    }
+</script>
+
+  </body>
+</html>

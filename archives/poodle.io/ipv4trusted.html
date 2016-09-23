@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+    <meta name="keywords" content="poodle attack sslv3 report zmap durumeric adrian bailey halderman" />
+    <meta name="description" content="POODLE Attack and SSLv3 Support Measurement" />
+    <link rel="stylesheet" type="text/css" href="bootstrap.css"/>
+    <title>POODLE Attack and SSLv3 Deployment</title>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>    <![endif]-->
+
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="page-header" id="banner">
+          <h1><a href="index.html">POODLE</a> <small><strong>IPv4 Addresses with Trusted Certificates</strong></small></h1>
+        </div>
+
+	<p>This dataset contains websites on the public IPv4 address space that support SSL, but do not support any version of TLS. We urge these sites to deploy TLS. More information and statistics can be found at <a href="index.html">https://poodle.io</a>.</p>
+
+				<h2>Dataset</h2>
+				<p>Our latest scan finished yesterday (Tuesday, October 14) at 12:30 PM EDT and can be downloaded at <a href="https://poodle.io/ipv4-sslv3only-trusted.2014-10-14.csv.gz">ipv4-sslv3only-trusted.2014-10-14.csv.gz</a>. We will be posting updated data when new scans complete.</p>
+
+				<h2>Scan Methodology</h2>
+				<p>In order to generate a list of domains that only support SSLv3 (but not any version of TLS), we performed a scan of the public IPv4 address space using the <a href="https://zmap.io">ZMap Internet Scanner</a> and then attempted to perform a TLS 1.2 handshake with each IP that responded to ZMap on port 443. The list here contains sites with browser trusted certificates (validated with Mozilla NSS root store) that did not support any version of TLS and downgraded the connection to SSLv3. Domain names were generated based on the CN (common name) on the presented certificate.</p>
+				
+		<p>Because we are not connecting to specific domains using SNI (because there is authoritative list of websites on the Internet), there are several caveats to this dataset. First, websites that are only accessible through SNI may not appear on the list even if they only support SSLv3---because we have no way to connect to them. Second, if an organization presents the browser-trusted certificate for their main site on a secondary IP address, this will show up on our list---even if their main site supports TLS. Third, because we initiate a TLS 1.2 connection, it is possible that sites could support SSLv3, but become confused by our TLS 1.2 handshake and terminate the connection instead of negotiating down to SSLv3. This shouldn't happen, but there are some implementations that do not fully follow the specification.</p>
+				
+
+	<h2>Correction to Previous Dataset</h2>
+	<p>Due to a parsing error, our original dataset incorrectly listed several domains (including google.com) as only supporting SSLv3. This dataset was removed after we discovered the bug and correct data has been reposted. We thank Adam Langley and Jacob Hoffman-Andrews for catching this error. </p>
+
+
+      <br/>
+    </div>
+    </div> <!-- /.container -->
+    </div>
+    </div>
+    <script type="text/javascript" src="https://ssl3.zmap.io/sslv3test.js"></script>
+    <script type="text/javascript">
+      var _gauges = _gauges || [];
+      (function() {
+        var t   = document.createElement('script');
+        t.type  = 'text/javascript';
+        t.async = true;
+        t.id    = 'gauges-tracker';
+        t.setAttribute('data-site-id', '51f73359108d7b36f5000203');
+        t.src = '//secure.gaug.es/track.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(t, s);
+      })();
+    </script>
+  </body>
+</html>

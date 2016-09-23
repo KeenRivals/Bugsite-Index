@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+    <meta name="keywords" content="poodle attack sslv3 report zmap durumeric adrian bailey halderman" />
+    <meta name="description" content="POODLE Attack and SSLv3 Support Measurement" />
+    <link rel="stylesheet" type="text/css" href="bootstrap.css"/>
+    <title>Protecting Browsers against POODLE</title>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>    <![endif]-->
+
+  </head>
+  <body>
+
+
+
+    <div class="container">
+      <div class="row">
+        <div class="page-header" id="banner">
+          <h1><a href="https://poodle.io/">POODLE</a> <small><strong>Disabling SSLv3 Support in Browsers</strong></small></h1>
+        </div>
+        <iframe src="sslv3test-local.html" width="100%" frameborder="0" height="75"></iframe>
+        <p>
+          If you would like to prevent from possibly being exploited through
+          POODLE, you can disable the use of SSLv3 within your web browser. We
+          provide instructions for common browsers and operating systems below.
+        </p>
+        <ul>
+          <li><a href="#firefox">Firefox</a></li>
+          <li><a href="#chrome">Google Chrome</a></li>
+          <ul>
+            <li><a href="#chrome-windows">Windows</a></li>
+            <li><a href="#chrome-ubuntu">Ubuntu</a></li>
+            <li><a href="#chrome-osx">Mac OS X</a></li>
+            <li><a href="#chrome-other">Other</a></li>
+          </ul>
+          <li><a href="#internet-explorer">Internet Explorer</a></li>
+					<li><a href="#chromium">Chromium</a></li>
+          <li><a href="#safari">Safari</a></li>
+        </ul>
+        <hr />
+        </div>
+
+        <a name="firefox"></a>
+        <h2>Firefox</h2>
+        <p>Please see the <a href=https://blog.mozilla.org/security/2014/10/14/the-poodle-attack-and-the-end-of-ssl-3-0/>Mozilla Security Blog</a> for how to protect yourself (plug-in available under &quot;Additional Precautions&quot;).</p>
+        <p>Alternatively, you can set the value <code>security.tls.version.min = 1</code> in the <code>about:config</code> dialog.</p>
+        <hr />
+
+        <a name="chrome"></a>
+        <h2>Google Chrome</h2>
+        <p>Chrome does not have a setting configurable in the user interface to turn of SSLv3. Instead, Chrome needs to be told not to use SSLv3 at launch. To automatically launch Chrome with SSLv3 disabled, follow the instructions for your operating system below.</p>
+        <ul>
+          <li><a href="#chrome-windows">Windows</a></li>
+          <li><a href="#chrome-ubuntu">Ubuntu</a></li>
+          <li><a href="#chrome-osx">Mac OS X</a></li>
+          <li><a href="#chrome-other">Other</a></li>
+        </ul>
+
+        <hr />
+
+        <a name="chrome-windows"></a>
+        <h3>Windows</h3>
+					<p>You can use this fix for a shortcut or the pin'd application on the
+						taskbar.</p>
+
+      	<ol>
+      		<li>Right click the Google Chrome shortcut on the desktop.</li>
+    			<img src="winDropMenu.png" class="img-responsive"></img>
+					<ul>
+						<li>If you are changing the shortcut pinned to the Taskbar, you must
+							then right click the &quot;Google Chrome&quot; item.</li>
+							<img src="winChromePinned.png" class="img-responsive"></img>
+					</ul>
+      		<li>Click Properties from the drop-down menu.</li>
+      		<li>You will see the properties menu for the shortcut to Google Chrome.</li>
+    			<img src="winPropertiesBefore.png" class="img-responsive"></img>
+      		<li>Click inside the &quot;Target&quot; box and scroll all the way to the right (past the quote (&quot;)).</li>
+      		<li>Enter <code>--ssl-version-min=tls1</code>.</li>
+    			<img src="winPropertiesAfter.png" class="img-responsive"></img>
+      		<li>Click &quot;OK&quot; on the properties menu.</li>
+      		<li>When asked for administrator permissions, click &quot;Continue&quot;.</li>
+    			<img src="winPermissions.png" class="img-responsive"></img>
+      		<li>Restart Chrome.</li>
+      	</ol>
+
+				<p>Alternatively, you can edit the 
+                <code>http/shell/open/command</code> registy value in
+                    <code>HKEY_CLASSES_ROOT</code> to specify <code>--ssl-version-min=tls1</code>at the end, similar to the following example:
+				<code>"C:\Program Files\Google\Chrome\Application\chrome.exe" --ssl-version-min=tls1 -- "%1"</code>.
+					This will protect you even if you open Chrome by clicking a link in an 
+					email or other document.
+					Thanks to Thomas Kunst and Gus Gutoski.
+				</p>
+
+        <hr />
+
+      <a name="chrome-ubuntu"></a>
+    	<h3>Ubuntu</h3>
+    	<p>Thanks to gertvdijk on <a href="http://askubuntu.com/questions/537196/how-do-i-patch-workaround-sslv3-poodle-vulnerability-cve-2014-3566">AskUbuntu</a>.<p>
+  		<ol>
+  			<li>Open <code>/usr/share/applications/google-chrome.desktop</code> in a text editor</li>
+  			<li>
+          For any line that begins with &quot;Exec&quot;, add the argument<code>--ssl-version-min=tls1</code>
+          <ul>
+            <li>
+              For instance the line <code>Exec=/usr/bin/google-chrome-stable %U</code> should become <code>Exec=/usr/bin/google-chrome-stable --ssl-version-min=tls1</code>
+            </li>
+          </ul>
+  			</li>
+  			<li>Reboot</li>
+  		</ol>
+
+      <hr />
+
+      <a name="chrome-osx"></a>
+    	<h3>OS X</h3>
+  		<p>Thanks to Jorja Hung on <a href="https://springerpe.github.io/tech/2014/10/15/how-not-to-get-bitten-by-poodle.html">GitHub</a>.</p>
+    		<br>
+        <div class="alert alert-warning">
+    	    <strong>Be Advised!</strong> This only protects you if you open Google Chrome from the Application that you create in Automator.
+        </div>
+    		<ol>
+    			<li>Open Automator from Applications.</li>
+    				<img src="osxAutomator.png" class="img-responsive"></img>
+    			<li>Double-click &quot;Workflow&quot;.</li>
+    			<li>Under Library, click Utilities.</li>
+    				<img src="osxUtil.png" class="img-responsive"></img>
+    			<li>Double-clide &quot;Run Shell Script&quot;.</li>
+    				<img src="osxShellBefore.png" class="img-responsive"></img>
+    			<li>Replace <code>cat</code> with
+    				<code>open -a "Google Chrome.app" --args --ssl-version-min=tls1</code>.</li>
+    				<img src="osxShellAfter.png" class="img-responsive"></img>
+    			<li>In the toolbar at the top of the screen, click &quot;File&quot; and
+    				then &quot;Save&quot;.</li>
+    			<li>In the &quot;Save As&quot; box, type
+    				<code>Chrome-POODLE-Proof.app</code>.</li>
+    			<li>In the &quot;File Format&quot; drop-down box, select
+    				&quot;Application&quot;.</li>
+    				<img src="osxSave.png" class="img-responsive"></img>
+    			<li>Click &quot;Save&quot;.</li>
+    		</ol>
+        <p>
+      		Depending on how you open Google Chrome, you may have to open it in a
+      		different way. If you open it through Spotlight, just type
+      		<em>Chrome-POODLE-Proof</em> instead of <em>Google Chrome</em> If you
+      		open it by clicking on it in the Dock, open Finder, and click
+      		Applications. Drag-and-drop the <em>Chrome-POODLE-Proof.app</em> to the
+      		Dock. When you want to open Chrome, click the icon that looks like a
+      		robot holding a pipe instead of the normal Google Chrome icon.
+        </p>
+
+      <hr />
+
+      <a name="chrome-other"></a>
+    	<h3>Other Operating Systems</h3>
+      <p>For any operating system, launching Chrome from the command-line with the extra flag <code>--ssl-version-min=tls1</code> will disable SSLv3. Consult your documentation for more detail.</p>
+
+      <hr />
+
+      <a name="internet-explorer"></a>
+      <h1>Internet Explorer</h1>
+      <p>
+      	To disable SSLv3 in Internet Explorer on Windows Vista and newer, uncheck
+      	the &quot;Use SSL 3.0&quot; box on the &quot;Advanced&quot; tab in the
+      	Internet Options program.
+      </p>
+      	<ol>
+      		<li>Launch &quot;Internet Options&quot; from the Start Menu</li>
+      		<li>Click the &quot;Advanced&quot; tab</li>
+      		<li>Uncheck &quot;Use SSL 3.0&quot;</li><img src="ie.png"></img>
+      		<li>Click &quot;OK&quot;</li>
+      	</ol>
+
+      <hr />
+
+			<a name="chromium"></a>
+			<h1>Chromium</h1>
+				<p>Thanks to David McBride.</p>
+
+				<p>On the stable releases of Debian and Ubuntu, edit 
+					<code>/etc/chromium-browser/default</code>.</p>
+
+				<pre>CHROMIUM_FLAGS="--ssl-version-min=tls1"</pre>
+				
+				<p>On the unstable release of Debian, edit 
+					<code>/etc/chromium.d/disable-sslv3</code>.</p>
+
+				<pre>CHROMIUM_FLAGS="${CHROMIUM_FLAGS} -ssl-version-min=tls1"</pre>
+			</hr>
+      <a name="safari"></a>
+      <h1>Safari</h1>
+      <p>Apple has released Security Update 2014-005, which disables CBC-mode ciphers in coordination with SSLv3. The patch is available for Mac OS <a href="http://support.apple.com/kb/DL1772">Mavericks</a>, <a href="http://support.apple.com/kb/DL1771">Mountain Lion</a>, and <a href="https://support.apple.com/kb/HT6535">Yosemite</a>.
+      </p>
+			<br/>
+    </div>
+  </div>
+</body>

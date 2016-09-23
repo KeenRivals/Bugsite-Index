@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<!--[if lt IE 10 ]> <html class="old-ie"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html class="not-ie"> <!--<![endif]-->
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+        <meta charset="UTF-8">
+        <meta name="keywords" content="logjam attack diffie-hellman TLS" />
+        <meta name="description" content="Weak Diffie-Hellman and the Logjam Attack" />
+        <title>Weak Diffie-Hellman and the Logjam Attack</title>
+        <link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
+        <link rel="stylesheet" type="text/css" href="css/custom.css"/>
+        <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+        <style type="text/css">
+            .vuln { color: #E62E00; }
+            .mainpt li {
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+            p {
+                    font-size: 102%;
+                }
+            li {
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+
+        </style>
+
+    </head>
+    <body>
+      <div class="container">
+        <div class="row">
+          <div class="col-md-10 col-md-offset-1">
+            <div class="page-header" id="banner">
+              <h1 style="font-size:37px">Weak Diffie-Hellman and the Logjam&nbsp;Attack</h1>
+            </div>
+
+            <iframe src="test.html" width="100%" frameborder="0" height="75"></iframe>
+
+            <p><a href="https://en.wikipedia.org/wiki/Diffie–Hellman_key_exchange">Diffie-Hellman
+                key exchange</a> is a popular cryptographic algorithm
+                that allows Internet protocols to agree on a shared
+                key and negotiate a secure connection. It is
+                fundamental to many protocols including HTTPS, SSH,
+                IPsec, SMTPS, and protocols that rely on TLS.</p>
+            <p>We have uncovered several weaknesses in how
+                Diffie-Hellman key exchange has been deployed:</p>
+
+            <ol class="mainpt">
+
+              <li><p><b>Logjam attack against the TLS protocol.</b>
+                  The Logjam attack allows a man-in-the-middle
+                  attacker to downgrade vulnerable TLS connections to
+                  512-bit export-grade cryptography. This allows the
+                  attacker to read and modify any data passed over the
+                  connection.  The attack is reminiscent of
+                  the <a href="http://freakattack.com">FREAK
+                  attack</a>, but is due to a flaw in the TLS protocol
+                  rather than an implementation vulnerability, and
+                  attacks a Diffie-Hellman key exchange rather than an
+                  RSA key exchange. The attack affects any server that
+                  supports <tt>DHE_EXPORT</tt> ciphers, and affects
+                  all modern web browsers. 8.4% of the Top 1 Million
+                  domains were initially vulnerable.</p></li>
+
+              <li><p><b>Threats from state-level adversaries.</b>
+                  Millions of HTTPS, SSH, and VPN servers all use the
+                  same prime numbers for Diffie-Hellman key
+                  exchange. Practitioners believed this was safe as
+                  long as new key exchange messages were generated for
+                  every connection. However, the first step in the
+                  number field sieve&mdash;the most efficient
+                  algorithm for breaking a Diffie-Hellman
+                  connection&mdash;is dependent only on this prime.
+                  After this first step, an attacker can quickly break
+                  individual connections.</p>
+                <p>We carried out this computation against the most
+                  common 512-bit prime used for TLS and demonstrate
+                  that the Logjam attack can be used to downgrade
+                  connections to 80% of TLS servers
+                  supporting <tt>DHE_EXPORT</tt>.  We further estimate
+                  that an academic team can break a 768-bit prime and
+                  that a nation-state can break a 1024-bit
+                  prime. Breaking the single, most common 1024-bit
+                  prime used by web servers would allow passive
+                  eavesdropping on connections to 18% of the Top 1
+                  Million HTTPS domains.  A second prime would allow
+                  passive decryption of connections to 66% of VPN
+                  servers and 26% of SSH servers. A close reading of
+                  published NSA leaks shows that the agency's attacks
+                  on VPNs are consistent with having achieved such a
+                  break.</p></li>
+
+            </ol>
+            <h3>Full Technical Paper</h3>
+
+            <p><a href="imperfect-forward-secrecy.pdf"><b>Imperfect Forward Secrecy: How Diffie-Hellman Fails in Practice</b></a><br/>               
+              David Adrian, Karthikeyan Bhargavan, Zakir Durumeric,
+              Pierrick Gaudry, Matthew Green, J. Alex Halderman, Nadia
+              Heninger, Drew Springall, Emmanuel Thom&eacute;, Luke
+              Valenta, Benjamin VanderSloot, Eric Wustrow, Santiago
+              Zanella-B&eacute;guelin, and Paul Zimmermann<br/>
+              <i>22nd ACM Conference on Computer and Communications Security</i> (CCS &rsquo;15), Denver, CO, October 2015<br/>
+              <b>Best&nbsp;Paper&nbsp;Award&nbsp;Winner</b></p>
+
+            <p>More: <a href="imperfect-forward-secrecy.pdf">Full paper</a> |
+              <a href="weakdh-ccs-slides.pdf">Talk slides</a> | 
+              <a href="imperfect-forward-secrecy-ccs15.bib.html">Bibtex</a></p>
+
+            <h3>Additional Information</h3>
+                
+            <p>We have also created a <a href="sysadmin.html"><b>Logjam Server Test</b></a>,
+              a <b><a href="sysadmin.html">Guide to Deploying Diffie-Hellman for TLS</a></b>, and
+              several <b><a href="logjam.html">Proof of Concept Demos</a></b>.</p>
+
+            <h3>Contact the Team</h3>
+
+            <p>This study was performed by computer scientists at
+            CNRS, Inria Nancy-Grand Est, Inria Paris-Rocquencourt,
+            Microsoft Research, Johns Hopkins University, University
+            of Michigan, and the University of Pennsylvania:
+              <a href="https://davidadrian.org/">David Adrian</a>,
+              <a href="https://prosecco.gforge.inria.fr/personal/karthik/">Karthikeyan Bhargavan</a>,
+              <a href="https://zakird.com">Zakir Durumeric</a>,
+              <a href="http://www.loria.fr/~gaudry/index.en.html">Pierrick Gaudry</a>,
+              <a href="https://isi.jhu.edu/~mgreen/">Matthew Green</a>,
+              <a href="https://jhalderm.com">J. Alex Halderman</a>,
+              <a href="https://www.cis.upenn.edu/~nadiah/">Nadia Heninger</a>,
+              <a href="https://aaspring.com">Drew Springall</a>,
+              <a href="http://www.loria.fr/~thome/">Emmanuel Thom&eacute;</a>,
+              <a href="https://www.seas.upenn.edu/~lukev/">Luke Valenta</a>,
+              <a href="https://benjaminvandersloot.com">Benjamin VanderSloot</a>,
+              <a href="https://ericw.us/trow/">Eric Wustrow</a>,
+              <a href="http://software.imdea.org/~szanella/">Santiago Zanella-Beguelin</a>, and
+              <a href="http://www.loria.fr/~zimmerma/">Paul Zimmermann</a>.
+              The team can be contacted at <b><a href="mailto:weakdh-team@umich.edu">weakdh-team@umich.edu</a></b>.</p>
+
+            <a name="affected"></a>
+            
+            <h3 id="affected">Who is Affected?</h3>
+            <p>Websites, mail servers, and other TLS-dependent
+                services that support <tt>DHE_EXPORT</tt> ciphers are
+                at risk for the Logjam attack. We use
+                <a href="https://zmap.io">Internet-wide scanning</a>
+                to measure who is vulnerable.</p>
+
+                <div class="row">
+                    <div class="col-md-9 col-md-offset-1">
+                        <table class="table table-condensed">
+                            <thead>
+                                 <th>Protocol</th>
+                                 <th><span class="pull-right">Vulnerable to Logjam</span></th>
+                             </thead>
+                             <tr>
+                                 <td>HTTPS &mdash; Top 1 Million Domains</td>
+                                 <td><span class="pull-right vuln">8.4&#37;</span></td>
+                             </tr>
+                             <tr>
+                                 <td>HTTPS &mdash; Browser Trusted Sites</td>
+                                 <td><span class="pull-right vuln">3.4&#37;</span></td>
+                             </tr>
+                             <tr>
+                                 <td>SMTP+StartTLS &mdash; IPv4 Address Space</td>
+                                 <td><span class="pull-right vuln">14.8&#37;</span></td>
+                             </tr>
+                             <tr>
+                                 <td>POP3S &mdash; IPv4 Address Space</td>
+                                 <td><span class="pull-right vuln">8.9&#37;</span></td>
+                             </tr>
+                             <tr>
+                                 <td>IMAPS &mdash; IPv4 Address Space</td>
+                                 <td><span class="pull-right vuln">8.4&#37;</span></td>
+                             </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <p>Websites that use one of a few commonly shared
+                1024-bit Diffie-Hellman groups may be susceptible to
+                passive eavesdropping from an attacker with
+                nation-state resources. Here, we show how various
+                protocols would be affected if a single 1024-bit group
+                were broken in each protocol, assuming a typical
+                up-to-date client (e.g., most recent version of
+                OpenSSH or up-to-date installation of Chrome).</p>
+
+                <div class="row">
+                    <div class="col-md-9 col-md-offset-1">
+                        <table class="table table-condensed">
+                            <thead>
+                                 <th></th>
+                                 <th><span class="pull-right">Vulnerable if most common 1024-bit group is broken</span></th>
+                             </thead>
+                             <tr>
+                                 <td>HTTPS &mdash; Top 1 Million Domains</td>
+                                 <td><span class="pull-right vuln">17.9&#37;</span></td>
+                             </tr>
+                             <tr>
+                                 <td>HTTPS &mdash; Browser Trusted Sites</td>
+                                 <td><span class="pull-right vuln">6.6&#37;</span></td>
+                             </tr>
+                             <tr>
+                                 <td>SSH &mdash; IPv4 Address Space</td>
+                                 <td><span class="pull-right vuln">25.7&#37;</span></td>
+                             </tr>
+                             <tr>
+                                 <td>IKEv1 (IPsec VPNs) &mdash; IPv4 Address Space</td>
+                                 <td><span class="pull-right vuln">66.1&#37;</span></td>
+                             </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <h3 id="sysadmin">What Should I Do?</h3>
+
+                <h4>If you run a server&hellip;</h4>
+
+                <p>If you have a web or mail server, you should
+                disable support for export cipher suites and use a
+                2048-bit Diffie-Hellman group. We have published
+                a <b><a href="sysadmin.html">Guide to Deploying
+                Diffie-Hellman for TLS</a></b> with step-by-step
+                instructions. If you use SSH, you should upgrade both
+                your server and client installations to the most
+                recent version of OpenSSH, which prefers
+                Elliptic-Curve Diffie-Hellman Key Exchange.</p>
+
+                <h4>If you use a browser&hellip;</h4>
+
+                <p>Make sure you have the most recent version of your
+                browser installed, and check for updates
+                frequently. Google Chrome (including Android Browser),
+                Mozilla Firefox, Microsoft Internet Explorer, and
+                Apple Safari are all deploying fixes for the Logjam
+                attack.</p>
+
+                <h4>If you&rsquo;re a sysadmin or developer &hellip;</h4>
+
+                <p>Make sure any TLS libraries you use are up-to-date,
+                that servers you maintain use 2048-bit or larger
+                primes, and that clients you maintain reject
+                Diffie-Hellman primes smaller than 1024-bit.</p>
+
+                <hr/>
+                
+                <p>These results were first made public on May 20, 2015;
+                peer-reviewed conference paper published October 13, 2015.
+                <img src="https://tls.fyi/0.png" style="display:none"></p>
+
+          </div>
+        </div>
+      </div> <!-- /.container -->
+      <script type="text/javascript">
+        var _gauges = _gauges || [];
+        (function() {
+        var t   = document.createElement('script');
+        t.type  = 'text/javascript';
+        t.async = true;
+        t.id    = 'gauges-tracker';
+        t.setAttribute('data-site-id', '5556395a92c6ac24af010c1a');
+        t.setAttribute('data-track-path', 'https://track.gaug.es/track.gif');
+        t.src = 'https://track.gaug.es/track.js';
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(t, s);
+        })();
+      </script>
+    </body>
+</html>

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+    <head>
+		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/>
+		<meta charset="UTF-8">
+		<meta name="keywords" content="TLS logjam attack zmap diffie-hellman" />
+		<meta name="description" content="Logjam Attack Details" />
+		<title>Logjam TLS Attack</title>
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.css"/>
+    <link rel="stylesheet" type="text/css" href="css/custom.css"/>
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]> <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script> <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script> <![endif]-->
+
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+			<div class="col-md-10 col-md-offset-1">
+				<div class="page-header" id="banner">
+					<h1>Logjam Attack Proof of
+					Concept Demonstrations</h1>
+				</div>
+				We describe the technical details of
+				our attacks in our research paper, 
+                <a href="imperfect-forward-secrecy.pdf"><b>Imperfect
+                Forward Secrecy: How Diffie-Hellman Fails in
+                Practice</b></a>.
+In the sections below, we provide more details about the cryptanalysis
+                we performed, along with proof of concept videos
+                demonstrating the attacks using our cryptanalysis.
+                </p>
+				<ul>
+					<li><a href="#precomputation">Cryptanalysis of Top 512-bit Diffie Hellman Prime</a></li>
+					<li><a href="#attack1">Attack I: Offline Decryption of Weak <tt>DHE</tt> Connections</a></li>
+					<li><a href="#attack2">Attack II: <tt>DHE_EXPORT</tt> Downgrade and Offline Decryption of TLS False Start</a></li>
+					<li><a href="#attack3">Attack III: <tt>DHE_EXPORT</tt> Downgrade and Man-In-The-Middle Server Impersonation</a></li>
+                                        <li><a href="#attack4">Attack IV: Attacking other weak Diffie-Hellman parameters</a></li>
+				</ul>
+
+				<h2 id="precomputation">Cryptanalysis of Top 512-bit Diffie Hellman Prime</h2>
+				
+<p>
+Our cryptanalysis consisted of performing a precomputation on the
+  primes given in two popular sets of weak Diffie-Hellman parameters.
+  After performing this computation, we are able to break any Diffie-Hellman key exchange using these primes
+  <i>in real time</i>. These parameters are commonly used in <tt>DHE_EXPORT</tt>
+  ciphers&mdash;these ciphers were <i>intentionally</i> designed to be
+  weak to satisfy old regulation standards in the 1990s, and require
+  that the prime number used, \(p\) be short (512-bits). This attack is
+  only feasible because the parameters are weak.
+				</p>
+
+				<p>
+					The first is hard-coded in Apache httpd from version 2.1.5 until 2.4.7, and
+					is the default group used for <tt>DHE_EXPORT</tt> cipher suites on 7% of the
+					Top 1 Million sites. Across the entire Internet, it is used by more than
+					a million HTTPS servers (3% of all HTTPS servers). This group first <a
+					href="http://svn.apache.org/viewvc/httpd/httpd/branches/2.2.x/modules/ssl/ssl_engine_dh.c?r1=151408&r2=189570"
+					target="_blank">appeared in 2005</a>.
+	      </p>
+
+	      <pre>
+Diffie-Hellman-Parameters: (512 bit)
+prime:
+  00:9f:db:8b:8a:00:45:44:f0:04:5f:17:37:d0:ba:
+  2e:0b:27:4c:df:1a:9f:58:82:18:fb:43:53:16:a1:
+  6e:37:41:71:fd:19:d8:d8:f3:7c:39:bf:86:3f:d6:
+  0e:3e:30:06:80:a3:03:0c:6e:4c:37:57:d0:8f:70:
+  e6:aa:87:10:33
+generator: 2 (0x2)</pre>
+	      <p>
+				</br>
+	        The second is bundled with the OpenSSL library in the file
+	        <tt>dh512.pem</tt>. It is the default prime used by the OpenSSL
+	        <tt>s_server</tt> program for both <tt>DHE</tt> and <tt>DHE_EXPORT</tt>
+	        ciphers  This program is mostly used in test configurations, not in
+	        production websites. The group first appeared in a precursor of
+	        OpenSSL, <a
+	        href="http://www.filewatcher.com/m/SSLeay-0.5.1a.tar.gz.549912-0.html"
+	        target="_blank">SSLeay 0.5.1a</a>, in 1995.
+				</p>
+
+<pre>Diffie-Hellman-Parameters: (512 bit)
+prime:
+  00:da:58:3c:16:d9:85:22:89:d0:e4:af:75:6f:4c:
+  ca:92:dd:4b:e5:33:b8:04:fb:0f:ed:94:ef:9c:8a:
+  44:03:ed:57:46:50:d3:69:99:db:29:d7:76:27:6b:
+  a2:d3:d4:12:e2:18:f4:dd:1e:08:4c:f6:d8:00:3e:
+  7c:47:74:e8:33
+generator: 2 (0x2)</pre>
+	      <p>
+	        We used <a href="http://cado-nfs.gforge.inria.fr"
+	        target="_blank">CADO-NFS</a> to perform two weeks worth of
+	        precomputation; one week for each of the primes. This enables us to calculate
+	        secret keys exchanged using Diffie-Hellman by computing the discrete
+	        log of a particular key exchange message in just a few minutes. Furthermore,
+	        since the Apache prime is used by a large number of servers, the
+	        precomputation cost can be amortized over compromised connections to
+	        any of these servers.
+				</p>
+
+        <hr />
+
+	      <h2 id="attack1">Attack I <small>Offline Decryption of Weak DHE Connections</small></h2>
+	    	<p>
+					<b>Attack.</b> This attack requires that the server default to using a Diffie-Hellman key
+					exchange with 512-bit parameters. In this attack, there is a <i>passive</i>
+					network adversary able to eavesdrop, who can obtain a transcript of the
+					communication between the client and server.
+				</p>
+
+	      <p>
+	        The video below, recorded in April 2015, demonstrates that a connection
+	        to <tt>tips.fbi.gov</tt> can be recorded and decrypted by an
+	        eavesdropper. The connection uses the OpenSSL 512-bit Diffie-Hellman
+	        group that we have already performed precomputation for. Since the
+	        group is small, without precomputation this process would only take one
+	        week. With our precomputation, we can break the Diffie-Hellman key
+	        exchange in minutes. This enables us to compute the connection keys and
+	        decrypt the recorded conversation quickly.
+	      </p>
+
+        <div class="embed-responsive embed-responsive-16by9 text-center">
+	         <video width="75%" controls>
+  	        <source src="i/eavesdrop-dhe-512.mp4" type="video/mp4" />
+  	        Your browser does not support MP4 videos.
+  	      </video>
+        </div>
+
+				<p>
+					<b>Susceptibility.</b> This attack works on most popular browsers and TLS
+					libraries. For example, Firefox, Chrome, Internet Explorer on Windows 8.1 and earlier, Safari,
+					OpenSSL, and JSSE were all vulnerable. Some clients were secure because they
+					rejected sufficiently small primes. For example, IE on Windows 10 rejected
+					primes shorter than 1024-bit, and GnuTLS rejected primes shorter than
+					728-bit.
+				</p>
+
+				<p>
+					<b>Prevention.</b> As of May 2015, <tt>www.fbi.gov</tt> has disabled
+					all <tt>DHE</tt> cipher suites, preventing this attack. This attack
+					can also be prevented if the client (web browser) rejects
+					short 512-bit parameters. 512-bit <tt>DHE</tt> is past its prime.
+				</p>
+                <p>We note that www.fbi.gov was one of a large number of websites affected by the Logjam Attack. While sites need to patch,
+                mounting the attack requires non-negligible expertise to mount, and likely has not been widely exploited in the wild.</p>
+				<hr />
+
+				<h2 id="attack2">Attack II <small><tt>DHE_EXPORT</tt> Downgrade and Offline Decryption of TLS False Start</small></h2>
+
+				<p>
+					<b>Attack.</b> This attack only requires that a server <i>support</i> 512-bit parameters,
+					but has a greater requirement of the client and attacker. The server, in
+					this case, only needs to support <tt>DHE_EXPORT</tt> cipher suites or use
+					512-bit parameters in non-export <tt>DHE</tt> ciphers. The client must be
+					using the <a
+					href="https://tools.ietf.org/html/draft-ietf-tls-falsestart-00"
+					target="_blank">TLS False Start</a> extension; that is, the client sends
+					application data before receiving the server's <tt>Finished</tt> message in the TLS
+					handshake. Finally, the adversary must be an active man-in-the-middle, able to
+					intercept, alter, and forward network traffic.
+				</p>
+
+				<p>
+					The attack proceeds in several steps:
+        </p>
+
+        <img class="img-responsive center-image" src="i/falseStart.svg" alt="DHE_EXPORT Downgrade and Offline Decryption of False Start Data" />
+
+				<ol>
+					<li>The browser connects to <a href="https://www.networksolutionsemail.com">www.networksolutionsemail.com</a> and offers non-export <tt>DHE</tt> ciphers.</li>
+					<li>The adversary tampers with the request and offers only <tt>DHE_EXPORT</tt> ciphers instead.</li>
+					<li>The server selects a <tt>DHE_EXPORT</tt> cipher.</li>
+					<li>The adversary tampers with the response so that it looks like non-export <tt>DHE</tt>.</li>
+					<li>The server sends export-grade Diffie-Hellman parameters with a 512-bit modulus</li>
+					<li>The client completes the Diffie-Hellman key exchange and asks for server confirmation.</li>
+					<li>The client sends False Start application data before getting confirmation from the server.</li>
+					<li>The adversary captures the False Start data, and closes the connection between the client and the server.</li>
+					<li>If the client connects again, the attacker lets the connection pass through to the server </li>
+				</ol>
+
+
+
+				<p>
+					At the end of this sequence, the attacker has recorded all the connection
+					data, including the server and client's ephemeral public keys. The
+					attacker can then obtain the secret key used to encrypt the transmitted
+					data, by computing the discrete log of one of these public keys. Once the
+					secret key is obtained, the attacker can decrypt the application data. In
+					the demo, this allows the attacker to steal the user's credentials.
+				</p>
+
+	      <p>
+	        The demonstration video below demonstrates connections to the webmail
+	        interface of Network Solutions being intercepted by a man-in-the-middle
+	        to steal the user's credentials.
+	      </p>
+
+        <div class="embed-responsive embed-responsive-16by9 text-center">
+  	      <video width="75%" controls>
+  	        <source src="i/false-start-dhe-export.mp4" type="video/mp4" />
+  	        Your browser does not support MP4 videos.
+  	      </video>
+        </div>
+
+
+	      <p>
+	        In the video above, computing the discrete log takes several minutes on
+	        a laptop. This can be optimized to be much faster, but in this attack
+	        scenario, the attacker has offline access to the data, and therefore
+	        has no limit on the time to needed to compute the discrete log and
+	        obtain the decryption key.
+	      </p>
+
+	      <p>
+	        <b>Susceptibility.</b> The demo above uses Firefox 35: the last version
+	        of Firefox to allow False Start for DHE cipher suites. The attack works
+	        for all browsers that use False Start for any DHE cipher suite, such as
+	        Google Chrome 41 on all platforms except Linux. Internet Explorer also
+	        enables False Start for DHE cipher suites and is vulnerable to this
+	        attack, but it only supports DHE with DSA certificates, which are
+	        rarely supported by servers on the public Internet.
+	      </p>
+
+				<p>
+					<b>Prevention.</b> Clients can prevent this attack by rejecting short
+					Diffie-Hellman parameters. Servers can prevent this by disabling
+					<tt>DHE_EXPORT</tt>, and using strong parameters for non-export
+					<tt>DHE</tt>.
+				</p>
+                <p>We note that www.networksolutionsemail.com was one of a large number of websites affected by the Logjam Attack. While sites need to patch,
+                mounting the attack requires non-negligible expertise to mount, and likely has not been widely exploited in the wild.</p>
+
+				<hr />
+
+				<h2 id="attack3">Attack III <small>DHE_EXPORT Downgrade and Man-In-The-Middle Server Impersonation</small></h2>
+
+				<p>
+          <b>Attack.</b> This attack is an online version of <a
+          href="#attack2">Attack II</a>. The requirements for the attacks are
+          the same, with one exception. In this case, rather than require the
+          client support TLS False Start, we instead require the client be
+          willing to wait a significant amount of time for the handshake to
+          complete. This is because the attacker must compute the connection key
+          during the handshake process, but computing the key takes several
+          minutes. Some clients have short timeouts which would close the
+          connection before the attacker finishes computing the key. If the
+          client leaves the connection open for long enough, the attacker is
+          able to fully impersonate the server to the client.
+        </p>
+
+        <img class="img-responsive center-image" src="i/dhead.svg" alt="DHE_EXPORT Downgrade and Man-In-The-Middle Server Impersonation" />
+
+        <p>
+          The attack proceeds as follows:
+        </p>
+
+        <ol>
+          <li>The curl client connects to <a href="https://www.tcl.tk">www.tcl.tk</a> and offers at least one <tt>DHE</tt> cipher, but does not offer any <tt>DHE_EXPORT</tt> ciphers.</li>
+          <li>The attacker tampers with the request and offers only <tt>DHE_EXPORT</tt> ciphers.</li>
+          <li>The server selects a <tt>DHE_EXPORT</tt> cipher.</li>
+          <li>The MitM attacker tampers with the response so that it looks like a non-export <tt>DHE</tt> cipher.</li>
+          <li>The server sends export-grade Diffie-Hellman parameters with a 512-bit modulus</li>
+          <li>The attacker reads the server's public Diffie-Hellman key and starts computing its discrete log.</li>
+          <li>The attacker gracefully closes the connection to the server.</li>
+          <li>The client completes the Diffie-Hellman key exchange and asks the server for confirmation.</li>
+          <li>Once the attacker finishes computing the discrete log, they derive the connection key and forge a confirmation.</li>
+          <li>The client accepts the forged confirmation. At this point, the attacker can impersonate the server to the client.</li>
+        </ol>
+        <p>
+          The video below demonstrates a popular unattended installation method
+          being used by an attacker to trick a user into downloading and executing
+          arbitrary code.
+        </p>
+
+
+            <div class="embed-responsive embed-responsive-16by9 text-center">
+              <video class="embed-responsive-item" controls width="75%">
+                <source src="i/dhe-export-active-downgrade.mp4" type="video/mp4" />
+                Your browser does not support MP4 videos.
+              </video>
+            </div>
+
+
+        <p>
+          <b>Susceptibility.</b> Computing the discrete log can take several
+          minutes. A client is vulnerable only if it continues waiting
+          and leaves the connection open while the discrete log is being
+          computed. By sending fake TLS warning alerts, we have been able to
+          keep handshake connections open for more than 11 minutes in Firefox.
+          This is unrealistic, as users will obviously not tolerate a 11 minute
+          delay to load a webpage. More realistically, as the video above shows,
+          we have also been able to mount the attack on non-browser OpenSSL
+          clients such as curl and git. These applications are typically used to
+          download batch data, are often launched in the background, and are
+          therefore more often willing to wait for long connection times.
+          Alternatively, the attack could be implemented against a connection
+          opened in the background by an already-loaded webpage. We also note
+          our implementation is not optimized, and performance could likely be
+          improved.
+        </p>
+
+        <p>
+          <b>Prevention.</b> Once again, clients can prevent this vulnerability
+          by rejecting short Diffie-Hellman parameters. While forcing short
+          timeouts currently blocks this attack, every year hardware and
+          algorithmic improvements reduce the time required to compute a
+          discrete log given the precomputation. Short timeouts are unlikely to
+          prevent this attack in the future.
+        </p>
+        <p>We note that www.tcl.tk was one of a large number of websites affected by the Logjam Attack. While sites need to patch,
+                mounting the attack requires non-negligible expertise to mount, and likely has not been widely exploited in the wild.</p>
+
+        <hr/>
+
+        <h2 id="attack4">Attack IV <small>Attacking other weak Diffie-Hellman parameters</small></h2>
+	
+        <p>
+          <b>Attack.</b> This attack is against servers that use
+          poorly generated primes, and does not rely on
+          precomputation. It was originally published
+          by <a href="https://sites.google.com/site/michaeljameswiener/dhshortexp.pdf">van
+          Oorschot and Wiener</a> in 1996. Despite this, our study
+          found over 150 vulnerable hosts.  Servers may be vulnerable
+          if they do not verify that groups have a special form that
+          is known to be secure (examples include "safe" primes or 
+          DSA groups) and additionally for either client or server
+          to choose a short private exponent, a common server-side
+          optimization. In this case, an attacker may be able to
+          recover a secret exponent using simple calculations.  It
+          enables an attacker to decrypt application data and fully
+          impersonate the server to the client.
+        </p>
+
+        <p>
+          The video below demonstrates a connection to a web interface of 
+          a messaging system being intercepted by a man-in-the-middle to 
+          steal user's credentials.
+        </p>
+
+        <div class="embed-responsive embed-responsive-16by9 text-center">
+	        <video class="embed-responsive-item" width="75%" controls>
+	          <source src="i/composite-order-censored.mp4" type="video/mp4" />
+	          Your browser does not support MP4 videos.
+	        </video>
+        </div>
+
+        <p>
+          The attack proceeds as follows:
+        </p>
+
+        <ol>
+          <li>The browser connects to the vulnerable website and offers a <tt>DHE</tt> cipher suite.</li>
+          <li>The attacker relays the request to the server.</li>
+          <li>The attacker reads the server's ephemeral Diffie-Hellman key from the server response, and starts computing its discrete log.</li>
+          <li>The attacker relays the server response to the client.</li>
+          <li>Client and server complete the <tt>DHE</tt> handshake, and agree on a connection key.</li>
+          <li>The client sends a request for a login page, and the attacker relays it to the server.</li>
+          <li>The attacker relays the server response to the client.</li>
+          <li>The user enters their credentials and the browser sends the encrypted credentials to server.</li>
+          <li>The attacker has finished calculating the discrete log and has derived the connection key. The attacker can impersonate the server, eavesdrop and tamper with messages at their leisure.</li>
+        </ol>
+
+        <img class="img-responsive center-image" src="i/comma-censored.svg" alt="MITM Impersonation in Weak DHE Connections" />
+
+        <p>
+          This scenario is similar to <a href="#attack1">Attack I</a>.
+          However, because the parameters chosen by the server are
+          weak, it takes just a few seconds for the
+          attacker to compute the connection keys, without causing any
+          user-noticeable delay.
+        </p>
+
+        <p>
+          <b>Susceptibility.</b> Clients and servers are vulnerable to
+          this attack if they use short exponents with Diffie-Hellman
+          key exchanges using primes that have not been verified to
+          either be "safe" or be generated as part of a DSA group.  A
+          "safe" prime is a prime of the form \(p = 2q+1\) for some
+          prime \(q\); a DSA group enforces that the generator
+          generates a subgroup of large prime order.  Many
+          Diffie-Hellman implementations use exponents as small as,
+          for example, 160 bits with a 1024-bit prime modulus as a
+          performance optimization.  This is not known to decrease
+          security when using "safe" or DSA primes, but when using an
+          insecurely generated prime (for example one which has been generated
+          at random without testing further properties) this can allow
+          an attacker to easily break the key exchange.
+        </p>
+
+        <p>
+          <b>Prevention.</b> This attack can be prevented by using
+          either "safe" primes or a well-generated DSA group.
+          Implementations can also mitigate this attack by using
+          full-sized exponents, which are likely to be secure even
+          when used in combination with randomly generated non-"safe"
+          primes.
+        </p>
+
+    </div>
+
+    </div>
+  </div><!-- /.container -->
+  <script type="text/javascript">
+    var _gauges = _gauges || [];
+    (function() {
+      var t   = document.createElement('script');
+      t.type  = 'text/javascript';
+      t.async = true;
+      t.id    = 'gauges-tracker';
+      t.setAttribute('data-site-id', '5556395a92c6ac24af010c1a');
+      t.setAttribute('data-track-path', 'https://track.gaug.es/track.gif');
+      t.src = 'https://track.gaug.es/track.js';
+      var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(t, s);
+    })();
+  </script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
+</body>
+</html>

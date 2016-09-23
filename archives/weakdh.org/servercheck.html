@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <meta name="description" content="Server Check Utility">
+  <meta name="keywords" content="tls logjam server check tool">
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <title>Attacks on Weak Finite Field DH Groups in TLS</title>
+
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="css/bootstrap.css">
+  <link rel="stylesheet" href="css/custom.css">
+
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+  <!--[if lt IE 9]>
+  <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <form class="form-horizontal" id="test-form">
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="server-input">Test A Server</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" id="server-input">
+            </div>
+            <div class="col-sm-1">
+              <button class="btn btn-primary" id="test-button" type="submit">Go</button>
+              <div id="spin-div">
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="alert alert-danger hidden" role="alert" id="warn-export">
+          <b>Warning!</b> This site supports export-grade Diffie-Hellman key
+          exchange and is vulnerable to the Logjam attack. You need to disable
+          export cipher suites.
+        </div>
+        <div class="alert alert-danger hidden" role="alert" id="warn-short">
+          <b>Warning!</b> This site uses weak Diffie-Hellman parameters. Your
+          site is vulnerable to attack and may stop working in Chrome, Firefox,
+          Safari, and Internet Explorer with upcoming patches. You need to
+          generate new, 2048-bit Diffie-Hellman parameters.
+        </div>
+        <div class="alert alert-warning hidden" role="alert" id="warn-common">
+          <b>Warning!</b> This site uses a commonly-shared 1024-bit
+          Diffie-Hellman group, and might be in range of being broken by a
+          nation-state. It might be a good idea to generate a unique, 2048-bit
+          group for the site.
+        </div>
+        <div class="alert alert-info hidden" role="alert" id="warn-1024">
+          <b>Good News!</b> This site uses a unique or infrequently used
+          1024-bit Diffie-Hellman group. You are likely safe, but it's still a
+          good idea to generate a unique, 2048-bit group for the site.
+        </div>
+        <div class="alert alert-info hidden" role="alert" id="safe">
+          <b>Good News!</b> This site uses strong (2048-bit or better) key
+          exchange parameters and is safe from the Logjam attack.
+        </div>
+        <div class="alert alert-info hidden" role="alert" id="ecdhe">
+          <b>Good News!</b> This site is safe from the Logjam attack. It
+          supports <tt>ECDHE</tt>, and does not use <tt>DHE</tt>.
+        </div>
+        <div class="alert alert-warning hidden" role="alert" id="nopfs">
+          <b>Warning!</b> This site does not support perfect forward secrecy.
+          While it is safe from the Logjam attack, you should deploy
+          Elliptic-Curve Diffie-Hellman (<tt>ECDHE</tt>) in order to protect
+          your users.
+        </div>
+
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <p class="hidden text-center text-danger" id="error-msg"></p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <table class="table table-striped hidden" id="results-table">
+          <thead><tr>
+            <th class="col-md-2">IP</th>
+            <th class="col-md-1">Connected</th>
+            <th class="col-md-1">TLS</th>
+            <th class="col-md-2">Insecure <tt>DHE_EXPORT</tt></th>
+            <th class="col-md-3"><tt>DHE</tt></th>
+            <th class="col-md-3">Chrome</th>
+          </tr></thead>
+          <tbody id="host-data">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div><!--container-->
+  <script src="https://code.jquery.com/jquery-1.11.3.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  <script src="spin.min.js"></script>
+  <script src="docheck.js"></script>
+</body>
+</html>

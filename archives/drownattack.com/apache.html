@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta name="description" content="">
+      <meta name="author" content="">
+      <link rel="icon" type="image/png" href="media/img/favicon.png">
+      <title>DROWN Attack - Apache</title>
+      <link href="media/css/style.css" rel="stylesheet" type="text/css">
+      <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600|Montserrat:400,700' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+      <header id="top">
+        <h1>The DROWN Attack</h1>
+        <div class="logo"></div>
+      </header>
+        <section id="intro">
+            <ul class="toc">
+          <li><a href="index.html" >Back</a>
+          </li><li>
+          </li><li>
+        </ul>
+        </section>
+
+
+        <section>
+        <h3>Apache Settings - The DROWN Attack</h3>
+        <p>We have not yet established contact with the Apache developers,
+            and therefore cannot determine with confidence the effect of the
+            following settings and/or advice. These only reflect our limited
+            understanding.</p>
+
+            <p> Apache HTTP Server users:
+            If you use an Apache HTTP server with keys that you don't
+            share with any other services, and that server runs Apache
+            httpd 2.4.x, you are not affected (because httpd 2.4
+            unconditionally disabled SSLv2). If the server runs Apache httpd 2.2.x,
+            SSLv2 is supported by default, and you are likely to be
+            vulnerable. You should ensure that your
+            <a href="https://httpd.apache.org/docs/2.2/mod/mod_ssl.html#sslprotocol">
+            configuration disables SSLv2</a>
+            (and preferably, SSLv3 too):
+
+        <pre>
+        SSLProtocol All -SSLv2 -SSLv3
+        </pre>
+        </section>
+
+      <!--<div class="footer-logo"></div>-->
+
+      <footer>
+        <p class="text-muted">Last updated March 1, 2016.  The DROWN
+        website and logo (<a href="media/img/DROWN_logo.svg">svg</a>;
+        free to use under
+        a <a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>
+        license) were designed
+        by <a href="http://sarahmadden.com/">Sarah Madden</a>.
+        Additional development for this website was done by Christian
+        Dresen of M&uuml;nster University of Applied Sciences.
+        | <a href="imprint.html">Imprint</a></p>
+	  </footer>
+<!--End of content -->
+      
+
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+      <script type="text/javascript">
+        // This is for a Gauges analytics account that I can give everyone accounts to. -- AH
+        var _gauges = _gauges || [];
+        (function() {
+          var t   = document.createElement('script');
+          t.type  = 'text/javascript';
+          t.async = true;
+          t.id    = 'gauges-tracker';
+          t.setAttribute('data-site-id', '56ccfb3c4b2ffa7a33003cfa');
+          t.setAttribute('data-track-path', 'https://track.gaug.es/track.gif');
+          t.src = 'https://d36ee2fcip1434.cloudfront.net/track.js';
+          var s = document.getElementsByTagName('script')[0];
+          s.parentNode.insertBefore(t, s);
+        })();
+      </script>
+  </body>
+</html>
