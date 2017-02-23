@@ -17,6 +17,6 @@ The goal of this project is to maintain a list of bug websites such as [Heartble
 * [ImageTragick.com](https://imagetragick.com/) – remote code execution in imagemagick via user-submitted images.
 * [OCSP Status Request](http://security.360.cn/cve/CVE-2016-6304/) - Allows exhaustion of server memory through OSCP Status Requests. 
 * [Poodle.io](https://poodle.io/) – allows MITM attacker to downgrade TLS connections and decrypt SSLv3 connections.
-* [SHAttered.io](https://shattered.io) - Collision attach against SHA-1.
+* [SHAttered.io](https://shattered.io) - Collision attack against SHA-1.
 * [Sweet32.info](https://sweet32.info/) - Birthday attacks on 64-bit block ciphers in TLS and OpenVPN.
 * [WeakDH.org](https://weakdh.org/) – applications which support DHE_EXPORT ciphers allow MITM via weak Diffie-Hellman keys.
