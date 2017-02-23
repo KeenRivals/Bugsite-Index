@@ -12,3 +12,4 @@ https://poodle.io
 https://sweet32.info
 https://weakdh.org
 http://security.360.cn/cve/CVE-2016-6304/
+https://shattered.io
