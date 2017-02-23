@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans|Raleway|Inconsolata">
+  <link rel="stylesheet" href="static/style.css">
+  <title>SHAttered</title>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <img src="static/logo.png" alt="SHA-1 has shattered." class='img-fluid img-logo' />
+
+    <div class="row">
+      <div class="col-sm-6 col-sm-push-6 logo">
+        <a href='static/infographic.pdf'
+        onclick="ga('send', 'event', 'Infographic', 'Download');"
+          ><img src="static/infographic-small.png" alt="SHAttered" class='img-fluid img-rounded img-main' /></a>
+      </div>
+      <div class="col-sm-6 col-sm-pull-6">
+        <p class='first-line'>We have broken SHA-1 in practice.</p>
+        <p>This industry cryptographic hash function standard is used for digital signatures and file
+        integrity verification, and protects a wide spectrum of digital assets, ranging credit card transactions, electronic documents, open-source software repositories and software updates.</p>
+        <p>
+        It is now practically possible to craft two colliding PDF files and obtain a SHA-1 digital signature on the first PDF file which can also be abused as a valid signature on the second PDF file.
+        </p>
+        <p>
+        For example, by crafting the two colliding PDF files as two rental agreements with different rent, it is possible to trick someone to create a valid signature for a high-rent contract by having him or her sign a low-rent contract.
+        </p>
+
+        <p class='text-center'><a
+        onclick="ga('send', 'event', 'Infographic', 'Download');"
+          href='static/infographic.pdf'>Infographic</a> | <a
+        onclick="ga('send', 'event', 'Paper', 'Download');"
+          href='static/shattered.pdf'>Paper</a></p>
+      </div>
+    </div>
+
+
+    <div class="row">
+      <div class="col-sm-6">
+
+        <h3>Attack proof</h3>
+        <p>
+        Here are two PDF files that display different content, yet have the same SHA-1 digest.
+        </p>
+        <br/>
+        <a href='static/infographic.pdf'><img src="static/shattered.png" alt="SHAttered" class='img-fluid img-rounded img-main' /></a>
+        <p class='text-center'><a
+        onclick="ga('send', 'event', 'Collision1', 'Download');"
+          href='static/shattered-1.pdf'>PDF 1</a> | <a
+        onclick="ga('send', 'event', 'Collision2', 'Download');"
+          href='static/shattered-2.pdf'>PDF 2</a></p>
+      </div>
+
+      <div class="col-sm-6">
+        <h3>File tester</h3>
+        Upload any file to test if they are part of a collision attack.
+        Rest assured that we do not store uploaded files.
+
+        <form id='online-checker' method="post" action="https://shattered.io/sample/submit" enctype="multipart/form-data">
+          <div class="upload-select">
+            <span class="glyphicon glyphicon-upload"></span>
+            <p class="text-center checker-banner">Drag some files here</p>
+            <p class='text-center'>Or, if you prefer..</p>
+            <span class="btn btn-info upload-dragndrop"> Choose a file to upload</span>
+            <input class="upload-file hide" type="file" name="file" id="file"/>
+          </div>
+          <div class="upload-inprogress hide">
+            <div class="progress progress-striped active">
+              <div class="progress-bar progress-bar-info" style="width: 0%;"></div>
+            </div>
+          </div>
+          <div class="upload-success hide"></div>
+          <div class="upload-error hide"> Upload failed. Please upload files under 100 MB.</div>
+          <div class="btn btn-inverse reset-upload hide"> Reset</div>
+        </form>
+
+      </div>
+    </div>
+
+
+  <hr>
+  <h2>Q&amp;A</h2>
+
+    <div class="row">
+      <div class="col-xs-12">
+
+        <h3>Isn't SHA-1 deprecated?</h3>
+        <p>Today, many applications still rely on SHA-1, even though theoretical attacks have been known since 2005, and SHA-1
+        was officially deprecated by NIST in 2011.
+        We hope our practical attack on SHA-1 will increase awareness and convince the industry to quickly move to safer alteratives, such as SHA-256.
+        </p>
+
+
+        <h3>How can I protect myself?</h3>
+        <p> You can use our file tester above to check your files. If you use Chrome, you will be <a href="https://security.googleblog.com/2016/11/sha-1-certificates-in-chrome.html">automatically protected</a> from insecure TLS/SSL certificates, and  <a href="https://blog.mozilla.org/security/2016/10/18/phasing-out-sha-1-on-the-public-web/">Firefox</a> has this feature planned for early 2017.<br>
+        Files sent via Gmail or saved in Google Drive are already automatically tested against this attack.</p>
+
+        <h3>What types of systems are affected?</h3>
+        <p>Any application that relies on SHA-1 for digital signatures, file integrity, or file identification is potentially vulnerable.
+        These include:
+        </p>
+        <ul>
+          <li>Digital Certificate signatures</li>
+          <li>Email PGP/GPG signatures</li>
+          <li>Software vendor signatures</li>
+          <li>Software updates</li>
+          <li>ISO checksums</li>
+          <li>Backup systems</li>
+          <li>Deduplication systems</li>
+          <li>GIT</li>
+          <li>...</li>
+        </ul>
+
+        <h3>Are TLS/SSL certificates at risk?</h3>
+        <p>Any Certification Authority abiding by the CA/Browser Forum regulations
+        is <a href="https://cabforum.org/2014/10/16/ballot-118-sha-1-sunset/">not allowed</a> to issue SHA-1 certificates anymore. Furthermore, it is
+        required that certificate authoritiess insert at least 20 bits of
+        randomness inside the serial number field. If properly implemented this
+        helps preventing a practical exploitation.
+        </p>
+
+        <h3>Will my browser show me a warning?</h3>
+
+        <p>Starting from version 56, released in January 2017, Chrome <a href="https://security.googleblog.com/2016/11/sha-1-certificates-in-chrome.html">will consider</a> any website protected with a SHA-1 certificate as insecure. <a href="https://blog.mozilla.org/security/2016/10/18/phasing-out-sha-1-on-the-public-web/">Firefox</a> has this feature planned for early 2017.
+        </p>
+
+
+        <h3>How is GIT affected?</h3>
+        <p>
+        GIT strongly relies on SHA-1 for the identification and integrity checking of all file objects and commits. It is essentially possible to create two GIT repositories with the same head commit hash and different contents, say a benign source code and a backdoored one. An attacker could potentially selectively serve either repository to targeted users. This will require attackers to compute their own collision.
+        </p>
+
+        <h3>How to I patch/upgrade my system?</h3>
+        <p>
+        Consider using safer alternatives, such as SHA-256, or SHA-3.
+        </p>
+
+        <h3>How do I detect this attack?</h3>
+
+        <p>
+        You can use the online tool above to submit files and have them checked
+        for a cryptanalytic collision attack on SHA-1. The code behind this was
+        developed by Marc Stevens (CWI) and Dan Shumow (Microsoft) and is
+        publicly available on <a href='https://github.com/cr-marcstevens/sha1collisiondetection '>GitHub</a>.
+        </p>
+
+        <p>
+        It is based on the concept of counter-cryptanalysis and it is able to detect known and unknown SHA-1 cryptanalytic collision attacks given just a single file from a colliding file pair.
+        </p>
+
+        <h3>How widespread is this?</h3>
+
+        <p>
+        As far as we know our example collision is the first ever created.
+        </p>
+
+
+        <h3>Has this been abused in the wild?</h3>
+
+        <p>
+        Not as far as we know.
+        </p>
+
+        <h3>Is Hardened SHA-1 vulnerable?</h3>
+
+        <p>
+        No, SHA-1 hardened with counter-cryptanalysis (see ‘how do I detect the attack’) will detect cryptanalytic collision attacks. In that case it adjusts the SHA-1 computation to result in a safe hash. This means that it will compute the regular SHA-1 hash for files without a collision attack, but produce a special hash for files with a collision attack, where both files will have a different unpredictable hash.
+        </p>
+
+        <h3>Who is capable of mounting this attack?</h3>
+        <p>
+        This attack required over 9,223,372,036,854,775,808 SHA1 computations.
+        This took the equivalent processing power as 6,500 years of single-CPU
+        computations and 110 years of single-GPU computations.
+        </p>
+
+        <h3>How does this attack compare to the brute force one?</h3>
+        <p>
+        The SHAttered attack is 100,000 faster than the brute force attack that relies on the birthday paradox.
+        The brute force attack would require 12,000,000 GPU years to complete, and it is therefore impractical.
+        </p>
+
+        <h3>How did you leverage the PDF format for this attack?</h3>
+        A picture is worth a thousand words, so here it <a href="static/pdf_format.png" />is</a>.
+
+        <h3>Who is the team behind this research?</h3>
+        <p>
+        This result is the product of a long term collaboration between the <a href="https://www.cwi.nl/research-groups/Cryptology">Cryptology Group at Centrum
+          Wiskunde &amp; Informatica (CWI) - the national research institute for mathematics and computer science
+          in the Netherlands </a>- and the <a href='https://g.co/research/protect'>Google Research Security, Privacy and Anti-abuse Group</a>. Two
+        years ago <a href='https://marc-stevens.nl/research/'>Marc Stevens</a> and <a href='https://elie.net'>Elie Bursztein</a>, who leads the  Google's anti-abuse research team,
+        began collaborating on making Marc's cryptanalytic attacks against SHA-1 practical by leveraging
+        Google expertise and infrastructure. Since then many CWI researchers and Googlers have helped make this
+        project possible, including <a href='http://pages.saclay.inria.fr/pierre.karpman/'>Pierre Karpman</a> who worked on the cryptanalysis and
+        prototype GPU implementation, and from Google <a href='http://corkami.github.io/'>Ange Albertini</a> who developed the PDF attack,
+        <a href='https://ymarkov.me'>Yarik Markov</a> who took care of the distributed GPU code,  <a href='http://serialhacker.org/'>Alex Petit-Bianco</a> implemented the collision detector to protect Google users, <a href='https://lucainvernizzi.net'>Luca Invernizzi</a> who created the online file checker, and Clement Blaisse who oversaw the
+        reliability of the computations.
+        </p>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script type='text/javascript' src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script type='text/javascript' src="static/bootstrap.min.js"></script>
+  <script type='text/javascript' src="static/upload.js"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+body {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1.9em;
+  color: #333;
+  margin-top: 2em;
+}
+
+.img-logo {
+  margin-bottom: 40px;
+  max-width: 100%;
+  height: auto;
+}
+
+.img-main {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+.pdf-img {
+  margin-bottom: 10px;
+  margin-top: 5px;
+}
+
+h1 {
+  font-family: 'Raleway', sans-serif;
+  font-size: 2.2em;
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  color: #222;
+}
+
+h3 {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.5em;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: #222;
+}
+
+h2 {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.8em;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: #222;
+}
+
+div .logo {
+  text-align: center;
+}
+
+.container {
+  max-width: 950px;
+}
+
+.submit-sample {
+  position: relative;
+  overflow: hidden;
+}
+
+.submit-sample input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.list-group-item {
+  border: 0;
+}
+
+#online-checker {
+  text-align: center;
+  padding: 70px 20px;
+  outline: 4px dashed #ccc;
+  border-radius: 2px;
+  outline-offset: -10px;
+  color: #ccc;
+  font-size: 1.3em;
+}
+
+.checker-banner {
+  font-size: 1.5em;
+}
+
+.upload-dragndrop {
+  display: inline;
+}
+
+.upload-dragover {
+  background-color: grey;
+}
+
+.hash {
+  font-family: 'Inconsolata', monospace;
+  word-wrap: break-word;
+}
+
+p {
+  text-align: justify;
+}
+
+.first-line {
+  font-style: italic;
+}
