@@ -15,6 +15,7 @@ The goal of this project is to maintain a list of bug websites such as [Heartble
 * [Heartbleed.com](http://heartbleed.com) – OpenSSL memory leak which could leak private keys.
 * [httpoxy.org](https://httpoxy.org/) – insecure handling of HTTP proxy environment variable in CGI applications.
 * [ImageTragick.com](https://imagetragick.com/) – remote code execution in imagemagick via user-submitted images.
+* [KRACKAttacks.com](https://krackattacks.com/) – WPA2 vulnerability resulting from nonce reuse that enables decryption of sent packets. In some cases this leads to MITM.
 * [OCSP Status Request](http://security.360.cn/cve/CVE-2016-6304/) - Allows exhaustion of server memory through OSCP Status Requests. 
 * [Poodle.io](https://poodle.io/) – allows MITM attacker to downgrade TLS connections and decrypt SSLv3 connections.
 * [SHAttered.io](https://shattered.io) - Collision attack against SHA-1.
