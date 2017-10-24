@@ -8,6 +8,7 @@ The goal of this project is to maintain a list of bug websites such as [Heartble
 * [Badlock.org](http://badlock.org/) – MITM attack for samba in an Active Directory environment.
 * [BreachAttack.com](http://breachattack.com/) – HTTPS information leak by compression. Related to CRIME.
 * [Dirty COW](https://dirtycow.ninja) – a privilege escalation vulnerability in the Linux Kernel. 
+* [DUHK Attack](https://duhkattack.com) – devices using the ANSI X9.31 Random Number Generator (RNG) in conjunction with a hard-coded seed key allows attackers to recover the secret key.
 * [DrownAttack.com](https://drownattack.com/) – attacks servers supporting modern TLS protocol suites by using their support for the obsolete, insecure, SSL v2 protocol.
 * [Factorable.net](https://factorable.net/) – widespread weak keys in network devices.
 * [FreakAttack.com](https://freakattack.com/) – allows an attacker to intercept HTTPS connections between vulnerable clients and servers and force them to use weakened encryption
