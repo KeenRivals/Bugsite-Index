@@ -17,9 +17,11 @@ The goal of this project is to maintain a list of bug websites such as [Heartble
 * [httpoxy.org](https://httpoxy.org/) – insecure handling of HTTP proxy environment variable in CGI applications.
 * [ImageTragick.com](https://imagetragick.com/) – remote code execution in imagemagick via user-submitted images.
 * [KRACKAttacks.com](https://krackattacks.com/) – WPA2 vulnerability resulting from nonce reuse that enables decryption of sent packets. In some cases this leads to MITM.
+* [MeltdownAttack.com](https://meltdownattack.com) - Information leak via broken isolation between priviledged and unpriviledged memory.
 * [OCSP Status Request](http://security.360.cn/cve/CVE-2016-6304/) - Allows exhaustion of server memory through OSCP Status Requests. 
 * [Poodle.io](https://poodle.io/) – allows MITM attacker to downgrade TLS connections and decrypt SSLv3 connections.
 * [ROBOTAttack.org](https://robotattack.org/) – Return of a 19-year-old vulnerability that allows performing RSA decryption and signing operations with the private key of a TLS server.
 * [SHAttered.io](https://shattered.io) - Collision attack against SHA-1.
+* [SpectreAttack.com](https://spectreattack.com) - Information leak via speculative execution behaviors in modern CPUs.
 * [Sweet32.info](https://sweet32.info/) - Birthday attacks on 64-bit block ciphers in TLS and OpenVPN.
 * [WeakDH.org](https://weakdh.org/) – applications which support DHE_EXPORT ciphers allow MITM via weak Diffie-Hellman keys.
